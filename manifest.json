@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "dtoc for Confluence",
   "version": "1.0.0",
-  "description": "Dynamic Table of Contents for Confluence pages.",
+  "description": "Dynamic Table of Content.",
   "permissions": [
     "storage"
   ],
