@@ -1,0 +1,136 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  width: 300px;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  background-color: #f4f5f7; /* Confluence-like background */
+}
+
+.header {
+  background-color: #0052cc; /* Atlassian blue */
+  color: white;
+  padding: 12px 16px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.content {
+  padding: 16px;
+  background-color: white;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.setting-row:last-child {
+  margin-bottom: 0;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+select {
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #dfe1e6;
+  background-color: #fafbfc;
+  font-size: 14px;
+}
+
+.btn {
+  background-color: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn:hover {
+  background-color: #0047b3;
+}
+
+.helper-text {
+  font-size: 12px;
+  color: #6b778c;
+}
+
+.footer {
+  padding: 12px 16px;
+  text-align: center;
+  background-color: #f4f5f7;
+  border-top: 1px solid #dfe1e6;
+}
+
+.footer p {
+  margin: 0;
+  font-size: 11px;
+  color: #5e6c84;
+}
+
+/* Toggle Switch Styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #0052cc;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #0052cc;
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+.slider.round {
+  border-radius: 22px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}

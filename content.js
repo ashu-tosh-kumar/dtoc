@@ -1,0 +1,358 @@
+// Immediately invoked function expression to avoid polluting the global namespace
+(() => {
+  // --- Constants & State ---
+  const SETTINGS_KEY = {
+    ENABLED: 'enabled',
+    POSITION: 'position',
+    CLOSED: 'closed',
+    MINIMIZED: 'minimized'
+  };
+
+  let state = {
+    enabled: true,
+    position: 'left',
+    closed: false,
+    minimized: false
+  };
+
+  let shadowRoot = null;
+  let container = null;
+  let contentArea = null;
+
+  // Icons (SVG strings)
+  const ICON_MINIMIZE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+  const ICON_CLOSE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+  const ICON_MAXIMIZE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`;
+
+  // --- Initialization ---
+
+  function init() {
+    loadSettings(() => {
+      // Check if we are in view mode (exclude edit routes)
+      if (isViewMode()) {
+        injectUI();
+        applyStateToUI();
+        parseHeadingsAndRender();
+      }
+      setupMutationObserver();
+    });
+
+    listenForSettingsChanges();
+  }
+
+  function isViewMode() {
+    // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
+    const path = window.location.pathname;
+    if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+
+    // Some pages append ?mode=edit or similar
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('mode') === 'edit') return false;
+
+    return true;
+  }
+
+  // --- Settings Management ---
+
+  function loadSettings(callback) {
+    chrome.storage.local.get(
+      [SETTINGS_KEY.ENABLED, SETTINGS_KEY.POSITION, SETTINGS_KEY.CLOSED, SETTINGS_KEY.MINIMIZED],
+      (result) => {
+        if (result[SETTINGS_KEY.ENABLED] !== undefined) state.enabled = result[SETTINGS_KEY.ENABLED];
+        if (result[SETTINGS_KEY.POSITION] !== undefined) state.position = result[SETTINGS_KEY.POSITION];
+        if (result[SETTINGS_KEY.CLOSED] !== undefined) state.closed = result[SETTINGS_KEY.CLOSED];
+        if (result[SETTINGS_KEY.MINIMIZED] !== undefined) state.minimized = result[SETTINGS_KEY.MINIMIZED];
+
+        callback();
+      }
+    );
+  }
+
+  function updateSetting(key, value) {
+    state[key] = value;
+    chrome.storage.local.set({ [key]: value });
+    applyStateToUI();
+  }
+
+  function listenForSettingsChanges() {
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'local') {
+        let changed = false;
+        for (let [key, { newValue }] of Object.entries(changes)) {
+          if (state[key] !== newValue) {
+            state[key] = newValue;
+            changed = true;
+          }
+        }
+        if (changed) {
+          applyStateToUI();
+        }
+      }
+    });
+  }
+
+  // --- UI Injection ---
+
+  function injectUI() {
+    // Don't inject multiple times
+    if (document.getElementById('dtoc-host')) return;
+
+    const host = document.createElement('div');
+    host.id = 'dtoc-host';
+    document.body.appendChild(host);
+
+    shadowRoot = host.attachShadow({ mode: 'open' });
+
+    // Fetch CSS file
+    const cssUrl = chrome.runtime.getURL('content.css');
+    const linkEl = document.createElement('link');
+    linkEl.rel = 'stylesheet';
+    linkEl.href = cssUrl;
+    shadowRoot.appendChild(linkEl);
+
+    container = document.createElement('div');
+    container.id = 'dtoc-container';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'dtoc-header';
+
+    const title = document.createElement('h2');
+    title.className = 'dtoc-title';
+    title.textContent = 'Table of Contents';
+
+    const controls = document.createElement('div');
+    controls.className = 'dtoc-controls';
+
+    const minBtn = document.createElement('button');
+    minBtn.className = 'icon-btn';
+    minBtn.title = 'Minimize';
+    minBtn.innerHTML = ICON_MINIMIZE;
+    minBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateSetting(SETTINGS_KEY.MINIMIZED, true);
+    });
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'icon-btn';
+    closeBtn.title = 'Close';
+    closeBtn.innerHTML = ICON_CLOSE;
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateSetting(SETTINGS_KEY.CLOSED, true);
+    });
+
+    controls.appendChild(minBtn);
+    controls.appendChild(closeBtn);
+
+    header.appendChild(title);
+    header.appendChild(controls);
+
+    // Content Area
+    contentArea = document.createElement('div');
+    contentArea.className = 'dtoc-content';
+    contentArea.innerHTML = '<div class="empty-state">Loading...</div>';
+
+    // Maximize Icon (visible only when minimized)
+    const maxIcon = document.createElement('div');
+    maxIcon.className = 'maximize-icon';
+    maxIcon.title = 'Expand TOC';
+    maxIcon.innerHTML = ICON_MAXIMIZE;
+
+    container.appendChild(header);
+    container.appendChild(contentArea);
+    container.appendChild(maxIcon);
+
+    // Handle click on minimized container to expand
+    container.addEventListener('click', () => {
+      if (state.minimized) {
+        updateSetting(SETTINGS_KEY.MINIMIZED, false);
+      }
+    });
+
+    shadowRoot.appendChild(container);
+  }
+
+  function applyStateToUI() {
+    if (!container) return;
+
+    if (!state.enabled || state.closed) {
+      container.classList.add('hidden');
+    } else {
+      container.classList.remove('hidden');
+    }
+
+    if (state.minimized) {
+      container.classList.add('minimized');
+    } else {
+      container.classList.remove('minimized');
+    }
+
+    // Position
+    container.classList.remove('position-left', 'position-right');
+    container.classList.add(\`position-\${state.position}\`);
+  }
+
+  // --- Reactivity & Mutation Handling ---
+
+  let observer = null;
+  let debounceTimer = null;
+
+  function setupMutationObserver() {
+    const config = { childList: true, subtree: true, characterData: true };
+
+    const callback = function(mutationsList, observer) {
+      // Debounce the parsing to avoid performance hits during rapid DOM updates
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        // Re-check view mode in case SPA navigated to edit mode
+        if (!isViewMode()) {
+          if (container && !container.classList.contains('hidden')) {
+            container.classList.add('hidden');
+          }
+          return;
+        } else if (state.enabled && !state.closed) {
+          if (!container) injectUI(); // Inject if not present
+          if (container) container.classList.remove('hidden');
+        }
+
+        parseHeadingsAndRender();
+      }, 500); // 500ms debounce
+    };
+
+    observer = new MutationObserver(callback);
+
+    // Attempt initial bind
+    const targetNode = getConfluenceContentContainer();
+    if (targetNode) {
+      observer.observe(targetNode, config);
+    }
+
+    // Also handle SPA URL changes which might not trigger significant DOM mutations
+    // on the targetNode if the container itself is replaced.
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+      const url = location.href;
+      if (url !== lastUrl) {
+        lastUrl = url;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          if (!isViewMode()) {
+             if (container) container.classList.add('hidden');
+          } else {
+            if (!container) injectUI(); // Inject if we started in edit mode and just switched
+            applyStateToUI();
+
+            // Re-bind observer if target node changed
+            const newTarget = getConfluenceContentContainer();
+            if (newTarget) {
+              observer.disconnect();
+              observer.observe(newTarget, config);
+            }
+            if (state.enabled && !state.closed && container) {
+              container.classList.remove('hidden');
+            }
+            parseHeadingsAndRender();
+          }
+        }, 1000); // Wait longer for SPA transition to finish
+      }
+    }).observe(document, {subtree: true, childList: true});
+  }
+
+  // --- Parsing & Navigation ---
+
+  function getConfluenceContentContainer() {
+    // Attempt to find the main content container in Confluence View Mode
+    // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
+    const selectors = [
+      '#main-content',
+      '#content',
+      '.ak-renderer-document',
+      '.wiki-content'
+    ];
+
+    for (let selector of selectors) {
+      const el = document.querySelector(selector);
+      if (el) return el;
+    }
+
+    // Fallback to body if we can't find a specific container, though we might catch sidebars
+    return document.body;
+  }
+
+  function parseHeadingsAndRender() {
+    if (!contentArea) return;
+
+    const contentContainer = getConfluenceContentContainer();
+
+    // Query headings only within the main content area to avoid site nav/sidebar
+    const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    if (headings.length === 0) {
+      contentArea.innerHTML = '<div class="empty-state">No headings found on this page.</div>';
+      return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.className = 'toc-list';
+
+    headings.forEach((heading, index) => {
+      // Skip hidden headings or headings inside specific UI widgets if necessary
+      if (heading.offsetParent === null) return;
+
+      const text = heading.textContent.trim();
+      if (!text) return; // Skip empty headings
+
+      // Normalize heading level (h1 = 1, h2 = 2, etc.)
+      const level = parseInt(heading.tagName.substring(1), 10);
+
+      // Ensure heading has an ID for navigation
+      let id = heading.id;
+      if (!id) {
+        id = \`dtoc-heading-\${index}-\${Math.random().toString(36).substr(2, 5)}\`;
+        heading.id = id;
+      }
+
+      const li = document.createElement('li');
+      li.className = \`toc-item toc-level-\${level}\`;
+
+      const a = document.createElement('a');
+      a.className = 'toc-link';
+      a.href = \`#\${id}\`;
+      a.textContent = text;
+
+      // Handle click to scroll smoothly
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // Push state to history so back button works, and URL updates
+        history.pushState(null, null, \`#\${id}\`);
+
+        // Scroll into view with a slight offset for Atlassian's sticky header
+        const rect = heading.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = rect.top + scrollTop - 70; // 70px offset for top nav
+
+        window.scrollTo({
+          top: targetY,
+          behavior: 'smooth'
+        });
+      });
+
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+
+    contentArea.innerHTML = ''; // Clear empty/loading state
+    contentArea.appendChild(ul);
+  }
+
+  // Start
+  // Use a slight delay or listen to load to ensure Confluence body exists
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(init, 500));
+  } else {
+    setTimeout(init, 500); // Slight delay for dynamic React renders in Confluence
+  }
+
+})();
