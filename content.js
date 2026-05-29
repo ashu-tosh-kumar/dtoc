@@ -190,7 +190,7 @@
 
     // Position
     container.classList.remove('position-left', 'position-right');
-    container.classList.add(\`position-\${state.position}\`);
+    container.classList.add(`position-${state.position}`);
   }
 
   // --- Reactivity & Mutation Handling ---
@@ -309,16 +309,16 @@
       // Ensure heading has an ID for navigation
       let id = heading.id;
       if (!id) {
-        id = \`dtoc-heading-\${index}-\${Math.random().toString(36).substr(2, 5)}\`;
+        id = `dtoc-heading-${index}-${Math.random().toString(36).substr(2, 5)}`;
         heading.id = id;
       }
 
       const li = document.createElement('li');
-      li.className = \`toc-item toc-level-\${level}\`;
+      li.className = `toc-item toc-level-${level}`;
 
       const a = document.createElement('a');
       a.className = 'toc-link';
-      a.href = \`#\${id}\`;
+      a.href = `#${id}`;
       a.textContent = text;
 
       // Handle click to scroll smoothly
@@ -326,7 +326,7 @@
         e.preventDefault();
 
         // Push state to history so back button works, and URL updates
-        history.pushState(null, null, \`#\${id}\`);
+        history.pushState(null, null, `#${id}`);
 
         // Scroll into view with a slight offset for Atlassian's sticky header
         const rect = heading.getBoundingClientRect();
