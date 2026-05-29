@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "dtoc for Confluence",
+  "name": "dtoc",
   "version": "1.0.0",
   "description": "Dynamic Table of Content.",
   "permissions": [
