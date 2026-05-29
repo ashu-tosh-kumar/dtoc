@@ -328,15 +328,19 @@
         // Push state to history so back button works, and URL updates
         history.pushState(null, null, `#${id}`);
 
-        // Scroll into view with a slight offset for Atlassian's sticky header
-        const rect = heading.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const targetY = rect.top + scrollTop - 70; // 70px offset for top nav
+        // Confluence might use a custom scrolling container instead of window.
+        // scrollIntoView is universally supported and works within overflow:auto containers.
+        heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        window.scrollTo({
-          top: targetY,
-          behavior: 'smooth'
-        });
+        // Slight hack for sticky header offset since scrollIntoView doesn't support offset directly
+        // We use a small timeout to let the smooth scroll finish (or partially finish),
+        // then adjust slightly if needed, or better, we temporarily use scrollMarginTop.
+        const originalScrollMargin = heading.style.scrollMarginTop;
+        heading.style.scrollMarginTop = '70px';
+
+        setTimeout(() => {
+          heading.style.scrollMarginTop = originalScrollMargin;
+        }, 1000);
       });
 
       li.appendChild(a);
