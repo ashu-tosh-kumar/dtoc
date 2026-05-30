@@ -99,13 +99,6 @@
 
     const host = document.createElement('div');
     host.id = 'dtoc-host';
-    // Apply critical host styles directly to avoid layout shift before CSS loads
-    host.style.position = 'fixed';
-    host.style.top = '0';
-    host.style.left = '0';
-    host.style.zIndex = '999999';
-    host.style.pointerEvents = 'none';
-
     document.body.appendChild(host);
 
     shadowRoot = host.attachShadow({ mode: 'open' });
