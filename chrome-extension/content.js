@@ -56,13 +56,12 @@
 
   function loadSettings(callback) {
     chrome.storage.local.get(
-      [SETTINGS_KEY.ENABLED, SETTINGS_KEY.POSITION, SETTINGS_KEY.CLOSED, SETTINGS_KEY.MINIMIZED, SETTINGS_KEY.DRAG_OFFSET],
+      [SETTINGS_KEY.ENABLED, SETTINGS_KEY.POSITION, SETTINGS_KEY.CLOSED, SETTINGS_KEY.MINIMIZED],
       (result) => {
         if (result[SETTINGS_KEY.ENABLED] !== undefined) state.enabled = result[SETTINGS_KEY.ENABLED];
         if (result[SETTINGS_KEY.POSITION] !== undefined) state.position = result[SETTINGS_KEY.POSITION];
         if (result[SETTINGS_KEY.CLOSED] !== undefined) state.closed = result[SETTINGS_KEY.CLOSED];
         if (result[SETTINGS_KEY.MINIMIZED] !== undefined) state.minimized = result[SETTINGS_KEY.MINIMIZED];
-        if (result[SETTINGS_KEY.DRAG_OFFSET] !== undefined) state.dragOffset = result[SETTINGS_KEY.DRAG_OFFSET];
 
         callback();
       }
@@ -100,6 +99,13 @@
 
     const host = document.createElement('div');
     host.id = 'dtoc-host';
+    // Apply critical host styles directly to avoid layout shift before CSS loads
+    host.style.position = 'fixed';
+    host.style.top = '0';
+    host.style.left = '0';
+    host.style.zIndex = '999999';
+    host.style.pointerEvents = 'none';
+
     document.body.appendChild(host);
 
     shadowRoot = host.attachShadow({ mode: 'open' });
@@ -117,9 +123,6 @@
     // Header
     const header = document.createElement('div');
     header.className = 'dtoc-header';
-
-    // Make header draggable
-    setupDragging(header, container);
 
     const title = document.createElement('h2');
     title.className = 'dtoc-title';

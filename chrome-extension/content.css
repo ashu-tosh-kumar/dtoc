@@ -3,6 +3,11 @@
   all: initial;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999999;
+  pointer-events: none;
 }
 
 *, *:before, *:after {
@@ -10,30 +15,28 @@
 }
 
 #dtoc-container {
-  position: fixed;
+  position: absolute; /* Relative to :host which is fixed at top left */
   top: 64px; /* Default below Atlassian top nav */
-  max-height: calc(100vh - 88px); /* Account for top (64px) and bottom (24px) spacing */
+  bottom: 24px;
   width: 280px;
   background-color: var(--ds-surface, #ffffff);
   border: 1px solid var(--ds-border, #dfe1e6);
   border-radius: 4px;
   box-shadow: var(--ds-shadow-overlay, 0 4px 8px rgba(9, 30, 66, 0.1), 0 0 1px rgba(9, 30, 66, 0.31));
-  z-index: 99999;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
   overflow: hidden;
   color: var(--ds-text, #172b4d);
+  pointer-events: auto; /* Re-enable pointer events for the container */
 }
 
 #dtoc-container.position-left {
   left: 24px;
-  right: auto;
 }
 
 #dtoc-container.position-right {
   right: 24px;
-  left: auto;
 }
 
 #dtoc-container.hidden {
@@ -71,12 +74,6 @@
   padding: 12px 16px;
   border-bottom: 1px solid var(--ds-border, #dfe1e6);
   background-color: var(--ds-surface-sunken, #fafbfc);
-  cursor: grab;
-  user-select: none;
-}
-
-.dtoc-header:active {
-  cursor: grabbing;
 }
 
 .dtoc-title {
