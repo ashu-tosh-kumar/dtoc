@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "name": "dtoc",
+  "version": "1.0.0",
+  "description": "Dynamic Table of Content.",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.atlassian.net/wiki/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "dtoc Settings"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    "content.css"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "dtoc-firefox@example.com",
+      "strict_min_version": "57.0"
+    }
+  }
+}
