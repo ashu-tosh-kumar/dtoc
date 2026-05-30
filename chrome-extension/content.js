@@ -56,12 +56,13 @@
 
   function loadSettings(callback) {
     chrome.storage.local.get(
-      [SETTINGS_KEY.ENABLED, SETTINGS_KEY.POSITION, SETTINGS_KEY.CLOSED, SETTINGS_KEY.MINIMIZED],
+      [SETTINGS_KEY.ENABLED, SETTINGS_KEY.POSITION, SETTINGS_KEY.CLOSED, SETTINGS_KEY.MINIMIZED, SETTINGS_KEY.DRAG_OFFSET],
       (result) => {
         if (result[SETTINGS_KEY.ENABLED] !== undefined) state.enabled = result[SETTINGS_KEY.ENABLED];
         if (result[SETTINGS_KEY.POSITION] !== undefined) state.position = result[SETTINGS_KEY.POSITION];
         if (result[SETTINGS_KEY.CLOSED] !== undefined) state.closed = result[SETTINGS_KEY.CLOSED];
         if (result[SETTINGS_KEY.MINIMIZED] !== undefined) state.minimized = result[SETTINGS_KEY.MINIMIZED];
+        if (result[SETTINGS_KEY.DRAG_OFFSET] !== undefined) state.dragOffset = result[SETTINGS_KEY.DRAG_OFFSET];
 
         callback();
       }
@@ -116,6 +117,9 @@
     // Header
     const header = document.createElement('div');
     header.className = 'dtoc-header';
+
+    // Make header draggable
+    setupDragging(header, container);
 
     const title = document.createElement('h2');
     title.className = 'dtoc-title';
