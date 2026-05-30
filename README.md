@@ -2,8 +2,11 @@
 
 Dynamic Table of Content.
 
-This extension automatically generates a non-intrusive, sticky Table of Contents, allowing you to quickly navigate long documents without
-losing your reading context.
+This extension automatically generates a non-intrusive, sticky Table of Contents, allowing you to quickly navigate long documents without losing your reading context.
+
+
+https://github.com/user-attachments/assets/f4e10d5f-0266-49f4-9800-8eeea60df0a9
+
 
 Supported Websites:
 
