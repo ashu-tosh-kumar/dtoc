@@ -31,6 +31,12 @@ NOTE: Not yet available on the Chrome Web Store. Stay tuned for updates!
 
 Download and install from the Chrome Web Store: [Dynamic Table of Content]()
 
+### Microsoft Edge Add-ons
+
+NOTE: Not yet available on the Microsoft Edge Add-ons store. Stay tuned for updates!
+
+Download and install from Microsoft Edge Add-ons: [Dynamic Table of Content]()
+
 ### Manual Installation
 
 To install the extension manually from source:
