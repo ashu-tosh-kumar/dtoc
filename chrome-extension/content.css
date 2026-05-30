@@ -12,7 +12,7 @@
 #dtoc-container {
   position: fixed;
   top: 64px; /* Default below Atlassian top nav */
-  bottom: 24px;
+  max-height: calc(100vh - 88px); /* Account for top (64px) and bottom (24px) spacing */
   width: 280px;
   background-color: var(--ds-surface, #ffffff);
   border: 1px solid var(--ds-border, #dfe1e6);
