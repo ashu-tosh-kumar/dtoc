@@ -2,83 +2,114 @@
  * @jest-environment jsdom
  */
 
-describe("content script view mode logic", () => {
-  // Extract the pure function logic for testing
-  function isViewMode(path, search) {
-    if (path.includes('/edit') || path.includes('/edit-v2')) return false;
-    const params = new URLSearchParams(search);
-    if (params.get('mode') === 'edit') return false;
-    return true;
-  }
+const fs = require('fs');
+const path = require('path');
 
-  test("returns true for standard view pages", () => {
-    expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '')).toBe(true);
+const extensions = ['chrome-extension', 'firefox-extension'];
+
+describe("Extension API usage and files structure", () => {
+  test("chrome-extension files use chrome.* API", () => {
+    const contentJs = fs.readFileSync(path.join(__dirname, 'chrome-extension', 'content.js'), 'utf8');
+    expect(contentJs).toMatch(/chrome\.storage\.local/);
+    expect(contentJs).not.toMatch(/browser\.storage\.local/);
+
+    const popupJs = fs.readFileSync(path.join(__dirname, 'chrome-extension', 'popup.js'), 'utf8');
+    expect(popupJs).toMatch(/chrome\.storage\.local/);
+    expect(popupJs).not.toMatch(/browser\.storage\.local/);
   });
 
-  test("returns false for /edit routes", () => {
-    expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture/edit', '')).toBe(false);
-  });
+  test("firefox-extension files use browser.* API", () => {
+    const contentJs = fs.readFileSync(path.join(__dirname, 'firefox-extension', 'content.js'), 'utf8');
+    expect(contentJs).toMatch(/browser\.storage\.local/);
+    expect(contentJs).not.toMatch(/chrome\.storage\.local/);
 
-  test("returns false for /edit-v2 routes", () => {
-    expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture/edit-v2', '')).toBe(false);
-  });
-
-  test("returns false when mode=edit is in query params", () => {
-    expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '?mode=edit')).toBe(false);
-  });
-});
-
-// Note: We use purely mocked/extracted logic in this test file
-// to avoid loading browser-specific extension APIs directly into Jest.
-describe("heading normalization logic", () => {
-  test("generates an ID if a heading lacks one", () => {
-    document.body.innerHTML = '<h1>Hello World</h1>';
-    const heading = document.querySelector('h1');
-
-    let id = heading.id;
-    if (!id) {
-      id = `dtoc-heading-0-${Math.random().toString(36).substr(2, 5)}`;
-      heading.id = id;
-    }
-
-    expect(heading.id).toMatch(/^dtoc-heading-0-[a-z0-9]{5}$/);
-  });
-
-  test("preserves existing heading IDs", () => {
-    document.body.innerHTML = '<h2 id="existing-anchor">Custom Section</h2>';
-    const heading = document.querySelector('h2');
-
-    let id = heading.id;
-    if (!id) {
-      id = `dtoc-heading-1-${Math.random().toString(36).substr(2, 5)}`;
-      heading.id = id;
-    }
-
-    expect(heading.id).toBe('existing-anchor');
+    const popupJs = fs.readFileSync(path.join(__dirname, 'firefox-extension', 'popup.js'), 'utf8');
+    expect(popupJs).toMatch(/browser\.storage\.local/);
+    expect(popupJs).not.toMatch(/chrome\.storage\.local/);
   });
 });
 
-describe("DOM container fallback logic", () => {
-  function getConfluenceContentContainer() {
-    const selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
-    for (let selector of selectors) {
-      const el = document.querySelector(selector);
-      if (el) return el;
-    }
-    return document.body;
-  }
+extensions.forEach(ext => {
+  describe(`Tests for ${ext}`, () => {
+    describe("content script view mode logic", () => {
+      // Extract the pure function logic for testing
+      function isViewMode(path, search) {
+        if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+        const params = new URLSearchParams(search);
+        if (params.get('mode') === 'edit') return false;
+        return true;
+      }
 
-  afterEach(() => {
-    document.body.innerHTML = '';
-  });
+      test("returns true for standard view pages", () => {
+        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '')).toBe(true);
+      });
 
-  test("finds #main-content first", () => {
-    document.body.innerHTML = '<div id="sidebar"></div><div id="main-content">Target</div>';
-    expect(getConfluenceContentContainer().id).toBe('main-content');
-  });
+      test("returns false for /edit routes", () => {
+        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture/edit', '')).toBe(false);
+      });
 
-  test("falls back to body if no container matches", () => {
-    document.body.innerHTML = '<div class="unknown-layout">Hello</div>';
-    expect(getConfluenceContentContainer()).toBe(document.body);
+      test("returns false for /edit-v2 routes", () => {
+        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture/edit-v2', '')).toBe(false);
+      });
+
+      test("returns false when mode=edit is in query params", () => {
+        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '?mode=edit')).toBe(false);
+      });
+    });
+
+    // Note: We use purely mocked/extracted logic in this test file
+    // to avoid loading browser-specific extension APIs directly into Jest.
+    describe("heading normalization logic", () => {
+      test("generates an ID if a heading lacks one", () => {
+        document.body.innerHTML = '<h1>Hello World</h1>';
+        const heading = document.querySelector('h1');
+
+        let id = heading.id;
+        if (!id) {
+          id = `dtoc-heading-0-${Math.random().toString(36).substr(2, 5)}`;
+          heading.id = id;
+        }
+
+        expect(heading.id).toMatch(/^dtoc-heading-0-[a-z0-9]{5}$/);
+      });
+
+      test("preserves existing heading IDs", () => {
+        document.body.innerHTML = '<h2 id="existing-anchor">Custom Section</h2>';
+        const heading = document.querySelector('h2');
+
+        let id = heading.id;
+        if (!id) {
+          id = `dtoc-heading-1-${Math.random().toString(36).substr(2, 5)}`;
+          heading.id = id;
+        }
+
+        expect(heading.id).toBe('existing-anchor');
+      });
+    });
+
+    describe("DOM container fallback logic", () => {
+      function getConfluenceContentContainer() {
+        const selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+        for (let selector of selectors) {
+          const el = document.querySelector(selector);
+          if (el) return el;
+        }
+        return document.body;
+      }
+
+      afterEach(() => {
+        document.body.innerHTML = '';
+      });
+
+      test("finds #main-content first", () => {
+        document.body.innerHTML = '<div id="sidebar"></div><div id="main-content">Target</div>';
+        expect(getConfluenceContentContainer().id).toBe('main-content');
+      });
+
+      test("falls back to body if no container matches", () => {
+        document.body.innerHTML = '<div class="unknown-layout">Hello</div>';
+        expect(getConfluenceContentContainer()).toBe(document.body);
+      });
+    });
   });
 });
