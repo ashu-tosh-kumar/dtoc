@@ -38,6 +38,10 @@ NOTE: Not yet available on the Microsoft Edge Add-ons store. Stay tuned for upda
 
 Download and install from Microsoft Edge Add-ons: [Dynamic Table of Content]()
 
+### Mozilla Firefox Add-ons
+
+NOTE: Not yet available on the Mozilla Firefox Add-ons. Stay tuned for updates!
+
 ### Manual Installation
 
 To install the extension manually from source:
