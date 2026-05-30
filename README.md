@@ -13,6 +13,7 @@ Supported Websites:
 Supported Browsers:
 
 - Chrome and all Chromium-based browsers (Edge, Brave, Arc, etc.)
+- Mozilla Firefox and Firefox based browsers like Zen browser
 
 ## Features
 
@@ -30,6 +31,10 @@ Supported Browsers:
 NOTE: Not yet available on the Chrome Web Store. Stay tuned for updates!
 
 Download and install from the Chrome Web Store: [Dynamic Table of Content]()
+
+### Mozilla Firefox Add-ons
+
+NOTE: Not yet available on the Mozilla Firefox Add-ons. Stay tuned for updates!
 
 ### Manual Installation
 
