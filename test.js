@@ -28,6 +28,8 @@ describe("content script view mode logic", () => {
   });
 });
 
+// Note: We use purely mocked/extracted logic in this test file
+// to avoid loading browser-specific extension APIs directly into Jest.
 describe("heading normalization logic", () => {
   test("generates an ID if a heading lacks one", () => {
     document.body.innerHTML = '<h1>Hello World</h1>';
