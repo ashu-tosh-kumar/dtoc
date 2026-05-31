@@ -3,3 +3,4 @@ node_modules/
 # VS Code
 .history/
 .vscode/
+firefox-extension/web-ext-artifacts/

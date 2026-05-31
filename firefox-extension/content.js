@@ -208,6 +208,7 @@
 
   function setupMutationObserver() {
     const config = { childList: true, subtree: true, characterData: true };
+    let currentTarget = null;
 
     const callback = function(mutationsList, observer) {
       // Debounce the parsing to avoid performance hits during rapid DOM updates
@@ -230,41 +231,49 @@
 
     observer = new MutationObserver(callback);
 
-    // Attempt initial bind
-    const targetNode = getConfluenceContentContainer();
-    if (targetNode) {
-      observer.observe(targetNode, config);
-    }
+    const rebindObserver = () => {
+      const targetNode = getConfluenceContentContainer();
+      if (targetNode && targetNode !== currentTarget) {
+        if (currentTarget) observer.disconnect();
+        observer.observe(targetNode, config);
+        currentTarget = targetNode;
+        return true;
+      }
+      return false;
+    };
 
-    // Also handle SPA URL changes which might not trigger significant DOM mutations
-    // on the targetNode if the container itself is replaced.
+    rebindObserver();
+
+    // Use a periodic check for URL changes and container availability 
+    // instead of a broad document-level MutationObserver.
     let lastUrl = location.href;
-    new MutationObserver(() => {
-      const url = location.href;
-      if (url !== lastUrl) {
-        lastUrl = url;
+    setInterval(() => {
+      const currentUrl = location.href;
+      const targetNode = getConfluenceContentContainer();
+
+      if (currentUrl !== lastUrl || (targetNode && targetNode !== currentTarget)) {
+        const urlChanged = currentUrl !== lastUrl;
+        lastUrl = currentUrl;
+        
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           if (!isViewMode()) {
-             if (container) container.classList.add('hidden');
+            if (container) container.classList.add('hidden');
           } else {
-            if (!container) injectUI(); // Inject if we started in edit mode and just switched
+            if (!container) injectUI();
             applyStateToUI();
 
-            // Re-bind observer if target node changed
-            const newTarget = getConfluenceContentContainer();
-            if (newTarget) {
-              observer.disconnect();
-              observer.observe(newTarget, config);
-            }
+            const bound = rebindObserver();
             if (state.enabled && !state.closed && container) {
               container.classList.remove('hidden');
             }
-            parseHeadingsAndRender();
+            if (bound || urlChanged) {
+              parseHeadingsAndRender();
+            }
           }
-        }, 1000); // Wait longer for SPA transition to finish
+        }, urlChanged ? 1000 : 500);
       }
-    }).observe(document, {subtree: true, childList: true});
+    }, 1000);
   }
 
   // --- Parsing & Navigation ---
@@ -284,14 +293,14 @@
       if (el) return el;
     }
 
-    // Fallback to body if we can't find a specific container, though we might catch sidebars
-    return document.body;
+    return null;
   }
 
   function parseHeadingsAndRender() {
     if (!contentArea) return;
 
     const contentContainer = getConfluenceContentContainer();
+    if (!contentContainer) return;
 
     // Query headings only within the main content area to avoid site nav/sidebar
     const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
