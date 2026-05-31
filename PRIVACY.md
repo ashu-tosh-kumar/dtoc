@@ -7,7 +7,8 @@ Your privacy is a top priority. This extension is designed to be as non-intrusiv
 `dtoc` only accesses the following data on supported pages (Confluence Cloud):
 
 - **Headings (H1-H6)**: The extension reads the text and tag names of headings to build the Table of Contents. This data never leaves your browser.
-- **IDs**: It may generate stable, deterministic IDs for headings that lack them to ensure anchor links function correctly.
+- **IDs**: It may generate stable, deterministic IDs (based on heading text) for headings that lack them. This ensures anchor links function correctly without unnecessary data processing.
+- **Surgical DOM Observation**: The extension uses optimized `MutationObserver` logic to target only relevant content areas, ensuring it doesn't observe or process sensitive page content outside of the main article area.
 
 ## Data Storage
 
@@ -30,6 +31,13 @@ We guarantee that `dtoc` makes **zero external network calls**.
 - No data collection or transmission.
 
 All parsing, rendering, and logic happens entirely within the context of your browser on your local machine.
+
+## Transparency
+
+To maintain transparency about development:
+
+- **Security Hardening**: Initial security review and suggestions provided by **Qodo**.
+- **Implementation**: Security fixes and hardening implemented by **Gemini CLI**.
 
 ## Contact
 
