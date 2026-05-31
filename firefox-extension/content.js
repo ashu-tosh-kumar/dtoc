@@ -24,6 +24,12 @@
   const ICON_CLOSE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
   const ICON_MAXIMIZE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`;
 
+  function createIconElement(svgString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, 'image/svg+xml');
+    return doc.documentElement;
+  }
+
   // --- Initialization ---
 
   function init() {
@@ -126,7 +132,7 @@
     const minBtn = document.createElement('button');
     minBtn.className = 'icon-btn';
     minBtn.title = 'Minimize';
-    minBtn.innerHTML = ICON_MINIMIZE;
+    minBtn.appendChild(createIconElement(ICON_MINIMIZE));
     minBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       updateSetting(SETTINGS_KEY.MINIMIZED, true);
@@ -135,7 +141,7 @@
     const closeBtn = document.createElement('button');
     closeBtn.className = 'icon-btn';
     closeBtn.title = 'Close';
-    closeBtn.innerHTML = ICON_CLOSE;
+    closeBtn.appendChild(createIconElement(ICON_CLOSE));
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       updateSetting(SETTINGS_KEY.CLOSED, true);
@@ -150,13 +156,16 @@
     // Content Area
     contentArea = document.createElement('div');
     contentArea.className = 'dtoc-content';
-    contentArea.innerHTML = '<div class="empty-state">Loading...</div>';
+    const loadingState = document.createElement('div');
+    loadingState.className = 'empty-state';
+    loadingState.textContent = 'Loading...';
+    contentArea.appendChild(loadingState);
 
     // Maximize Icon (visible only when minimized)
     const maxIcon = document.createElement('div');
     maxIcon.className = 'maximize-icon';
     maxIcon.title = 'Expand TOC';
-    maxIcon.innerHTML = ICON_MAXIMIZE;
+    maxIcon.appendChild(createIconElement(ICON_MAXIMIZE));
 
     container.appendChild(header);
     container.appendChild(contentArea);
@@ -288,7 +297,11 @@
     const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
     if (headings.length === 0) {
-      contentArea.innerHTML = '<div class="empty-state">No headings found on this page.</div>';
+      contentArea.textContent = '';
+      const emptyState = document.createElement('div');
+      emptyState.className = 'empty-state';
+      emptyState.textContent = 'No headings found on this page.';
+      contentArea.appendChild(emptyState);
       return;
     }
 
@@ -346,7 +359,7 @@
       ul.appendChild(li);
     });
 
-    contentArea.innerHTML = ''; // Clear empty/loading state
+    contentArea.textContent = ''; // Clear empty/loading state
     contentArea.appendChild(ul);
   }
 

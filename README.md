@@ -68,5 +68,8 @@ To run the unit tests:
 - Initial release with core features.
 - Supports Confluence Cloud and adapts to Light/Dark themes.
 
+## Credits
+Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under the FontAwesome Free License ([https://fontawesome.com/license/free](https://fontawesome.com/license/free)). The specific icon used is the "folder-tree" solid icon.
+
 ---
 *Developed by Jules.*
