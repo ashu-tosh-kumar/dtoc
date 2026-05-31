@@ -255,9 +255,9 @@
 
     const rebindObserver = () => {
       const targetNode = getConfluenceContentContainer();
-      if (targetNode && targetNode !== currentTarget) {
+      if (targetNode !== currentTarget) {
         if (currentTarget) observer.disconnect();
-        observer.observe(targetNode, config);
+        if (targetNode) observer.observe(targetNode, config);
         currentTarget = targetNode;
         return true;
       }
@@ -322,7 +322,10 @@
     if (!contentArea) return;
 
     const contentContainer = getConfluenceContentContainer();
-    if (!contentContainer) return;
+    if (!contentContainer) {
+      contentArea.textContent = '';
+      return;
+    }
 
     // Query headings only within the main content area to avoid site nav/sidebar
     const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
