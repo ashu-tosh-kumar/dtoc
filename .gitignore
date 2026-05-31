@@ -4,3 +4,4 @@ node_modules/
 .history/
 .vscode/
 firefox-extension/web-ext-artifacts/
+chrome-extension/web-ext-artifacts/
