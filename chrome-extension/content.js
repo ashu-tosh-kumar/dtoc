@@ -8,6 +8,14 @@
     MINIMIZED: 'minimized'
   };
 
+  // Map storage keys to internal state property names to decouple them
+  const STATE_KEY_MAP = {
+    [SETTINGS_KEY.ENABLED]: 'enabled',
+    [SETTINGS_KEY.POSITION]: 'position',
+    [SETTINGS_KEY.CLOSED]: 'closed',
+    [SETTINGS_KEY.MINIMIZED]: 'minimized'
+  };
+
   let state = {
     enabled: true,
     position: 'left',
@@ -28,6 +36,16 @@
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, 'image/svg+xml');
     return doc.documentElement;
+  }
+
+  function slugify(text) {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   // --- Initialization ---
@@ -61,32 +79,35 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
-    chrome.storage.local.get(
-      [SETTINGS_KEY.ENABLED, SETTINGS_KEY.POSITION, SETTINGS_KEY.CLOSED, SETTINGS_KEY.MINIMIZED],
-      (result) => {
-        if (result[SETTINGS_KEY.ENABLED] !== undefined) state.enabled = result[SETTINGS_KEY.ENABLED];
-        if (result[SETTINGS_KEY.POSITION] !== undefined) state.position = result[SETTINGS_KEY.POSITION];
-        if (result[SETTINGS_KEY.CLOSED] !== undefined) state.closed = result[SETTINGS_KEY.CLOSED];
-        if (result[SETTINGS_KEY.MINIMIZED] !== undefined) state.minimized = result[SETTINGS_KEY.MINIMIZED];
-
-        callback();
+    const keys = Object.values(SETTINGS_KEY);
+    chrome.storage.local.get(keys, (result) => {
+      for (const storageKey of keys) {
+        const stateKey = STATE_KEY_MAP[storageKey];
+        if (result[storageKey] !== undefined && stateKey) {
+          state[stateKey] = result[storageKey];
+        }
       }
-    );
+      callback();
+    });
   }
 
-  function updateSetting(key, value) {
-    state[key] = value;
-    chrome.storage.local.set({ [key]: value });
-    applyStateToUI();
+  function updateSetting(storageKey, value) {
+    const stateKey = STATE_KEY_MAP[storageKey];
+    if (stateKey) {
+      state[stateKey] = value;
+      chrome.storage.local.set({ [storageKey]: value });
+      applyStateToUI();
+    }
   }
 
   function listenForSettingsChanges() {
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'local') {
         let changed = false;
-        for (let [key, { newValue }] of Object.entries(changes)) {
-          if (state[key] !== newValue) {
-            state[key] = newValue;
+        for (let [storageKey, { newValue }] of Object.entries(changes)) {
+          const stateKey = STATE_KEY_MAP[storageKey];
+          if (stateKey && state[stateKey] !== newValue) {
+            state[stateKey] = newValue;
             changed = true;
           }
         }
@@ -209,6 +230,7 @@
 
   function setupMutationObserver() {
     const config = { childList: true, subtree: true, characterData: true };
+    let currentTarget = null;
 
     const callback = function(mutationsList, observer) {
       // Debounce the parsing to avoid performance hits during rapid DOM updates
@@ -231,41 +253,49 @@
 
     observer = new MutationObserver(callback);
 
-    // Attempt initial bind
-    const targetNode = getConfluenceContentContainer();
-    if (targetNode) {
-      observer.observe(targetNode, config);
-    }
+    const rebindObserver = () => {
+      const targetNode = getConfluenceContentContainer();
+      if (targetNode && targetNode !== currentTarget) {
+        if (currentTarget) observer.disconnect();
+        observer.observe(targetNode, config);
+        currentTarget = targetNode;
+        return true;
+      }
+      return false;
+    };
 
-    // Also handle SPA URL changes which might not trigger significant DOM mutations
-    // on the targetNode if the container itself is replaced.
+    rebindObserver();
+
+    // Use a periodic check for URL changes and container availability 
+    // instead of a broad document-level MutationObserver.
     let lastUrl = location.href;
-    new MutationObserver(() => {
-      const url = location.href;
-      if (url !== lastUrl) {
-        lastUrl = url;
+    setInterval(() => {
+      const currentUrl = location.href;
+      const targetNode = getConfluenceContentContainer();
+
+      if (currentUrl !== lastUrl || (targetNode && targetNode !== currentTarget)) {
+        const urlChanged = currentUrl !== lastUrl;
+        lastUrl = currentUrl;
+        
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           if (!isViewMode()) {
-             if (container) container.classList.add('hidden');
+            if (container) container.classList.add('hidden');
           } else {
-            if (!container) injectUI(); // Inject if we started in edit mode and just switched
+            if (!container) injectUI();
             applyStateToUI();
 
-            // Re-bind observer if target node changed
-            const newTarget = getConfluenceContentContainer();
-            if (newTarget) {
-              observer.disconnect();
-              observer.observe(newTarget, config);
-            }
+            const bound = rebindObserver();
             if (state.enabled && !state.closed && container) {
               container.classList.remove('hidden');
             }
-            parseHeadingsAndRender();
+            if (bound || urlChanged) {
+              parseHeadingsAndRender();
+            }
           }
-        }, 1000); // Wait longer for SPA transition to finish
+        }, urlChanged ? 1000 : 500);
       }
-    }).observe(document, {subtree: true, childList: true});
+    }, 1000);
   }
 
   // --- Parsing & Navigation ---
@@ -285,14 +315,14 @@
       if (el) return el;
     }
 
-    // Fallback to body if we can't find a specific container, though we might catch sidebars
-    return document.body;
+    return null;
   }
 
   function parseHeadingsAndRender() {
     if (!contentArea) return;
 
     const contentContainer = getConfluenceContentContainer();
+    if (!contentContainer) return;
 
     // Query headings only within the main content area to avoid site nav/sidebar
     const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -309,6 +339,8 @@
     const ul = document.createElement('ul');
     ul.className = 'toc-list';
 
+    const idCounts = {};
+
     headings.forEach((heading, index) => {
       // Skip hidden headings or headings inside specific UI widgets if necessary
       if (heading.offsetParent === null) return;
@@ -322,7 +354,17 @@
       // Ensure heading has an ID for navigation
       let id = heading.id;
       if (!id) {
-        id = `dtoc-heading-${index}-${Math.random().toString(36).substr(2, 5)}`;
+        const slug = slugify(text) || 'heading';
+        const baseId = `dtoc-${slug}`;
+        
+        if (idCounts[baseId]) {
+          idCounts[baseId]++;
+          id = `${baseId}-${idCounts[baseId]}`;
+        } else {
+          idCounts[baseId] = 1;
+          id = baseId;
+        }
+
         heading.id = id;
       }
 
