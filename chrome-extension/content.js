@@ -38,6 +38,16 @@
     return doc.documentElement;
   }
 
+  function slugify(text) {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   // --- Initialization ---
 
   function init() {
@@ -329,6 +339,8 @@
     const ul = document.createElement('ul');
     ul.className = 'toc-list';
 
+    const idCounts = {};
+
     headings.forEach((heading, index) => {
       // Skip hidden headings or headings inside specific UI widgets if necessary
       if (heading.offsetParent === null) return;
@@ -342,7 +354,17 @@
       // Ensure heading has an ID for navigation
       let id = heading.id;
       if (!id) {
-        id = `dtoc-heading-${index}-${Math.random().toString(36).substr(2, 5)}`;
+        const slug = slugify(text) || 'heading';
+        const baseId = `dtoc-${slug}`;
+        
+        if (idCounts[baseId]) {
+          idCounts[baseId]++;
+          id = `${baseId}-${idCounts[baseId]}`;
+        } else {
+          idCounts[baseId] = 1;
+          id = baseId;
+        }
+
         heading.id = id;
       }
 

@@ -60,30 +60,59 @@ extensions.forEach(ext => {
     // Note: We use purely mocked/extracted logic in this test file
     // to avoid loading browser-specific extension APIs directly into Jest.
     describe("heading normalization logic", () => {
+      function slugify(text) {
+        return text
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      }
+
       test("generates an ID if a heading lacks one", () => {
         document.body.innerHTML = '<h1>Hello World</h1>';
         const heading = document.querySelector('h1');
+        const text = heading.textContent.trim();
 
         let id = heading.id;
         if (!id) {
-          id = `dtoc-heading-0-${Math.random().toString(36).substr(2, 5)}`;
+          const slug = slugify(text) || 'heading';
+          id = `dtoc-${slug}`;
           heading.id = id;
         }
 
-        expect(heading.id).toMatch(/^dtoc-heading-0-[a-z0-9]{5}$/);
+        expect(heading.id).toBe('dtoc-hello-world');
       });
 
       test("preserves existing heading IDs", () => {
         document.body.innerHTML = '<h2 id="existing-anchor">Custom Section</h2>';
         const heading = document.querySelector('h2');
+        const text = heading.textContent.trim();
 
         let id = heading.id;
         if (!id) {
-          id = `dtoc-heading-1-${Math.random().toString(36).substr(2, 5)}`;
+          const slug = slugify(text) || 'heading';
+          id = `dtoc-${slug}`;
           heading.id = id;
         }
 
         expect(heading.id).toBe('existing-anchor');
+      });
+
+      test("handles empty or special character only text", () => {
+        document.body.innerHTML = '<h3>!!!</h3>';
+        const heading = document.querySelector('h3');
+        const text = heading.textContent.trim();
+
+        let id = heading.id;
+        if (!id) {
+          const slug = slugify(text) || 'heading';
+          id = `dtoc-${slug}`;
+          heading.id = id;
+        }
+
+        expect(heading.id).toBe('dtoc-heading');
       });
     });
 
@@ -94,7 +123,7 @@ extensions.forEach(ext => {
           const el = document.querySelector(selector);
           if (el) return el;
         }
-        return document.body;
+        return null;
       }
 
       afterEach(() => {
@@ -106,9 +135,9 @@ extensions.forEach(ext => {
         expect(getConfluenceContentContainer().id).toBe('main-content');
       });
 
-      test("falls back to body if no container matches", () => {
+      test("returns null if no container matches", () => {
         document.body.innerHTML = '<div class="unknown-layout">Hello</div>';
-        expect(getConfluenceContentContainer()).toBe(document.body);
+        expect(getConfluenceContentContainer()).toBe(null);
       });
     });
   });
