@@ -24,6 +24,13 @@ Supported Browsers:
 - **Reactivity**: Rebuilds the TOC on the fly as Confluence SPA pages update.
 - **Privacy First**: Zero external network calls. All preferences are saved locally.
 
+## Privacy & Security
+
+We take your data seriously. For detailed information, please see our:
+
+- [Privacy Policy](PRIVACY.md)
+- [Security Policy](SECURITY.md)
+
 ## Getting Started
 
 ### Chrome Web Store
@@ -69,7 +76,9 @@ To run the unit tests:
 - Supports Confluence Cloud and adapts to Light/Dark themes.
 
 ## Credits
+
 Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under the FontAwesome Free License ([https://fontawesome.com/license/free](https://fontawesome.com/license/free)). The specific icon used is the "folder-tree" solid icon.
 
 ---
 *Developed by Jules.*
+*Security hardening reviewed by Qodo and implemented by Gemini CLI.*
