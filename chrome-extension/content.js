@@ -8,6 +8,14 @@
     MINIMIZED: 'minimized'
   };
 
+  // Map storage keys to internal state property names to decouple them
+  const STATE_KEY_MAP = {
+    [SETTINGS_KEY.ENABLED]: 'enabled',
+    [SETTINGS_KEY.POSITION]: 'position',
+    [SETTINGS_KEY.CLOSED]: 'closed',
+    [SETTINGS_KEY.MINIMIZED]: 'minimized'
+  };
+
   let state = {
     enabled: true,
     position: 'left',
@@ -61,32 +69,35 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
-    chrome.storage.local.get(
-      [SETTINGS_KEY.ENABLED, SETTINGS_KEY.POSITION, SETTINGS_KEY.CLOSED, SETTINGS_KEY.MINIMIZED],
-      (result) => {
-        if (result[SETTINGS_KEY.ENABLED] !== undefined) state.enabled = result[SETTINGS_KEY.ENABLED];
-        if (result[SETTINGS_KEY.POSITION] !== undefined) state.position = result[SETTINGS_KEY.POSITION];
-        if (result[SETTINGS_KEY.CLOSED] !== undefined) state.closed = result[SETTINGS_KEY.CLOSED];
-        if (result[SETTINGS_KEY.MINIMIZED] !== undefined) state.minimized = result[SETTINGS_KEY.MINIMIZED];
-
-        callback();
+    const keys = Object.values(SETTINGS_KEY);
+    chrome.storage.local.get(keys, (result) => {
+      for (const storageKey of keys) {
+        const stateKey = STATE_KEY_MAP[storageKey];
+        if (result[storageKey] !== undefined && stateKey) {
+          state[stateKey] = result[storageKey];
+        }
       }
-    );
+      callback();
+    });
   }
 
-  function updateSetting(key, value) {
-    state[key] = value;
-    chrome.storage.local.set({ [key]: value });
-    applyStateToUI();
+  function updateSetting(storageKey, value) {
+    const stateKey = STATE_KEY_MAP[storageKey];
+    if (stateKey) {
+      state[stateKey] = value;
+      chrome.storage.local.set({ [storageKey]: value });
+      applyStateToUI();
+    }
   }
 
   function listenForSettingsChanges() {
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'local') {
         let changed = false;
-        for (let [key, { newValue }] of Object.entries(changes)) {
-          if (state[key] !== newValue) {
-            state[key] = newValue;
+        for (let [storageKey, { newValue }] of Object.entries(changes)) {
+          const stateKey = STATE_KEY_MAP[storageKey];
+          if (stateKey && state[stateKey] !== newValue) {
+            state[stateKey] = newValue;
             changed = true;
           }
         }
