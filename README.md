@@ -39,19 +39,15 @@ We take your data seriously. For detailed information, please see our:
 
 ### Chrome Web Store
 
-NOTE: Not yet available on the Chrome Web Store. Stay tuned for updates!
-
-Download and install from the Chrome Web Store: [Dynamic Table of Content]()
+_NOTE: Not yet available on the Chrome Web Store. Stay tuned for updates!_
 
 ### Microsoft Edge Add-ons
 
-NOTE: Not yet available on the Microsoft Edge Add-ons store. Stay tuned for updates!
-
-Download and install from Microsoft Edge Add-ons: [Dynamic Table of Content]()
+Download and install from Microsoft Edge Add-ons: [Dynamic Table of Content](https://microsoftedge.microsoft.com/addons/detail/dtoc/kibljloiohjclbilhjmlfmahhdionhgc)
 
 ### Mozilla Firefox Add-ons
 
-NOTE: Not yet available on the Mozilla Firefox Add-ons. Stay tuned for updates!
+_NOTE: Not yet available on the Mozilla Firefox Add-ons. Stay tuned for updates!_
 
 ### Manual Installation
 
