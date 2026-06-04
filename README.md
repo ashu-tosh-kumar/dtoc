@@ -76,8 +76,6 @@ To run the unit tests:
 - Added ability to request support for new websites directly from the extension popup (links to a Google Form).
 - Extracted hostname is passed to the Form to maintain user privacy.
 - Displays Open Source text in the extension popup footer.
-- Configured CI/CD GitHub action workflows to also trigger on the development branch.
-- Updated `manifest.json` versions to 1.1.0.
 
 `v1.0.0`
 
