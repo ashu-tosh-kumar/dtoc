@@ -27,6 +27,7 @@ Supported Browsers:
 - **Atlassian Theming**: Automatically adapts to Confluence's Light and Dark modes.
 - **Reactivity**: Rebuilds the TOC on the fly as Confluence SPA pages update.
 - **Privacy First**: Zero external network calls. All preferences are saved locally.
+- **Request Website Support**: A built-in Google form link to request support for websites, pre-filled with the hostname (the extension still doesn't make any external API calls by itself).
 
 ## Privacy & Security
 
@@ -69,6 +70,13 @@ To run the unit tests:
 2. Run tests: `npm test`
 
 ## Changelog
+
+`v1.1.0`
+
+- Added ability to request support for new websites directly from the extension popup (links to a Google Form).
+- Extracted hostname is passed to the Form to maintain user privacy.
+- Displays Open Source text in the extension popup footer.
+- Updated `manifest.json` versions to 1.1.0.
 
 `v1.0.0`
 
