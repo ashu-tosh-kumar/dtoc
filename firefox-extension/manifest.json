@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "Dynamic Table of Content.",
   "permissions": [
-    "storage"
+    "storage",
+    "activeTab"
   ],
   "content_scripts": [
     {
