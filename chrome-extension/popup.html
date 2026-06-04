@@ -27,14 +27,22 @@
       </select>
     </div>
 
-    <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+    <div id="restore-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px; display: none;">
       <button id="restore-btn" class="btn">Show TOC</button>
       <small class="helper-text">Click to bring back the TOC if you closed it on the page.</small>
+    </div>
+
+    <div id="support-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px; display: none;">
+      <button id="request-support-btn" class="btn">Request Website Support</button>
+      <small class="helper-text">This website is not currently supported.</small>
     </div>
   </div>
 
   <div class="footer">
     <p>Privacy First: No external calls, all data stays local.</p>
+    <p class="open-source-text">
+      ❤️ Open source on <a href="https://github.com/ashu-tosh-kumar/dtoc" target="_blank">GitHub</a>
+    </p>
   </div>
 
   <script src="popup.js"></script>

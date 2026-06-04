@@ -9,6 +9,7 @@ Your privacy is a top priority. This extension is designed to be as non-intrusiv
 - **Headings (H1-H6)**: The extension reads the text and tag names of headings to build the Table of Contents. This data never leaves your browser.
 - **IDs**: It may generate stable, deterministic IDs (based on heading text) for headings that lack them. This ensures anchor links function correctly without unnecessary data processing.
 - **Surgical DOM Observation**: The extension uses optimized `MutationObserver` logic to target only relevant content areas, ensuring it doesn't observe or process sensitive page content outside of the main article area.
+- **Active Tab URLs**: We request the `activeTab` permission to check if the current website is supported, and to optionally auto-fill a Google Form with just the *hostname* (never full paths or queries) when you request support for a new site.
 
 ## Data Storage
 
