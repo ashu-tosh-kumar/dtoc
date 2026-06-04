@@ -10,7 +10,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.atlassian.net/wiki/*"
+        "https://*.atlassian.net/wiki/*",
+        "https://dev.to/*"
       ],
       "js": [
         "content.js"
@@ -33,7 +34,8 @@
         "content.css"
       ],
       "matches": [
-        "https://*.atlassian.net/*"
+        "https://*.atlassian.net/*",
+        "https://dev.to/*"
       ]
     }
   ],
