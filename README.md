@@ -39,7 +39,7 @@ We take your data seriously. For detailed information, please see our:
 
 ### Chrome Web Store
 
-_NOTE: Not yet available on the Chrome Web Store. Stay tuned for updates!_
+Download and install from Chrome Web Store: [Dynamic Table of Content](https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl?authuser=0&hl=en)
 
 ### Microsoft Edge Add-ons
 
@@ -47,7 +47,7 @@ Download and install from Microsoft Edge Add-ons: [Dynamic Table of Content](htt
 
 ### Mozilla Firefox Add-ons
 
-_NOTE: Not yet available on the Mozilla Firefox Add-ons. Stay tuned for updates!_
+Download and install from Mozilla Firefox Add-ons: [Dynamic Table of Content](https://addons.mozilla.org/en-US/firefox/addon/dtoc/)
 
 ### Manual Installation
 
