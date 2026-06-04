@@ -61,7 +61,8 @@ extensions.forEach(ext => {
     // to avoid loading browser-specific extension APIs directly into Jest.
     describe("heading normalization logic", () => {
       function slugify(text) {
-        return text
+        const truncated = text.substring(0, 200);
+        return truncated
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
