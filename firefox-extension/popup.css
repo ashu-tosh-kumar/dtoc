@@ -82,6 +82,19 @@ select {
   color: #5e6c84;
 }
 
+.footer .open-source-text {
+  margin-top: 6px;
+}
+
+.footer .open-source-text a {
+  color: #0052cc;
+  text-decoration: none;
+}
+
+.footer .open-source-text a:hover {
+  text-decoration: underline;
+}
+
 /* Toggle Switch Styles */
 .switch {
   position: relative;
