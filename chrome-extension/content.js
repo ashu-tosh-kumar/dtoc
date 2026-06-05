@@ -336,6 +336,40 @@
     return null;
   }
 
+  function getPageTitle() {
+    const selectors = [
+      'h1#title-text',
+      'h1[data-test-id="page-title"]',
+      '.ak-page-header-title h1',
+      '#main-title h1',
+      '.crayons-article__header__meta h1',
+      '.crayons-article__main h1',
+      'h1.crayons-title',
+      'h1'
+    ];
+
+    for (const selector of selectors) {
+      const el = document.querySelector(selector);
+      if (el && el.textContent.trim()) {
+        return {
+          text: el.textContent.trim(),
+          element: el
+        };
+      }
+    }
+
+    let titleText = document.title;
+    titleText = titleText
+      .replace(/\s*-\s*Confluence\s*$/i, '')
+      .replace(/\s*-\s*DEV Community\s*$/i, '')
+      .trim();
+
+    return {
+      text: titleText || 'Top',
+      element: null
+    };
+  }
+
   function parseHeadingsAndRender() {
     if (!contentArea) return;
 
@@ -351,25 +385,42 @@
     const ul = document.createElement('ul');
     ul.className = 'toc-list';
 
-    // Add TOP item
-    const topLi = document.createElement('li');
-    topLi.className = 'toc-item';
-    const topA = document.createElement('a');
-    topA.className = 'toc-link';
-    topA.href = '#';
-    topA.textContent = 'TOP';
-    topA.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    topLi.appendChild(topA);
-    ul.appendChild(topLi);
+    // Get the page title info
+    const titleInfo = getPageTitle();
 
-    const topSeparator = document.createElement('hr');
-    topSeparator.className = 'toc-separator';
-    ul.appendChild(topSeparator);
+    // Prepend Page Title to TOC if it's not the same element as the first heading
+    const firstHeading = headings[0];
+    const hasTitlePrepend = titleInfo.element !== firstHeading;
 
-    let hasVisibleHeadings = false;
+    if (hasTitlePrepend) {
+      const titleLi = document.createElement('li');
+      titleLi.className = 'toc-item toc-level-1 toc-title-item';
+
+      const titleA = document.createElement('a');
+      titleA.className = 'toc-link';
+      titleA.href = '#';
+      titleA.textContent = titleInfo.text;
+
+      titleA.addEventListener('click', (e) => {
+        e.preventDefault();
+        history.pushState(null, null, window.location.pathname + window.location.search);
+
+        if (titleInfo.element) {
+          titleInfo.element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const originalScrollMargin = titleInfo.element.style.scrollMarginTop;
+          titleInfo.element.style.scrollMarginTop = '70px';
+          setTimeout(() => {
+            titleInfo.element.style.scrollMarginTop = originalScrollMargin;
+          }, 1000);
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+
+      titleLi.appendChild(titleA);
+      ul.appendChild(titleLi);
+    }
+
     const idCounts = {};
 
     headings.forEach((heading, index) => {
@@ -378,8 +429,6 @@
 
       const text = heading.textContent.trim();
       if (!text) return; // Skip empty headings
-
-      hasVisibleHeadings = true;
 
       // Normalize heading level (h1 = 1, h2 = 2, etc.)
       const level = parseInt(heading.tagName.substring(1), 10);
@@ -434,26 +483,6 @@
       li.appendChild(a);
       ul.appendChild(li);
     });
-
-    if (hasVisibleHeadings) {
-      const bottomSeparator = document.createElement('hr');
-      bottomSeparator.className = 'toc-separator';
-      ul.appendChild(bottomSeparator);
-    }
-
-    // Add END item
-    const endLi = document.createElement('li');
-    endLi.className = 'toc-item';
-    const endA = document.createElement('a');
-    endA.className = 'toc-link';
-    endA.href = '#';
-    endA.textContent = 'END';
-    endA.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    });
-    endLi.appendChild(endA);
-    ul.appendChild(endLi);
 
     contentArea.textContent = ''; // Clear empty/loading state
     contentArea.appendChild(ul);
