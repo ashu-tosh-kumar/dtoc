@@ -90,7 +90,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     const tocList = hostLocator.locator('.toc-list');
     await expect(tocList).toBeVisible();
 
-    const firstLink = tocList.locator('.toc-link').first();
+    const firstLink = tocList.locator('.toc-link:not([href="#"])').first();
     const href = await firstLink.getAttribute('href');
 
     await firstLink.click();
@@ -179,7 +179,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/position-right/);
 
-    const secondLink = tocList.locator('.toc-link').nth(1);
+    const secondLink = tocList.locator('.toc-link:not([href="#"])').nth(1);
     const secondHref = await secondLink.getAttribute('href');
     await secondLink.click();
     await page.waitForFunction((expectedHash) => {

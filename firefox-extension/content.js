@@ -330,18 +330,28 @@
     // Query headings only within the main content area to avoid site nav/sidebar
     const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
-    if (headings.length === 0) {
-      contentArea.textContent = '';
-      const emptyState = document.createElement('div');
-      emptyState.className = 'empty-state';
-      emptyState.textContent = 'No headings found on this page.';
-      contentArea.appendChild(emptyState);
-      return;
-    }
-
     const ul = document.createElement('ul');
     ul.className = 'toc-list';
 
+    // Add TOP item
+    const topLi = document.createElement('li');
+    topLi.className = 'toc-item';
+    const topA = document.createElement('a');
+    topA.className = 'toc-link';
+    topA.href = '#';
+    topA.textContent = 'TOP';
+    topA.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    topLi.appendChild(topA);
+    ul.appendChild(topLi);
+
+    const topSeparator = document.createElement('hr');
+    topSeparator.className = 'toc-separator';
+    ul.appendChild(topSeparator);
+
+    let hasVisibleHeadings = false;
     const idCounts = {};
 
     headings.forEach((heading, index) => {
@@ -350,6 +360,8 @@
 
       const text = heading.textContent.trim();
       if (!text) return; // Skip empty headings
+
+      hasVisibleHeadings = true;
 
       // Normalize heading level (h1 = 1, h2 = 2, etc.)
       const level = parseInt(heading.tagName.substring(1), 10);
@@ -404,6 +416,26 @@
       li.appendChild(a);
       ul.appendChild(li);
     });
+
+    if (hasVisibleHeadings) {
+      const bottomSeparator = document.createElement('hr');
+      bottomSeparator.className = 'toc-separator';
+      ul.appendChild(bottomSeparator);
+    }
+
+    // Add END item
+    const endLi = document.createElement('li');
+    endLi.className = 'toc-item';
+    const endA = document.createElement('a');
+    endA.className = 'toc-link';
+    endA.href = '#';
+    endA.textContent = 'END';
+    endA.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+    endLi.appendChild(endA);
+    ul.appendChild(endLi);
 
     contentArea.textContent = ''; // Clear empty/loading state
     contentArea.appendChild(ul);

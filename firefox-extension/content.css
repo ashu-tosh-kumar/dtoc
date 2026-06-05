@@ -163,6 +163,12 @@
 .toc-level-5 .toc-link { padding-left: 64px; font-size: 12px; color: var(--ds-text-subtlest, #5e6c84); }
 .toc-level-6 .toc-link { padding-left: 76px; font-size: 12px; color: var(--ds-text-subtlest, #5e6c84); }
 
+.toc-separator {
+  margin: 4px 0;
+  border: 0;
+  border-top: 1px solid var(--ds-border, #dfe1e6);
+}
+
 .empty-state {
   padding: 16px;
   text-align: center;
