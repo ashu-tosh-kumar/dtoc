@@ -325,13 +325,21 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.close();
   });
 
-  test('Unsupported website interactions (Wikipedia)', async () => {
+  test('Experimental website interactions (Wikipedia)', async () => {
     test.setTimeout(120000);
     const page = await browserContext.newPage();
     await page.goto('https://en.wikipedia.org/wiki/Main_Page', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
 
     const hostLocator = page.locator('#dtoc-host');
-    await expect(hostLocator).not.toBeAttached();
+    await expect(hostLocator).toBeAttached({ timeout: 10000 });
+
+    const containerLocator = hostLocator.locator('css=div#dtoc-container');
+    await expect(containerLocator).toBeVisible();
+    await expect(containerLocator).toHaveClass(/experimental/);
+
+    const headerTitle = hostLocator.locator('.dtoc-title');
+    await expect(headerTitle).toHaveText('Table of Contents (Beta)');
 
     const popupPage = await browserContext.newPage();
 
@@ -362,6 +370,12 @@ test.describe('DTOC Extension E2E Tests', () => {
 
     const requestSupportBtn = popupPage.locator('#request-support-btn');
     await expect(requestSupportBtn).toBeVisible();
+
+    const restoreContainer = popupPage.locator('#restore-container');
+    await expect(restoreContainer).toBeVisible();
+
+    const experimentalBadge = popupPage.locator('#experimental-badge');
+    await expect(experimentalBadge).toBeVisible();
 
     await page.close();
     await popupPage.close();

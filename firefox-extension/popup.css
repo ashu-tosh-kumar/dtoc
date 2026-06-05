@@ -145,3 +145,23 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.experimental-badge {
+  background-color: #ffebe6;
+  border: 1px solid #ff5630;
+  border-radius: 3px;
+  padding: 8px 12px;
+}
+
+.experimental-badge span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #bf2600;
+}
+
+.experimental-badge p {
+  margin: 4px 0 0 0;
+  font-size: 11px;
+  color: #42526e;
+  line-height: 1.4;
+}

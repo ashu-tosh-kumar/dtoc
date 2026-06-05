@@ -64,6 +64,12 @@
     listenForSettingsChanges();
   }
 
+  function isSupportedSite() {
+    const hostname = window.location.hostname;
+    const supportedSites = ['.atlassian.net', 'dev.to', 'medium.com'];
+    return supportedSites.some(site => hostname.endsWith(site));
+  }
+
   function isViewMode() {
     const path = window.location.pathname;
     const hostname = window.location.hostname;
@@ -78,13 +84,17 @@
       if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
       if (path === '/' || path === '') return false;
-    } else {
+    } else if (hostname.includes('atlassian.net')) {
       // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
       if (path.includes('/edit') || path.includes('/edit-v2')) return false;
 
       // Some pages append ?mode=edit or similar
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'edit') return false;
+    } else {
+      // Generic site exclusions
+      if (path.includes('/edit') || path.includes('/editor') || path.includes('/write') || path.includes('/new') || path.includes('/compose') || path.includes('/draft')) return false;
+      if (path === '/' || path === '' || path === '/index.html') return false;
     }
 
     return true;
@@ -153,6 +163,9 @@
 
     container = document.createElement('div');
     container.id = 'dtoc-container';
+    if (!isSupportedSite()) {
+      container.classList.add('experimental');
+    }
 
     // Header
     const header = document.createElement('div');
@@ -160,7 +173,7 @@
 
     const title = document.createElement('h2');
     title.className = 'dtoc-title';
-    title.textContent = 'Table of Contents';
+    title.textContent = isSupportedSite() ? 'Table of Contents' : 'Table of Contents (Beta)';
 
     const controls = document.createElement('div');
     controls.className = 'dtoc-controls';
@@ -326,7 +339,7 @@
       selectors = [
         'article'
       ];
-    } else {
+    } else if (window.location.hostname.includes('atlassian.net')) {
       // Attempt to find the main content container in Confluence View Mode
       // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
       selectors = [
@@ -334,6 +347,19 @@
         '#content',
         '.ak-renderer-document',
         '.wiki-content'
+      ];
+    } else {
+      // Generic content selectors fallback
+      selectors = [
+        'article',
+        'main',
+        '[role="main"]',
+        '#main',
+        '#content',
+        '.post-content',
+        '.article-content',
+        '.entry-content',
+        'body'
       ];
     }
 

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const requestSupportBtn = document.getElementById('request-support-btn');
   const restoreContainer = document.getElementById('restore-container');
   const supportContainer = document.getElementById('support-container');
+  const experimentalBadge = document.getElementById('experimental-badge');
 
   // Supported site patterns
   const supportedSites = ['.atlassian.net', 'dev.to', 'medium.com'];
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
            restoreContainer.style.display = 'none';
            supportContainer.style.display = 'flex';
+           experimentalBadge.style.display = 'none';
            return;
         }
 
@@ -28,18 +30,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isSupported) {
           restoreContainer.style.display = 'flex';
           supportContainer.style.display = 'none';
+          experimentalBadge.style.display = 'none';
         } else {
-          restoreContainer.style.display = 'none';
+          // Unsupported/Experimental site: show both buttons, show experimental badge
+          restoreContainer.style.display = 'flex';
           supportContainer.style.display = 'flex';
+          experimentalBadge.style.display = 'block';
+
+          // Update helper text to reflect experimental support
+          const supportHelperText = supportContainer.querySelector('.helper-text');
+          if (supportHelperText) {
+            supportHelperText.textContent = 'Explicit support is not yet added for this website. Features might be experimental.';
+          }
         }
       } catch (e) {
         // If there's an error parsing the URL
         restoreContainer.style.display = 'none';
         supportContainer.style.display = 'flex';
+        experimentalBadge.style.display = 'none';
       }
     } else {
       // Cannot determine tab URL, default to showing restore
       restoreContainer.style.display = 'flex';
+      experimentalBadge.style.display = 'none';
     }
   });
 

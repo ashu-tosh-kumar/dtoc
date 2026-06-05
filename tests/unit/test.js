@@ -40,10 +40,13 @@ extensions.forEach(ext => {
         } else if (hostname.includes('medium.com')) {
           if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
           if (path === '/' || path === '') return false;
-        } else {
+        } else if (hostname.includes('atlassian.net')) {
           if (path.includes('/edit') || path.includes('/edit-v2')) return false;
           const params = new URLSearchParams(search);
           if (params.get('mode') === 'edit') return false;
+        } else {
+          if (path.includes('/edit') || path.includes('/editor') || path.includes('/write') || path.includes('/new') || path.includes('/compose') || path.includes('/draft')) return false;
+          if (path === '/' || path === '' || path === '/index.html') return false;
         }
         return true;
       }
@@ -73,6 +76,16 @@ extensions.forEach(ext => {
         expect(isViewMode('/new-story', '', 'medium.com')).toBe(false);
         expect(isViewMode('/p/12345/edit', '', 'medium.com')).toBe(false);
         expect(isViewMode('/', '', 'medium.com')).toBe(false);
+      });
+
+      test("generic site: returns true for standard path", () => {
+        expect(isViewMode('/blog/post-1', '', 'generic.com')).toBe(true);
+      });
+
+      test("generic site: returns false for editor paths and homepage", () => {
+        expect(isViewMode('/edit/post', '', 'generic.com')).toBe(false);
+        expect(isViewMode('/new-post', '', 'generic.com')).toBe(false);
+        expect(isViewMode('/', '', 'generic.com')).toBe(false);
       });
     });
 
@@ -148,8 +161,20 @@ extensions.forEach(ext => {
           selectors = [
             'article'
           ];
-        } else {
+        } else if (hostname.includes('atlassian.net')) {
           selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+        } else {
+          selectors = [
+            'article',
+            'main',
+            '[role="main"]',
+            '#main',
+            '#content',
+            '.post-content',
+            '.article-content',
+            '.entry-content',
+            'body'
+          ];
         }
         for (let selector of selectors) {
           const el = document.querySelector(selector);
@@ -175,6 +200,16 @@ extensions.forEach(ext => {
       test("finds article element for Medium", () => {
         document.body.innerHTML = '<article>Medium Content</article>';
         expect(getContentContainer('medium.com').tagName.toLowerCase()).toBe('article');
+      });
+
+      test("finds main element for generic site", () => {
+        document.body.innerHTML = '<main>Generic Main</main>';
+        expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('main');
+      });
+
+      test("falls back to body for generic site if nothing else matches", () => {
+        document.body.innerHTML = '<div>Generic Body Content</div>';
+        expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('body');
       });
     });
   });
