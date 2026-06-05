@@ -65,13 +65,22 @@
   }
 
   function isViewMode() {
-    // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
     const path = window.location.pathname;
-    if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+    const hostname = window.location.hostname;
 
-    // Some pages append ?mode=edit or similar
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('mode') === 'edit') return false;
+    if (hostname.includes('dev.to')) {
+      // Dev.to edit paths: /new, or ending in /edit
+      if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+      // Exclude home page
+      if (path === '/' || path === '') return false;
+    } else {
+      // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
+      if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+
+      // Some pages append ?mode=edit or similar
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'edit') return false;
+    }
 
     return true;
   }
@@ -254,7 +263,7 @@
     observer = new MutationObserver(callback);
 
     const rebindObserver = () => {
-      const targetNode = getConfluenceContentContainer();
+      const targetNode = getContentContainer();
       if (targetNode !== currentTarget) {
         if (currentTarget) observer.disconnect();
         if (targetNode) observer.observe(targetNode, config);
@@ -271,7 +280,7 @@
     let lastUrl = location.href;
     setInterval(() => {
       const currentUrl = location.href;
-      const targetNode = getConfluenceContentContainer();
+      const targetNode = getContentContainer();
 
       if (currentUrl !== lastUrl || (targetNode && targetNode !== currentTarget)) {
         const urlChanged = currentUrl !== lastUrl;
@@ -300,15 +309,24 @@
 
   // --- Parsing & Navigation ---
 
-  function getConfluenceContentContainer() {
-    // Attempt to find the main content container in Confluence View Mode
-    // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
-    const selectors = [
-      '#main-content',
-      '#content',
-      '.ak-renderer-document',
-      '.wiki-content'
-    ];
+  function getContentContainer() {
+    let selectors = [];
+    if (window.location.hostname.includes('dev.to')) {
+      selectors = [
+        '#article-body',
+        '.crayons-article__body',
+        '.crayons-article__main'
+      ];
+    } else {
+      // Attempt to find the main content container in Confluence View Mode
+      // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
+      selectors = [
+        '#main-content',
+        '#content',
+        '.ak-renderer-document',
+        '.wiki-content'
+      ];
+    }
 
     for (let selector of selectors) {
       const el = document.querySelector(selector);
@@ -321,7 +339,7 @@
   function parseHeadingsAndRender() {
     if (!contentArea) return;
 
-    const contentContainer = getConfluenceContentContainer();
+    const contentContainer = getContentContainer();
     if (!contentContainer) {
       contentArea.textContent = '';
       return;
