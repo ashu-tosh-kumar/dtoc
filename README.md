@@ -4,15 +4,15 @@ Dynamic Table of Content.
 
 This extension automatically generates a non-intrusive, sticky Table of Contents, allowing you to quickly navigate long documents without losing your reading context.
 
+<https://github.com/user-attachments/assets/958a6e77-acb1-443f-86c2-ed6ab4300a0b>
 
-https://github.com/user-attachments/assets/958a6e77-acb1-443f-86c2-ed6ab4300a0b
-
-Watch on YouTube: https://www.youtube.com/watch?v=fk5zKwXVzYk
-
+Watch on YouTube: <https://www.youtube.com/watch?v=fk5zKwXVzYk>
 
 Supported Websites:
 
 - Confluence Cloud (`https://*.atlassian.net/wiki/*`)
+- DEV Community (`https://dev.to/*`)
+- Medium (`https://medium.com/*`, `https://*.medium.com/*`)
 
 Supported Browsers:
 
@@ -22,6 +22,7 @@ Supported Browsers:
 ## Features
 
 - **Automatic Parsing**: Detects headings (`H1-H6`) and builds a nested TOC.
+- **Page Title Navigation**: Prepends the page or article title at the top of the TOC for quick navigation back to the top of the document.
 - **Floating UI**: Stays pinned to the side of your screen while you scroll.
 - "Minimize and Close": Easily minimize the TOC to save space or close it entirely when not needed.
 - **Atlassian Theming**: Automatically adapts to Confluence's Light and Dark modes.
@@ -58,7 +59,7 @@ To install the extension manually from source:
 2. Open Chrome (or any Chromium-based browser like Edge, Brave, Arc) and navigate to `chrome://extensions/`.
 3. Enable "Developer mode" in the top right corner.
 4. Click "Load unpacked" and select the folder containing this repository.
-5. The extension will now automatically run on any Confluence Cloud (`https://*.atlassian.net/wiki/*`) page.
+5. The extension will now automatically run on supported websites.
 
 ## Development & Testing
 
@@ -70,6 +71,12 @@ To run the unit tests:
 2. Run tests: `npm test`
 
 ## Changelog
+
+`v1.2.0`
+
+- Added support for DEV Community (`dev.to`).
+- Added dynamic page/article title item at the top of the TOC.
+- Added support for Medium (`medium.com` and subdomains).
 
 `v1.1.0`
 

@@ -11,7 +11,9 @@
     {
       "matches": [
         "https://*.atlassian.net/wiki/*",
-        "https://dev.to/*"
+        "https://dev.to/*",
+        "https://medium.com/*",
+        "https://*.medium.com/*"
       ],
       "js": [
         "content.js"
@@ -35,7 +37,9 @@
       ],
       "matches": [
         "https://*.atlassian.net/*",
-        "https://dev.to/*"
+        "https://dev.to/*",
+        "https://medium.com/*",
+        "https://*.medium.com/*"
       ]
     }
   ],

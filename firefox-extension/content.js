@@ -73,6 +73,11 @@
       if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
       if (path === '/' || path === '') return false;
+    } else if (hostname.includes('medium.com')) {
+      // Medium edit paths: /new-story, or ending in /edit
+      if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+      // Exclude home page
+      if (path === '/' || path === '') return false;
     } else {
       // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
       if (path.includes('/edit') || path.includes('/edit-v2')) return false;
@@ -317,6 +322,10 @@
         '.crayons-article__body',
         '.crayons-article__main'
       ];
+    } else if (window.location.hostname.includes('medium.com')) {
+      selectors = [
+        'article'
+      ];
     } else {
       // Attempt to find the main content container in Confluence View Mode
       // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
@@ -362,6 +371,9 @@
     titleText = titleText
       .replace(/\s*-\s*Confluence\s*$/i, '')
       .replace(/\s*-\s*DEV Community\s*$/i, '')
+      .replace(/\s*\|\s*by\s+.*\|\s*Medium\s*$/i, '')
+      .replace(/\s*\|\s*Medium\s*$/i, '')
+      .replace(/\s*-\s*Medium\s*$/i, '')
       .trim();
 
     return {

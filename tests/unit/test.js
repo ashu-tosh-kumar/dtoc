@@ -33,10 +33,18 @@ extensions.forEach(ext => {
   describe(`Tests for ${ext}`, () => {
     describe("content script view mode logic", () => {
       // Extract the pure function logic for testing
-      function isViewMode(path, search) {
-        if (path.includes('/edit') || path.includes('/edit-v2')) return false;
-        const params = new URLSearchParams(search);
-        if (params.get('mode') === 'edit') return false;
+      function isViewMode(path, search, hostname = 'mocked.atlassian.net') {
+        if (hostname.includes('dev.to')) {
+          if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+          if (path === '/' || path === '') return false;
+        } else if (hostname.includes('medium.com')) {
+          if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+          if (path === '/' || path === '') return false;
+        } else {
+          if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+          const params = new URLSearchParams(search);
+          if (params.get('mode') === 'edit') return false;
+        }
         return true;
       }
 
@@ -54,6 +62,17 @@ extensions.forEach(ext => {
 
       test("returns false when mode=edit is in query params", () => {
         expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '?mode=edit')).toBe(false);
+      });
+
+      test("medium.com: returns true for article page", () => {
+        expect(isViewMode('/p/some-article-slug', '', 'medium.com')).toBe(true);
+        expect(isViewMode('/p/some-article-slug', '', 'subdomain.medium.com')).toBe(true);
+      });
+
+      test("medium.com: returns false for new-story, edit routes, and homepage", () => {
+        expect(isViewMode('/new-story', '', 'medium.com')).toBe(false);
+        expect(isViewMode('/p/12345/edit', '', 'medium.com')).toBe(false);
+        expect(isViewMode('/', '', 'medium.com')).toBe(false);
       });
     });
 
@@ -117,8 +136,21 @@ extensions.forEach(ext => {
     });
 
     describe("DOM container fallback logic", () => {
-      function getConfluenceContentContainer() {
-        const selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+      function getContentContainer(hostname = 'mocked.atlassian.net') {
+        let selectors = [];
+        if (hostname.includes('dev.to')) {
+          selectors = [
+            '#article-body',
+            '.crayons-article__body',
+            '.crayons-article__main'
+          ];
+        } else if (hostname.includes('medium.com')) {
+          selectors = [
+            'article'
+          ];
+        } else {
+          selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+        }
         for (let selector of selectors) {
           const el = document.querySelector(selector);
           if (el) return el;
@@ -130,14 +162,19 @@ extensions.forEach(ext => {
         document.body.innerHTML = '';
       });
 
-      test("finds #main-content first", () => {
+      test("finds #main-content first for Confluence", () => {
         document.body.innerHTML = '<div id="sidebar"></div><div id="main-content">Target</div>';
-        expect(getConfluenceContentContainer().id).toBe('main-content');
+        expect(getContentContainer('mocked.atlassian.net').id).toBe('main-content');
       });
 
-      test("returns null if no container matches", () => {
+      test("returns null if no container matches for Confluence", () => {
         document.body.innerHTML = '<div class="unknown-layout">Hello</div>';
-        expect(getConfluenceContentContainer()).toBe(null);
+        expect(getContentContainer('mocked.atlassian.net')).toBe(null);
+      });
+
+      test("finds article element for Medium", () => {
+        document.body.innerHTML = '<article>Medium Content</article>';
+        expect(getContentContainer('medium.com').tagName.toLowerCase()).toBe('article');
       });
     });
   });

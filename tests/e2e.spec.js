@@ -199,6 +199,132 @@ test.describe('DTOC Extension E2E Tests', () => {
     await popupPage.close();
   });
 
+  test('Supported website interactions (Medium)', async () => {
+    test.setTimeout(120000);
+    const page = await browserContext.newPage();
+
+    await page.route('https://medium.com/@author/my-awesome-article', async route => {
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>My Awesome Article | by Author | Medium</title>
+        </head>
+        <body>
+          <article>
+            <h1>My Awesome Article</h1>
+            <h2>Section 1</h2>
+            <p>Some text</p>
+            <h3>Subsection A</h3>
+            <p>Details</p>
+            <h2>Section 2</h2>
+            <p>More text</p>
+          </article>
+        </body>
+        </html>
+      `;
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: html,
+      });
+    });
+
+    await page.goto('https://medium.com/@author/my-awesome-article');
+    await page.waitForSelector('h1, h2, h3', { timeout: 10000 });
+    await page.waitForTimeout(2000);
+
+    const hostLocator = page.locator('#dtoc-host');
+    await expect(hostLocator).toBeAttached({ timeout: 10000 });
+
+    const containerLocator = hostLocator.locator('css=div#dtoc-container');
+    await expect(containerLocator).toBeVisible();
+
+    const headerTitle = hostLocator.locator('.dtoc-title');
+    await expect(headerTitle).toHaveText('Table of Contents');
+
+    const tocList = hostLocator.locator('.toc-list');
+    await expect(tocList).toBeVisible();
+
+    // The first heading is <h1>, but since it is the first heading in <article>,
+    // and matching the title, let's see if firstLink has 'Section 1' or 'My Awesome Article'.
+    // In content.js: titleInfo.element is the h1. firstHeading is also h1.
+    // So hasTitlePrepend is false, meaning 'My Awesome Article' is not prepended.
+    // The first item in the list is the h1 'My Awesome Article'.
+    const firstLink = tocList.locator('.toc-link').first();
+    await expect(firstLink).toHaveText('My Awesome Article');
+
+    const href = await firstLink.getAttribute('href');
+    await firstLink.click();
+
+    await page.waitForFunction((expectedHash) => {
+      return window.location.hash === expectedHash;
+    }, href);
+
+    await page.close();
+  });
+
+  test('Supported website interactions (Dev.to)', async () => {
+    test.setTimeout(120000);
+    const page = await browserContext.newPage();
+
+    await page.route('https://dev.to/author/my-awesome-post', async route => {
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>My Awesome Post - DEV Community</title>
+        </head>
+        <body>
+          <div id="article-body">
+            <h1>My Awesome Post</h1>
+            <h2>Section 1</h2>
+            <p>Some text</p>
+            <h3>Subsection A</h3>
+            <p>Details</p>
+            <h2>Section 2</h2>
+            <p>More text</p>
+          </div>
+        </body>
+        </html>
+      `;
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: html,
+      });
+    });
+
+    await page.goto('https://dev.to/author/my-awesome-post');
+    await page.waitForSelector('h1, h2, h3', { timeout: 10000 });
+    await page.waitForTimeout(2000);
+
+    const hostLocator = page.locator('#dtoc-host');
+    await expect(hostLocator).toBeAttached({ timeout: 10000 });
+
+    const containerLocator = hostLocator.locator('css=div#dtoc-container');
+    await expect(containerLocator).toBeVisible();
+
+    const headerTitle = hostLocator.locator('.dtoc-title');
+    await expect(headerTitle).toHaveText('Table of Contents');
+
+    const tocList = hostLocator.locator('.toc-list');
+    await expect(tocList).toBeVisible();
+
+    const firstLink = tocList.locator('.toc-link').first();
+    await expect(firstLink).toHaveText('My Awesome Post');
+
+    const href = await firstLink.getAttribute('href');
+    await firstLink.click();
+
+    await page.waitForFunction((expectedHash) => {
+      return window.location.hash === expectedHash;
+    }, href);
+
+    expect(page.url()).toContain(href);
+    await page.close();
+  });
+
   test('Unsupported website interactions (Wikipedia)', async () => {
     test.setTimeout(120000);
     const page = await browserContext.newPage();
