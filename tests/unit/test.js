@@ -9,21 +9,21 @@ const extensions = ['chrome-extension', 'firefox-extension'];
 
 describe("Extension API usage and files structure", () => {
   test("chrome-extension files use chrome.* API", () => {
-    const contentJs = fs.readFileSync(path.join(__dirname, 'chrome-extension', 'content.js'), 'utf8');
+    const contentJs = fs.readFileSync(path.join(__dirname, '..', '..', 'chrome-extension', 'content.js'), 'utf8');
     expect(contentJs).toMatch(/chrome\.storage\.local/);
     expect(contentJs).not.toMatch(/browser\.storage\.local/);
 
-    const popupJs = fs.readFileSync(path.join(__dirname, 'chrome-extension', 'popup.js'), 'utf8');
+    const popupJs = fs.readFileSync(path.join(__dirname, '..', '..', 'chrome-extension', 'popup.js'), 'utf8');
     expect(popupJs).toMatch(/chrome\.storage\.local/);
     expect(popupJs).not.toMatch(/browser\.storage\.local/);
   });
 
   test("firefox-extension files use browser.* API", () => {
-    const contentJs = fs.readFileSync(path.join(__dirname, 'firefox-extension', 'content.js'), 'utf8');
+    const contentJs = fs.readFileSync(path.join(__dirname, '..', '..', 'firefox-extension', 'content.js'), 'utf8');
     expect(contentJs).toMatch(/browser\.storage\.local/);
     expect(contentJs).not.toMatch(/chrome\.storage\.local/);
 
-    const popupJs = fs.readFileSync(path.join(__dirname, 'firefox-extension', 'popup.js'), 'utf8');
+    const popupJs = fs.readFileSync(path.join(__dirname, '..', '..', 'firefox-extension', 'popup.js'), 'utf8');
     expect(popupJs).toMatch(/browser\.storage\.local/);
     expect(popupJs).not.toMatch(/chrome\.storage\.local/);
   });

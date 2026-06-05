@@ -1,4 +1,7 @@
 node_modules/
+temp-firefox-extension/
+playwright-report/
+test-results/
 
 # VS Code
 .history/
