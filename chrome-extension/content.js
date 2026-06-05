@@ -39,9 +39,7 @@
   }
 
   function slugify(text) {
-    // Truncate to prevent ReDoS or CPU blocking on massive strings
-    const truncated = text.substring(0, 200);
-    return truncated
+    return text
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -350,13 +348,8 @@
       // Skip hidden headings or headings inside specific UI widgets if necessary
       if (heading.offsetParent === null) return;
 
-      let text = heading.textContent.trim();
+      const text = heading.textContent.trim();
       if (!text) return; // Skip empty headings
-
-      // Limit text length to prevent memory exhaustion and UI layout issues
-      if (text.length > 500) {
-        text = text.substring(0, 500) + '...';
-      }
 
       // Normalize heading level (h1 = 1, h2 = 2, etc.)
       const level = parseInt(heading.tagName.substring(1), 10);
