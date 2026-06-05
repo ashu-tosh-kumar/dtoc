@@ -1,0 +1,4 @@
+## 2024-05-18 - [DOM-Based DoS via Unbounded Text Extraction]
+**Vulnerability:** The application extracted heading text from the DOM and passed it directly into a series of regular expressions (in `slugify`) to generate element IDs, without any length limits. A maliciously crafted page with a multi-megabyte string in a heading could cause the extension to lock up the browser tab due to regular expression evaluation and excessive memory allocation.
+**Learning:** Even entirely local, DOM-based operations can be vectors for Denial of Service if user-generated content from the active tab is processed using expensive operations (like regex replace) without bounding the input size.
+**Prevention:** Always enforce strict length limits (e.g., `text.substring(0, MAX_LENGTH)`) on text extracted from the DOM before performing any CPU-intensive string manipulation or rendering it in the UI.
