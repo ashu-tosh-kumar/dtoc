@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "dtoc",
-  "version": "1.2.0",
+  "version": "1.1.0",
   "description": "Dynamic Table of Content.",
   "permissions": [
     "storage",
@@ -10,8 +10,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.atlassian.net/wiki/*",
-        "https://dev.to/*"
+        "https://*.atlassian.net/wiki/*"
       ],
       "js": [
         "content.js"
@@ -34,8 +33,7 @@
         "content.css"
       ],
       "matches": [
-        "https://*.atlassian.net/*",
-        "https://dev.to/*"
+        "https://*.atlassian.net/*"
       ]
     }
   ],

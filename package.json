@@ -1,14 +1,13 @@
 {
   "name": "app",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "description": "Dynamic Table of Content for Confluence.",
   "main": "chrome-extension/content.js",
   "scripts": {
     "test": "jest tests/unit",
     "test:e2e": "playwright test",
-    "build-chrome": "mkdir -p chrome-extension/web-ext-artifacts && rm -f chrome-extension/web-ext-artifacts/dtoc-chrome-*.zip && cd chrome-extension && VERSION=$(node -p \"require('../package.json').version\") && zip -r web-ext-artifacts/dtoc-chrome-$VERSION.zip . -x \"web-ext-artifacts/*\" \"node_modules/*\" \".git/*\"",
-    "build-firefox": "cd firefox-extension && web-ext build --overwrite-dest && VERSION=$(node -p \"require('../package.json').version\") && rm -f web-ext-artifacts/dtoc-firefox-*.zip && mv web-ext-artifacts/dtoc-$VERSION.zip web-ext-artifacts/dtoc-firefox-$VERSION.zip",
-    "build": "npm run build-chrome && npm run build-firefox"
+    "build-chrome": "mkdir -p chrome-extension/web-ext-artifacts && rm -f chrome-extension/web-ext-artifacts/dtoc-chrome.zip && cd chrome-extension && zip -r web-ext-artifacts/dtoc-chrome.zip . -x \"web-ext-artifacts/*\" \"node_modules/*\" \".git/*\"",
+    "build-firefox": "cd firefox-extension && web-ext build --overwrite-dest"
   },
   "repository": {
     "type": "git",
