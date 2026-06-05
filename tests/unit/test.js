@@ -212,5 +212,89 @@ extensions.forEach(ext => {
         expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('body');
       });
     });
+
+    describe("settings inheritance resolution logic", () => {
+      function resolveSettings(result, hostname) {
+        const currentDomain = hostname.replace(/^www\./i, '');
+        const siteSettings = result.siteSettings || {};
+        const siteConfig = siteSettings[currentDomain] || {};
+
+        const globalEnabled = result.enabled !== undefined ? result.enabled : true;
+        const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : true;
+        const enabled = globalEnabled && siteEnabled;
+
+        const globalPosition = result.position || 'left';
+        const position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
+
+        const closed = result.closed !== undefined ? result.closed : false;
+        const minimized = result.minimized !== undefined ? result.minimized : false;
+
+        return { enabled, position, closed, minimized };
+      }
+
+      test("inherits global settings when site-specific settings are not configured", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        expect(resolved.enabled).toBe(true);
+        expect(resolved.position).toBe('right');
+        expect(resolved.closed).toBe(false);
+        expect(resolved.minimized).toBe(true);
+      });
+
+      test("overrides with site-specific settings when configured", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: false,
+          siteSettings: {
+            'levelup.gitconnected.com': {
+              enabled: false,
+              position: 'left'
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        expect(resolved.enabled).toBe(false);
+        expect(resolved.position).toBe('left');
+      });
+
+      test("disables site if global is disabled, regardless of site-specific toggle", () => {
+        const result = {
+          enabled: false,
+          position: 'right',
+          siteSettings: {
+            'levelup.gitconnected.com': {
+              enabled: true,
+              position: 'left'
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        expect(resolved.enabled).toBe(false);
+      });
+      
+      test("strips www. from hostname to find site configuration", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          siteSettings: {
+            'medium.com': {
+              enabled: false,
+              position: 'left'
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'www.medium.com');
+        expect(resolved.enabled).toBe(false);
+        expect(resolved.position).toBe('left');
+      });
+    });
   });
 });

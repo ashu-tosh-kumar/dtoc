@@ -103,15 +103,23 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
-    const keys = Object.values(SETTINGS_KEY);
+    const keys = ['enabled', 'position', 'closed', 'minimized', 'siteSettings'];
     browser.storage.local.get(keys).then((result) => {
-      for (const storageKey of keys) {
-        const stateKey = STATE_KEY_MAP[storageKey];
-        if (result[storageKey] !== undefined && stateKey) {
-          state[stateKey] = result[storageKey];
-        }
-      }
-      callback();
+      const currentDomain = window.location.hostname.replace(/^www\./i, '');
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+
+      const globalEnabled = result.enabled !== undefined ? result.enabled : true;
+      const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : true;
+      state.enabled = globalEnabled && siteEnabled;
+
+      const globalPosition = result.position || 'left';
+      state.position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
+
+      state.closed = result.closed !== undefined ? result.closed : false;
+      state.minimized = result.minimized !== undefined ? result.minimized : false;
+
+      if (callback) callback();
     });
   }
 
@@ -127,17 +135,9 @@
   function listenForSettingsChanges() {
     browser.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'local') {
-        let changed = false;
-        for (let [storageKey, { newValue }] of Object.entries(changes)) {
-          const stateKey = STATE_KEY_MAP[storageKey];
-          if (stateKey && state[stateKey] !== newValue) {
-            state[stateKey] = newValue;
-            changed = true;
-          }
-        }
-        if (changed) {
+        loadSettings(() => {
           applyStateToUI();
-        }
+        });
       }
     });
   }

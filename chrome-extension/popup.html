@@ -7,7 +7,7 @@
 </head>
 <body>
   <div class="header">
-    <h1>DTOC</h1>
+    <h1>DTOC <span class="subtitle">Dynamic Table of Contents</span></h1>
   </div>
 
   <div class="content">
@@ -16,30 +16,58 @@
       <p>Explicit support is not yet added for this website. Features might be experimental.</p>
     </div>
 
-    <div class="setting-row">
-      <label for="enable-toggle">Enable Extension</label>
-      <label class="switch">
-        <input type="checkbox" id="enable-toggle">
-        <span class="slider round"></span>
-      </label>
+    <div class="settings-grid">
+      <!-- Headers -->
+      <div class="grid-header">Setting</div>
+      <div class="grid-header text-center">Global</div>
+      <div class="grid-header text-center site-header-title" id="site-header-title">SITE</div>
+
+      <!-- Extension status -->
+      <div class="grid-label">Extension Status</div>
+      <div class="grid-control">
+        <label class="switch">
+          <input type="checkbox" id="global-enable-toggle">
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="grid-control">
+        <label class="switch" id="site-enable-switch">
+          <input type="checkbox" id="site-enable-toggle">
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <!-- TOC position -->
+      <div class="grid-label">TOC Position</div>
+      <div class="grid-control">
+        <select id="global-position-select">
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+      <div class="grid-control">
+        <select id="site-position-select">
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
     </div>
 
-    <div class="setting-row">
-      <label for="position-select">TOC Position</label>
-      <select id="position-select">
-        <option value="left">Left</option>
-        <option value="right">Right</option>
-      </select>
-    </div>
-
-    <div id="restore-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px; display: none;">
+    <div id="restore-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px; display: none; margin-top: 8px;">
       <button id="restore-btn" class="btn">Show TOC</button>
       <small class="helper-text">Click to bring back the TOC if you closed it on the page.</small>
     </div>
 
-    <div id="support-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 8px; display: none;">
+    <div id="support-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px; display: none; margin-top: 8px;">
       <button id="request-support-btn" class="btn">Request Website Support</button>
       <small class="helper-text">This website is not currently supported.</small>
+    </div>
+
+    <hr class="divider">
+
+    <div class="actions-row">
+      <button id="reset-all-btn" class="btn btn-danger">Reset All Settings</button>
+      <button id="reset-site-btn" class="btn btn-secondary">Reset Site Settings</button>
     </div>
   </div>
 

@@ -72,11 +72,14 @@ To run the unit tests:
 
 ## Changelog
 
-`v1.2.0`
+`v2.0.0`
 
+- Added experimental support for all websites (`http://*/*` and `https://*/*`) using generic HTML semantic selectors.
+- Added split settings in the extension popup (Global vs. Site-Specific status toggles and TOC positions).
+- Added "Reset Site Settings" and "Reset All Settings" actions in the popup.
 - Added support for DEV Community (`dev.to`).
-- Added dynamic page/article title item at the top of the TOC.
 - Added support for Medium (`medium.com` and subdomains).
+- Added dynamic page/article title item at the top of the TOC.
 
 `v1.1.0`
 
@@ -96,3 +99,4 @@ Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed u
 ---
 *Developed by Jules.*
 *Security hardening reviewed by Qodo and implemented by Gemini CLI.*
+*Split settings architecture, generic cross-website support, and E2E automation developed by Google Antigravity 2.0.*
