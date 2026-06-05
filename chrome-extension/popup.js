@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const supportContainer = document.getElementById('support-container');
 
   // Supported site patterns
-  const supportedSites = ['.atlassian.net'];
+  const supportedSites = ['.atlassian.net', 'dev.to'];
 
   // Check current tab to see if it's supported
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

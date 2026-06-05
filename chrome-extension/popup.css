@@ -22,17 +22,15 @@ body {
 .content {
   padding: 16px;
   background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .setting-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-}
-
-.setting-row:last-child {
-  margin-bottom: 0;
 }
 
 label {
