@@ -13,6 +13,7 @@ Watch on YouTube: https://www.youtube.com/watch?v=fk5zKwXVzYk
 Supported Websites:
 
 - Confluence Cloud (`https://*.atlassian.net/wiki/*`)
+- Dev.to (`https://dev.to/*`)
 
 Supported Browsers:
 
@@ -69,6 +70,11 @@ To run the unit tests:
 2. Run tests: `npm test`
 
 ## Changelog
+
+`v1.1.0`
+
+- Added support for Dev.to (`https://dev.to/*`)
+- Adapts to native Dev.to Light/Dark theme styles
 
 `v1.0.0`
 

@@ -33,27 +33,44 @@ extensions.forEach(ext => {
   describe(`Tests for ${ext}`, () => {
     describe("content script view mode logic", () => {
       // Extract the pure function logic for testing
-      function isViewMode(path, search) {
-        if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+      function isViewMode(hostname, path, search) {
         const params = new URLSearchParams(search);
-        if (params.get('mode') === 'edit') return false;
+
+        if (hostname.includes('dev.to')) {
+          if (path === '/new' || path.endsWith('/edit')) return false;
+        } else {
+          if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+          if (params.get('mode') === 'edit') return false;
+        }
         return true;
       }
 
-      test("returns true for standard view pages", () => {
-        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '')).toBe(true);
+      test("Confluence: returns true for standard view pages", () => {
+        expect(isViewMode('myorg.atlassian.net', '/wiki/spaces/ENG/pages/1234/Architecture', '')).toBe(true);
       });
 
-      test("returns false for /edit routes", () => {
-        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture/edit', '')).toBe(false);
+      test("Confluence: returns false for /edit routes", () => {
+        expect(isViewMode('myorg.atlassian.net', '/wiki/spaces/ENG/pages/1234/Architecture/edit', '')).toBe(false);
       });
 
-      test("returns false for /edit-v2 routes", () => {
-        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture/edit-v2', '')).toBe(false);
+      test("Confluence: returns false for /edit-v2 routes", () => {
+        expect(isViewMode('myorg.atlassian.net', '/wiki/spaces/ENG/pages/1234/Architecture/edit-v2', '')).toBe(false);
       });
 
-      test("returns false when mode=edit is in query params", () => {
-        expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '?mode=edit')).toBe(false);
+      test("Confluence: returns false when mode=edit is in query params", () => {
+        expect(isViewMode('myorg.atlassian.net', '/wiki/spaces/ENG/pages/1234/Architecture', '?mode=edit')).toBe(false);
+      });
+
+      test("Dev.to: returns true for standard view pages", () => {
+        expect(isViewMode('dev.to', '/user/post-title', '')).toBe(true);
+      });
+
+      test("Dev.to: returns false for /new routes", () => {
+        expect(isViewMode('dev.to', '/new', '')).toBe(false);
+      });
+
+      test("Dev.to: returns false for /edit routes", () => {
+        expect(isViewMode('dev.to', '/user/post-title/edit', '')).toBe(false);
       });
     });
 
@@ -117,8 +134,13 @@ extensions.forEach(ext => {
     });
 
     describe("DOM container fallback logic", () => {
-      function getConfluenceContentContainer() {
-        const selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+      function getContentContainer(hostname) {
+        let selectors = [];
+        if (hostname.includes('dev.to')) {
+          selectors = ['#article-body', '.crayons-article__body'];
+        } else {
+          selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+        }
         for (let selector of selectors) {
           const el = document.querySelector(selector);
           if (el) return el;
@@ -130,14 +152,24 @@ extensions.forEach(ext => {
         document.body.innerHTML = '';
       });
 
-      test("finds #main-content first", () => {
+      test("Confluence: finds #main-content first", () => {
         document.body.innerHTML = '<div id="sidebar"></div><div id="main-content">Target</div>';
-        expect(getConfluenceContentContainer().id).toBe('main-content');
+        expect(getContentContainer('myorg.atlassian.net').id).toBe('main-content');
       });
 
-      test("returns null if no container matches", () => {
+      test("Confluence: returns null if no container matches", () => {
         document.body.innerHTML = '<div class="unknown-layout">Hello</div>';
-        expect(getConfluenceContentContainer()).toBe(null);
+        expect(getContentContainer('myorg.atlassian.net')).toBe(null);
+      });
+
+      test("Dev.to: finds #article-body", () => {
+        document.body.innerHTML = '<div id="article-body">Target</div>';
+        expect(getContentContainer('dev.to').id).toBe('article-body');
+      });
+
+      test("Dev.to: finds .crayons-article__body", () => {
+        document.body.innerHTML = '<div class="crayons-article__body">Target</div>';
+        expect(getContentContainer('dev.to').className).toBe('crayons-article__body');
       });
     });
   });
