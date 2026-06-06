@@ -113,7 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLScjq5hXfuV2H97XSu918Hl26rVgGxfAJa3Vlc2T97miEMLldw/viewform?usp=pp_url&entry.745477224=${encodeURIComponent(hostnameParam)}`;
-      chrome.tabs.create({ url: formUrl });
+      if (formUrl.startsWith('https://docs.google.com/forms/d/e/')) {
+        chrome.tabs.create({ url: formUrl });
+      }
     });
   });
 

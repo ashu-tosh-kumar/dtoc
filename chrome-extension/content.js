@@ -27,15 +27,61 @@
   let container = null;
   let contentArea = null;
 
-  // Icons (SVG strings)
-  const ICON_MINIMIZE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
-  const ICON_CLOSE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-  const ICON_MAXIMIZE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`;
+  // Icons
+  const ICON_MINIMIZE = 'minimize';
+  const ICON_CLOSE = 'close';
+  const ICON_MAXIMIZE = 'maximize';
 
-  function createIconElement(svgString) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgString, 'image/svg+xml');
-    return doc.documentElement;
+  function createIconElement(iconType) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+
+    if (iconType === 'minimize') {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", "5");
+      line.setAttribute("y1", "12");
+      line.setAttribute("x2", "19");
+      line.setAttribute("y2", "12");
+      svg.appendChild(line);
+    } else if (iconType === 'close') {
+      const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line1.setAttribute("x1", "18");
+      line1.setAttribute("y1", "6");
+      line1.setAttribute("x2", "6");
+      line1.setAttribute("y2", "18");
+      svg.appendChild(line1);
+
+      const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line2.setAttribute("x1", "6");
+      line2.setAttribute("y1", "6");
+      line2.setAttribute("x2", "18");
+      line2.setAttribute("y2", "18");
+      svg.appendChild(line2);
+    } else if (iconType === 'maximize') {
+      const paths = [
+        { x1: "8", y1: "6", x2: "21", y2: "6" },
+        { x1: "8", y1: "12", x2: "21", y2: "12" },
+        { x1: "8", y1: "18", x2: "21", y2: "18" },
+        { x1: "3", y1: "6", x2: "3.01", y2: "6" },
+        { x1: "3", y1: "12", x2: "3.01", y2: "12" },
+        { x1: "3", y1: "18", x2: "3.01", y2: "18" }
+      ];
+      paths.forEach(p => {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", p.x1);
+        line.setAttribute("y1", p.y1);
+        line.setAttribute("x2", p.x2);
+        line.setAttribute("y2", p.y2);
+        svg.appendChild(line);
+      });
+    }
+
+    return svg;
   }
 
   function slugify(text) {
@@ -398,7 +444,7 @@
     titleText = titleText
       .replace(/\s*-\s*Confluence\s*$/i, '')
       .replace(/\s*-\s*DEV Community\s*$/i, '')
-      .replace(/\s*\|\s*by\s+.*\|\s*Medium\s*$/i, '')
+      .replace(/\s*\|\s*by\s+[^|]*\|\s*Medium\s*$/i, '')
       .replace(/\s*\|\s*Medium\s*$/i, '')
       .replace(/\s*-\s*Medium\s*$/i, '')
       .trim();
