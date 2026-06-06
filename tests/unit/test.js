@@ -33,10 +33,25 @@ extensions.forEach(ext => {
   describe(`Tests for ${ext}`, () => {
     describe("content script view mode logic", () => {
       // Extract the pure function logic for testing
-      function isViewMode(path, search) {
-        if (path.includes('/edit') || path.includes('/edit-v2')) return false;
-        const params = new URLSearchParams(search);
-        if (params.get('mode') === 'edit') return false;
+      function isViewMode(path, search, hostname = 'mocked.atlassian.net') {
+        const normalizedHostname = (hostname || '').toLowerCase();
+        const isAllowedHost = (domain) =>
+          normalizedHostname === domain || normalizedHostname.endsWith(`.${domain}`);
+
+        if (isAllowedHost('dev.to')) {
+          if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+          if (path === '/' || path === '') return false;
+        } else if (isAllowedHost('medium.com')) {
+          if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+          if (path === '/' || path === '') return false;
+        } else if (isAllowedHost('atlassian.net')) {
+          if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+          const params = new URLSearchParams(search);
+          if (params.get('mode') === 'edit') return false;
+        } else {
+          if (path.includes('/edit') || path.includes('/editor') || path.includes('/write') || path.includes('/new') || path.includes('/compose') || path.includes('/draft')) return false;
+          if (path === '/' || path === '' || path === '/index.html') return false;
+        }
         return true;
       }
 
@@ -54,6 +69,27 @@ extensions.forEach(ext => {
 
       test("returns false when mode=edit is in query params", () => {
         expect(isViewMode('/wiki/spaces/ENG/pages/1234/Architecture', '?mode=edit')).toBe(false);
+      });
+
+      test("medium.com: returns true for article page", () => {
+        expect(isViewMode('/p/some-article-slug', '', 'medium.com')).toBe(true);
+        expect(isViewMode('/p/some-article-slug', '', 'subdomain.medium.com')).toBe(true);
+      });
+
+      test("medium.com: returns false for new-story, edit routes, and homepage", () => {
+        expect(isViewMode('/new-story', '', 'medium.com')).toBe(false);
+        expect(isViewMode('/p/12345/edit', '', 'medium.com')).toBe(false);
+        expect(isViewMode('/', '', 'medium.com')).toBe(false);
+      });
+
+      test("generic site: returns true for standard path", () => {
+        expect(isViewMode('/blog/post-1', '', 'generic.com')).toBe(true);
+      });
+
+      test("generic site: returns false for editor paths and homepage", () => {
+        expect(isViewMode('/edit/post', '', 'generic.com')).toBe(false);
+        expect(isViewMode('/new-post', '', 'generic.com')).toBe(false);
+        expect(isViewMode('/', '', 'generic.com')).toBe(false);
       });
     });
 
@@ -117,8 +153,37 @@ extensions.forEach(ext => {
     });
 
     describe("DOM container fallback logic", () => {
-      function getConfluenceContentContainer() {
-        const selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+      function isHostOrSubdomain(hostname, domain) {
+        return hostname === domain || hostname.endsWith(`.${domain}`);
+      }
+
+      function getContentContainer(hostname = 'mocked.atlassian.net') {
+        let selectors = [];
+        if (isHostOrSubdomain(hostname, 'dev.to')) {
+          selectors = [
+            '#article-body',
+            '.crayons-article__body',
+            '.crayons-article__main'
+          ];
+        } else if (isHostOrSubdomain(hostname, 'medium.com')) {
+          selectors = [
+            'article'
+          ];
+        } else if (isHostOrSubdomain(hostname, 'atlassian.net')) {
+          selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
+        } else {
+          selectors = [
+            'article',
+            'main',
+            '[role="main"]',
+            '#main',
+            '#content',
+            '.post-content',
+            '.article-content',
+            '.entry-content',
+            'body'
+          ];
+        }
         for (let selector of selectors) {
           const el = document.querySelector(selector);
           if (el) return el;
@@ -130,14 +195,127 @@ extensions.forEach(ext => {
         document.body.innerHTML = '';
       });
 
-      test("finds #main-content first", () => {
+      test("finds #main-content first for Confluence", () => {
         document.body.innerHTML = '<div id="sidebar"></div><div id="main-content">Target</div>';
-        expect(getConfluenceContentContainer().id).toBe('main-content');
+        expect(getContentContainer('mocked.atlassian.net').id).toBe('main-content');
       });
 
-      test("returns null if no container matches", () => {
+      test("returns null if no container matches for Confluence", () => {
         document.body.innerHTML = '<div class="unknown-layout">Hello</div>';
-        expect(getConfluenceContentContainer()).toBe(null);
+        expect(getContentContainer('mocked.atlassian.net')).toBe(null);
+      });
+
+      test("finds article element for Medium", () => {
+        document.body.innerHTML = '<article>Medium Content</article>';
+        expect(getContentContainer('medium.com').tagName.toLowerCase()).toBe('article');
+      });
+
+      test("finds main element for generic site", () => {
+        document.body.innerHTML = '<main>Generic Main</main>';
+        expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('main');
+      });
+
+      test("falls back to body for generic site if nothing else matches", () => {
+        document.body.innerHTML = '<div>Generic Body Content</div>';
+        expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('body');
+      });
+    });
+
+    describe("settings inheritance resolution logic", () => {
+      function resolveSettings(result, hostname) {
+        const currentDomain = hostname.replace(/^www\./i, '');
+        const siteSettings = result.siteSettings || {};
+        const siteConfig = siteSettings[currentDomain] || {};
+
+        const globalEnabled = result.enabled !== undefined ? result.enabled : true;
+        const supportedSites = ['.atlassian.net', 'dev.to', 'medium.com'];
+        const isSupported = supportedSites.some(site => currentDomain.endsWith(site));
+        const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : isSupported;
+        const enabled = globalEnabled && siteEnabled;
+
+        const globalPosition = result.position || 'left';
+        const position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
+
+        const closed = result.closed !== undefined ? result.closed : false;
+        const minimized = result.minimized !== undefined ? result.minimized : false;
+
+        return { enabled, position, closed, minimized };
+      }
+
+      test("inherits global settings when site-specific settings are not configured on supported sites", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.enabled).toBe(true);
+        expect(resolved.position).toBe('right');
+        expect(resolved.closed).toBe(false);
+        expect(resolved.minimized).toBe(true);
+      });
+
+      test("defaults to disabled when site-specific settings are not configured on unsupported sites", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        expect(resolved.enabled).toBe(false);
+      });
+
+      test("allows enabling unsupported sites via site-specific override", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: false,
+          siteSettings: {
+            'levelup.gitconnected.com': {
+              enabled: true,
+              position: 'left'
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        expect(resolved.enabled).toBe(true);
+        expect(resolved.position).toBe('left');
+      });
+
+      test("disables site if global is disabled, regardless of site-specific toggle", () => {
+        const result = {
+          enabled: false,
+          position: 'right',
+          siteSettings: {
+            'levelup.gitconnected.com': {
+              enabled: true,
+              position: 'left'
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        expect(resolved.enabled).toBe(false);
+      });
+      
+      test("strips www. from hostname to find site configuration", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          siteSettings: {
+            'medium.com': {
+              enabled: false,
+              position: 'left'
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'www.medium.com');
+        expect(resolved.enabled).toBe(false);
+        expect(resolved.position).toBe('left');
       });
     });
   });
