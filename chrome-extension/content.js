@@ -120,17 +120,17 @@
     const path = window.location.pathname;
     const hostname = window.location.hostname;
 
-    if (hostname.includes('dev.to')) {
+    if (hostname === 'dev.to' || hostname.endsWith('.dev.to')) {
       // Dev.to edit paths: /new, or ending in /edit
       if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
       if (path === '/' || path === '') return false;
-    } else if (hostname.includes('medium.com')) {
+    } else if (hostname === 'medium.com' || hostname.endsWith('.medium.com')) {
       // Medium edit paths: /new-story, or ending in /edit
       if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
       if (path === '/' || path === '') return false;
-    } else if (hostname.includes('atlassian.net')) {
+    } else if (hostname === 'atlassian.net' || hostname.endsWith('.atlassian.net')) {
       // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
       if (path.includes('/edit') || path.includes('/edit-v2')) return false;
 
