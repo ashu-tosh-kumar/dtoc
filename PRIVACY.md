@@ -4,7 +4,7 @@ Your privacy is a top priority. This extension is designed to be as non-intrusiv
 
 ## Data Accessed
 
-`dtoc` only accesses the following data on supported pages (Confluence Cloud):
+`dtoc` only accesses the following data on supported pages:
 
 - **Headings (H1-H6)**: The extension reads the text and tag names of headings to build the Table of Contents. This data never leaves your browser.
 - **IDs**: It may generate stable, deterministic IDs (based on heading text) for headings that lack them. This ensures anchor links function correctly without unnecessary data processing.

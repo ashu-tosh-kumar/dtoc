@@ -2,7 +2,8 @@
 
 This document outlines the feasibility of expanding our Table of Contents (TOC) extension to support additional high-traffic websites that host long-form content but lack a native, sticky TOC.
 
-## 1. Medium
+## 1. Medium [SUPPORTED]
+
 **Target User Base & Demographics:**
 Massive global audience of readers, bloggers, developers, and professionals reading long-form articles. Highly engaged tech community.
 
@@ -18,6 +19,7 @@ Medium periodically updates its DOM structure and obfuscates CSS class names. We
 ---
 
 ## 2. Substack
+
 **Target User Base & Demographics:**
 Rapidly growing platform for independent writers, journalists, and newsletter creators. Content is heavily skewed towards long-form essays and deep dives.
 
@@ -32,7 +34,8 @@ Substack heavily monetizes through paywalls. Our extension must gracefully handl
 
 ---
 
-## 3. Dev.to (DEV Community)
+## 3. Dev.to (DEV Community) [SUPPORTED]
+
 **Target User Base & Demographics:**
 Millions of software developers and tech enthusiasts reading tutorials, guides, and opinion pieces.
 
@@ -48,6 +51,7 @@ Many Dev.to authors *do* manually create a TOC at the beginning of their article
 ---
 
 ## 4. GitHub Repositories (READMEs) & Wikis
+
 **Target User Base & Demographics:**
 Virtually every software developer. Extensive use of long-form Markdown files for project documentation.
 
@@ -63,6 +67,7 @@ GitHub recently introduced a native, sticky TOC sidebar for README files on the 
 ---
 
 ## 5. Reddit (Long-form Text Posts)
+
 **Target User Base & Demographics:**
 Huge general audience. Subreddits dedicated to stories, legal advice, deep dives, and technical explanations frequently feature massive walls of text.
 
