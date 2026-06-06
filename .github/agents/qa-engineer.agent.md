@@ -44,7 +44,7 @@ When reviewing a commit/PR, execute these checks:
 - Load Firefox extension from [firefox-extension](file:///Users/ashutosh/projects/My/dtoc/firefox-extension).
   - Open `about:debugging` -> This Firefox -> Load Temporary Add-on -> Select `firefox-extension/manifest.json`.
 - Test on:
-  - Supported sites: Confluence (`.atlassian.net`), Dev.to (`dev.to`), Medium (`medium.com`).
+  - Supported sites: Confluence, Dev.to, and Medium (including custom-domain publications, see [SUPPORTED_SITES.md](../../SUPPORTED_SITES.md)).
   - Unsupported site: Toggled on manually (Beta mode).
 - Verify overlay positions (left/right alignment), minimizing, expanding, and closing works cleanly without console errors.
 

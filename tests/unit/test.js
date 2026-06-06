@@ -7,6 +7,29 @@ const path = require('path');
 
 const extensions = ['chrome-extension', 'firefox-extension'];
 
+const MEDIUM_DOMAINS = [
+  'levelup.gitconnected.com',
+  'plainenglish.io',
+  'uxdesign.cc',
+  'uxplanet.org',
+  'betterprogramming.pub',
+  'itnext.io',
+  'proandroiddev.com',
+  'writingcooperative.com',
+  'ehandbook.com',
+  'entrepreneurshandbook.co',
+  'dailyjs.com'
+];
+
+function isMediumSite(hostname) {
+  const cleanHost = (hostname || '').toLowerCase().replace(/^www\./i, '');
+  return cleanHost === 'medium.com' ||
+         cleanHost.endsWith('.medium.com') ||
+         MEDIUM_DOMAINS.some(domain => 
+           cleanHost === domain || cleanHost.endsWith('.' + domain)
+         );
+}
+
 describe("Extension API usage and files structure", () => {
   test("chrome-extension files use chrome.* API", () => {
     const contentJs = fs.readFileSync(path.join(__dirname, '..', '..', 'chrome-extension', 'content.js'), 'utf8');
@@ -41,7 +64,7 @@ extensions.forEach(ext => {
         if (isAllowedHost('dev.to')) {
           if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
           if (path === '/' || path === '') return false;
-        } else if (isAllowedHost('medium.com')) {
+        } else if (isMediumSite(normalizedHostname)) {
           if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
           if (path === '/' || path === '') return false;
         } else if (isAllowedHost('atlassian.net')) {
@@ -80,6 +103,12 @@ extensions.forEach(ext => {
         expect(isViewMode('/new-story', '', 'medium.com')).toBe(false);
         expect(isViewMode('/p/12345/edit', '', 'medium.com')).toBe(false);
         expect(isViewMode('/', '', 'medium.com')).toBe(false);
+      });
+
+      test("custom Medium publications: returns true for article page and false for edit/homepage", () => {
+        expect(isViewMode('/p/some-article-slug', '', 'levelup.gitconnected.com')).toBe(true);
+        expect(isViewMode('/new-story', '', 'python.plainenglish.io')).toBe(false);
+        expect(isViewMode('/', '', 'python.plainenglish.io')).toBe(false);
       });
 
       test("generic site: returns true for standard path", () => {
@@ -165,7 +194,7 @@ extensions.forEach(ext => {
             '.crayons-article__body',
             '.crayons-article__main'
           ];
-        } else if (isHostOrSubdomain(hostname, 'medium.com')) {
+        } else if (isMediumSite(hostname)) {
           selectors = [
             'article'
           ];
@@ -210,6 +239,11 @@ extensions.forEach(ext => {
         expect(getContentContainer('medium.com').tagName.toLowerCase()).toBe('article');
       });
 
+      test("finds article element for custom Medium publications", () => {
+        document.body.innerHTML = '<article>Medium Content</article>';
+        expect(getContentContainer('levelup.gitconnected.com').tagName.toLowerCase()).toBe('article');
+      });
+
       test("finds main element for generic site", () => {
         document.body.innerHTML = '<main>Generic Main</main>';
         expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('main');
@@ -228,8 +262,8 @@ extensions.forEach(ext => {
         const siteConfig = siteSettings[currentDomain] || {};
 
         const globalEnabled = result.enabled !== undefined ? result.enabled : true;
-        const supportedSites = ['.atlassian.net', 'dev.to', 'medium.com'];
-        const isSupported = supportedSites.some(site => currentDomain.endsWith(site));
+        const otherSupported = ['.atlassian.net', 'dev.to'];
+        const isSupported = otherSupported.some(site => currentDomain.endsWith(site)) || isMediumSite(currentDomain);
         const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : isSupported;
         const enabled = globalEnabled && siteEnabled;
 
@@ -265,8 +299,20 @@ extensions.forEach(ext => {
           minimized: true,
           siteSettings: {}
         };
-        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        const resolved = resolveSettings(result, 'wikipedia.org');
         expect(resolved.enabled).toBe(false);
+      });
+
+      test("defaults to enabled when site-specific settings are not configured on custom Medium publication sites", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        expect(resolved.enabled).toBe(true);
       });
 
       test("allows enabling unsupported sites via site-specific override", () => {
@@ -276,13 +322,13 @@ extensions.forEach(ext => {
           closed: false,
           minimized: false,
           siteSettings: {
-            'levelup.gitconnected.com': {
+            'wikipedia.org': {
               enabled: true,
               position: 'left'
             }
           }
         };
-        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        const resolved = resolveSettings(result, 'wikipedia.org');
         expect(resolved.enabled).toBe(true);
         expect(resolved.position).toBe('left');
       });
@@ -292,13 +338,13 @@ extensions.forEach(ext => {
           enabled: false,
           position: 'right',
           siteSettings: {
-            'levelup.gitconnected.com': {
+            'wikipedia.org': {
               enabled: true,
               position: 'left'
             }
           }
         };
-        const resolved = resolveSettings(result, 'levelup.gitconnected.com');
+        const resolved = resolveSettings(result, 'wikipedia.org');
         expect(resolved.enabled).toBe(false);
       });
       
