@@ -376,7 +376,10 @@
 
   function getContentContainer() {
     let selectors = [];
-    if (window.location.hostname.includes('dev.to')) {
+    if (
+      window.location.hostname === 'dev.to' ||
+      window.location.hostname.endsWith('.dev.to')
+    ) {
       selectors = [
         '#article-body',
         '.crayons-article__body',
