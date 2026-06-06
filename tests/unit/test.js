@@ -34,13 +34,17 @@ extensions.forEach(ext => {
     describe("content script view mode logic", () => {
       // Extract the pure function logic for testing
       function isViewMode(path, search, hostname = 'mocked.atlassian.net') {
-        if (hostname.includes('dev.to')) {
+        const normalizedHostname = (hostname || '').toLowerCase();
+        const isAllowedHost = (domain) =>
+          normalizedHostname === domain || normalizedHostname.endsWith(`.${domain}`);
+
+        if (isAllowedHost('dev.to')) {
           if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
           if (path === '/' || path === '') return false;
-        } else if (hostname.includes('medium.com')) {
+        } else if (isAllowedHost('medium.com')) {
           if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
           if (path === '/' || path === '') return false;
-        } else if (hostname.includes('atlassian.net')) {
+        } else if (isAllowedHost('atlassian.net')) {
           if (path.includes('/edit') || path.includes('/edit-v2')) return false;
           const params = new URLSearchParams(search);
           if (params.get('mode') === 'edit') return false;
@@ -149,19 +153,23 @@ extensions.forEach(ext => {
     });
 
     describe("DOM container fallback logic", () => {
+      function isHostOrSubdomain(hostname, domain) {
+        return hostname === domain || hostname.endsWith(`.${domain}`);
+      }
+
       function getContentContainer(hostname = 'mocked.atlassian.net') {
         let selectors = [];
-        if (hostname.includes('dev.to')) {
+        if (isHostOrSubdomain(hostname, 'dev.to')) {
           selectors = [
             '#article-body',
             '.crayons-article__body',
             '.crayons-article__main'
           ];
-        } else if (hostname.includes('medium.com')) {
+        } else if (isHostOrSubdomain(hostname, 'medium.com')) {
           selectors = [
             'article'
           ];
-        } else if (hostname.includes('atlassian.net')) {
+        } else if (isHostOrSubdomain(hostname, 'atlassian.net')) {
           selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
         } else {
           selectors = [
