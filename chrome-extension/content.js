@@ -382,7 +382,10 @@
         '.crayons-article__body',
         '.crayons-article__main'
       ];
-    } else if (window.location.hostname.includes('medium.com')) {
+    } else if (
+      window.location.hostname === 'medium.com' ||
+      window.location.hostname.endsWith('.medium.com')
+    ) {
       selectors = [
         'article'
       ];
