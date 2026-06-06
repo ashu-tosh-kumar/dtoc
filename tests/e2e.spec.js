@@ -180,7 +180,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     await expect(popupPage.locator('#site-toggle-btn')).not.toHaveClass(/disabled-control/);
     await expect(popupPage.locator('.settings-panel')).not.toHaveClass(/disabled-control/);
     await expect(popupPage.locator('#only-for-btn')).not.toHaveClass(/disabled-control/);
-    await expect(popupPage.locator('#reset-site-btn')).not.toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#reset-site-btn')).toHaveClass(/disabled-control/);
     await expect(popupPage.locator('#reset-all-btn')).not.toHaveClass(/disabled-control/);
 
     // 3. Disable site-specific status via Site Quick-Toggle -> TOC should hide
@@ -197,10 +197,9 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.bringToFront();
     await expect(containerLocator).not.toHaveClass(/hidden/);
 
-    // Reset site settings to clear the override before testing global/OnlyFor settings
+    // Verify reset site button is disabled since Only For is not active
     await popupPage.bringToFront();
-    await popupPage.locator('#reset-site-btn').click();
-    await page.waitForTimeout(1000);
+    await expect(popupPage.locator('#reset-site-btn')).toHaveClass(/disabled-control/);
 
     // 4. Change global position to right -> TOC should be on the right
     await popupPage.bringToFront();
@@ -226,10 +225,15 @@ test.describe('DTOC Extension E2E Tests', () => {
     // 5. Test Reset Site Settings -> site specific setting goes back to global (right) -> TOC should be on right
     await popupPage.bringToFront();
     const resetSiteBtn = popupPage.locator('#reset-site-btn');
+    await expect(resetSiteBtn).not.toHaveClass(/disabled-control/);
     await resetSiteBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/position-right/);
+
+    // Verify reset site button is disabled again after resetting site settings
+    await popupPage.bringToFront();
+    await expect(resetSiteBtn).toHaveClass(/disabled-control/);
 
     // 6. Test Reset All Settings
     await popupPage.bringToFront();

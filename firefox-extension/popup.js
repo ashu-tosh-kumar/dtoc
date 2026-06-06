@@ -164,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.settings-panel').classList.remove('disabled-control');
         onlyForBtn.classList.remove('disabled-control');
         supportContainer.classList.remove('disabled-control');
-        resetSiteBtn.classList.remove('disabled-control');
         resetAllBtn.classList.remove('disabled-control');
 
         // Gray out restore button if disabled on this site
@@ -174,6 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           restoreBtn.classList.add('disabled-control');
           restoreContainer.classList.add('disabled-control');
+        }
+
+        // Gray out reset site button if site settings override is not active
+        if (siteOverrideActive) {
+          resetSiteBtn.classList.remove('disabled-control');
+        } else {
+          resetSiteBtn.classList.add('disabled-control');
         }
       } else {
         globalOffBtn.classList.add('active');
