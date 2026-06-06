@@ -389,7 +389,10 @@
       selectors = [
         'article'
       ];
-    } else if (window.location.hostname.includes('atlassian.net')) {
+    } else if (
+      window.location.hostname === 'atlassian.net' ||
+      window.location.hostname.endsWith('.atlassian.net')
+    ) {
       // Attempt to find the main content container in Confluence View Mode
       // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
       selectors = [
