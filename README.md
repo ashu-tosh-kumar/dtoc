@@ -4,15 +4,11 @@ Dynamic Table of Content.
 
 This extension automatically generates a non-intrusive, sticky Table of Contents, allowing you to quickly navigate long documents without losing your reading context.
 
+<https://github.com/user-attachments/assets/958a6e77-acb1-443f-86c2-ed6ab4300a0b>
 
-https://github.com/user-attachments/assets/958a6e77-acb1-443f-86c2-ed6ab4300a0b
+Watch on YouTube: <https://www.youtube.com/watch?v=fk5zKwXVzYk>
 
-Watch on YouTube: https://www.youtube.com/watch?v=fk5zKwXVzYk
-
-
-Supported Websites:
-
-- Confluence Cloud (`https://*.atlassian.net/wiki/*`)
+For a full list of natively supported websites (including Confluence, DEV Community, Medium, and various popular custom-domain Medium publications), please see [SUPPORTED_SITES.md](SUPPORTED_SITES.md).
 
 Supported Browsers:
 
@@ -22,6 +18,7 @@ Supported Browsers:
 ## Features
 
 - **Automatic Parsing**: Detects headings (`H1-H6`) and builds a nested TOC.
+- **Page Title Navigation**: Prepends the page or article title at the top of the TOC for quick navigation back to the top of the document.
 - **Floating UI**: Stays pinned to the side of your screen while you scroll.
 - "Minimize and Close": Easily minimize the TOC to save space or close it entirely when not needed.
 - **Atlassian Theming**: Automatically adapts to Confluence's Light and Dark modes.
@@ -58,7 +55,7 @@ To install the extension manually from source:
 2. Open Chrome (or any Chromium-based browser like Edge, Brave, Arc) and navigate to `chrome://extensions/`.
 3. Enable "Developer mode" in the top right corner.
 4. Click "Load unpacked" and select the folder containing this repository.
-5. The extension will now automatically run on any Confluence Cloud (`https://*.atlassian.net/wiki/*`) page.
+5. The extension will now automatically run on supported websites.
 
 ## Development & Testing
 
@@ -70,6 +67,15 @@ To run the unit tests:
 2. Run tests: `npm test`
 
 ## Changelog
+
+`v2.0.0`
+
+- Added experimental support (Beta) for all websites using generic HTML semantic selectors.
+- Overhauled the extension popup UI with split settings (Global vs. Site-Specific status toggles and TOC position settings).
+- Added "Reset Site Settings" and "Reset All Settings" buttons in the popup, with the "Reset Site Settings" button dynamically disabled when no site-specific settings are configured.
+- Added native support for DEV Community (`dev.to`).
+- Added native support for Medium (`medium.com` and subdomains) as well as common custom-domain Medium publications (e.g., `levelup.gitconnected.com`, `python.plainenglish.io`).
+- Added a dynamic page/article title heading at the top of the Table of Contents for quick navigation back to the top of the page.
 
 `v1.1.0`
 
@@ -87,5 +93,10 @@ To run the unit tests:
 Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under the FontAwesome Free License ([https://fontawesome.com/license/free](https://fontawesome.com/license/free)). The specific icon used is the "folder-tree" solid icon.
 
 ---
-*Developed by Jules.*
-*Security hardening reviewed by Qodo and implemented by Gemini CLI.*
+
+- *Developed by Jules using `prd.md`.*
+- *Security hardening reviewed by Qodo and implemented by Gemini CLI.*
+- *Split settings architecture, generic cross-website support, and E2E automation
+  developed by Google Antigravity 2.0.*
+- Agentic workflow files added by GitHub Copilot with thorough review and grounding done
+  by Google Antigravity 2.0.

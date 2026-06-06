@@ -27,15 +27,61 @@
   let container = null;
   let contentArea = null;
 
-  // Icons (SVG strings)
-  const ICON_MINIMIZE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
-  const ICON_CLOSE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-  const ICON_MAXIMIZE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`;
+  // Icons
+  const ICON_MINIMIZE = 'minimize';
+  const ICON_CLOSE = 'close';
+  const ICON_MAXIMIZE = 'maximize';
 
-  function createIconElement(svgString) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgString, 'image/svg+xml');
-    return doc.documentElement;
+  function createIconElement(iconType) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+
+    if (iconType === 'minimize') {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", "5");
+      line.setAttribute("y1", "12");
+      line.setAttribute("x2", "19");
+      line.setAttribute("y2", "12");
+      svg.appendChild(line);
+    } else if (iconType === 'close') {
+      const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line1.setAttribute("x1", "18");
+      line1.setAttribute("y1", "6");
+      line1.setAttribute("x2", "6");
+      line1.setAttribute("y2", "18");
+      svg.appendChild(line1);
+
+      const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line2.setAttribute("x1", "6");
+      line2.setAttribute("y1", "6");
+      line2.setAttribute("x2", "18");
+      line2.setAttribute("y2", "18");
+      svg.appendChild(line2);
+    } else if (iconType === 'maximize') {
+      const paths = [
+        { x1: "8", y1: "6", x2: "21", y2: "6" },
+        { x1: "8", y1: "12", x2: "21", y2: "12" },
+        { x1: "8", y1: "18", x2: "21", y2: "18" },
+        { x1: "3", y1: "6", x2: "3.01", y2: "6" },
+        { x1: "3", y1: "12", x2: "3.01", y2: "12" },
+        { x1: "3", y1: "18", x2: "3.01", y2: "18" }
+      ];
+      paths.forEach(p => {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", p.x1);
+        line.setAttribute("y1", p.y1);
+        line.setAttribute("x2", p.x2);
+        line.setAttribute("y2", p.y2);
+        svg.appendChild(line);
+      });
+    }
+
+    return svg;
   }
 
   function slugify(text) {
@@ -64,14 +110,63 @@
     listenForSettingsChanges();
   }
 
-  function isViewMode() {
-    // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
-    const path = window.location.pathname;
-    if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+  // Constant list of Medium publication domains (excluding medium.com itself)
+  const MEDIUM_DOMAINS = [
+    'levelup.gitconnected.com',
+    'plainenglish.io',
+    'uxdesign.cc',
+    'uxplanet.org',
+    'betterprogramming.pub',
+    'itnext.io',
+    'proandroiddev.com',
+    'writingcooperative.com',
+    'ehandbook.com',
+    'entrepreneurshandbook.co',
+    'dailyjs.com'
+  ];
 
-    // Some pages append ?mode=edit or similar
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('mode') === 'edit') return false;
+  function isMediumSite(hostname) {
+    const cleanHost = hostname.replace(/^www\./i, '');
+    return cleanHost === 'medium.com' ||
+           cleanHost.endsWith('.medium.com') ||
+           MEDIUM_DOMAINS.some(domain => 
+             cleanHost === domain || cleanHost.endsWith('.' + domain)
+           );
+  }
+
+  function isSupportedSite() {
+    const hostname = window.location.hostname;
+    const cleanHost = hostname.replace(/^www\./i, '');
+    const otherSupported = ['.atlassian.net', 'dev.to'];
+    return otherSupported.some(site => cleanHost.endsWith(site)) || isMediumSite(cleanHost);
+  }
+
+  function isViewMode() {
+    const path = window.location.pathname;
+    const hostname = window.location.hostname;
+
+    if (hostname === 'dev.to' || hostname.endsWith('.dev.to')) {
+      // Dev.to edit paths: /new, or ending in /edit
+      if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+      // Exclude home page
+      if (path === '/' || path === '') return false;
+    } else if (isMediumSite(hostname)) {
+      // Medium edit paths: /new-story, or ending in /edit
+      if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
+      // Exclude home page
+      if (path === '/' || path === '') return false;
+    } else if (hostname === 'atlassian.net' || hostname.endsWith('.atlassian.net')) {
+      // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
+      if (path.includes('/edit') || path.includes('/edit-v2')) return false;
+
+      // Some pages append ?mode=edit or similar
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'edit') return false;
+    } else {
+      // Generic site exclusions
+      if (path.includes('/edit') || path.includes('/editor') || path.includes('/write') || path.includes('/new') || path.includes('/compose') || path.includes('/draft')) return false;
+      if (path === '/' || path === '' || path === '/index.html') return false;
+    }
 
     return true;
   }
@@ -79,15 +174,24 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
-    const keys = Object.values(SETTINGS_KEY);
+    const keys = ['enabled', 'position', 'closed', 'minimized', 'siteSettings'];
     browser.storage.local.get(keys).then((result) => {
-      for (const storageKey of keys) {
-        const stateKey = STATE_KEY_MAP[storageKey];
-        if (result[storageKey] !== undefined && stateKey) {
-          state[stateKey] = result[storageKey];
-        }
-      }
-      callback();
+      const currentDomain = window.location.hostname.replace(/^www\./i, '');
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+
+      const globalEnabled = result.enabled !== undefined ? result.enabled : true;
+      const defaultSiteEnabled = isSupportedSite();
+      const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : defaultSiteEnabled;
+      state.enabled = globalEnabled && siteEnabled;
+
+      const globalPosition = result.position || 'left';
+      state.position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
+
+      state.closed = result.closed !== undefined ? result.closed : false;
+      state.minimized = result.minimized !== undefined ? result.minimized : false;
+
+      if (callback) callback();
     });
   }
 
@@ -103,17 +207,9 @@
   function listenForSettingsChanges() {
     browser.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'local') {
-        let changed = false;
-        for (let [storageKey, { newValue }] of Object.entries(changes)) {
-          const stateKey = STATE_KEY_MAP[storageKey];
-          if (stateKey && state[stateKey] !== newValue) {
-            state[stateKey] = newValue;
-            changed = true;
-          }
-        }
-        if (changed) {
+        loadSettings(() => {
           applyStateToUI();
-        }
+        });
       }
     });
   }
@@ -139,6 +235,9 @@
 
     container = document.createElement('div');
     container.id = 'dtoc-container';
+    if (!isSupportedSite()) {
+      container.classList.add('experimental');
+    }
 
     // Header
     const header = document.createElement('div');
@@ -146,7 +245,7 @@
 
     const title = document.createElement('h2');
     title.className = 'dtoc-title';
-    title.textContent = 'Table of Contents';
+    title.textContent = isSupportedSite() ? 'Table of Contents' : 'Table of Contents (Beta)';
 
     const controls = document.createElement('div');
     controls.className = 'dtoc-controls';
@@ -254,7 +353,7 @@
     observer = new MutationObserver(callback);
 
     const rebindObserver = () => {
-      const targetNode = getConfluenceContentContainer();
+      const targetNode = getContentContainer();
       if (targetNode !== currentTarget) {
         if (currentTarget) observer.disconnect();
         if (targetNode) observer.observe(targetNode, config);
@@ -271,7 +370,7 @@
     let lastUrl = location.href;
     setInterval(() => {
       const currentUrl = location.href;
-      const targetNode = getConfluenceContentContainer();
+      const targetNode = getContentContainer();
 
       if (currentUrl !== lastUrl || (targetNode && targetNode !== currentTarget)) {
         const urlChanged = currentUrl !== lastUrl;
@@ -300,15 +399,47 @@
 
   // --- Parsing & Navigation ---
 
-  function getConfluenceContentContainer() {
-    // Attempt to find the main content container in Confluence View Mode
-    // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
-    const selectors = [
-      '#main-content',
-      '#content',
-      '.ak-renderer-document',
-      '.wiki-content'
-    ];
+  function getContentContainer() {
+    let selectors = [];
+    if (
+      window.location.hostname === 'dev.to' ||
+      window.location.hostname.endsWith('.dev.to')
+    ) {
+      selectors = [
+        '#article-body',
+        '.crayons-article__body',
+        '.crayons-article__main'
+      ];
+    } else if (isMediumSite(window.location.hostname)) {
+      selectors = [
+        'article'
+      ];
+    } else if (
+      window.location.hostname === 'atlassian.net' ||
+      window.location.hostname.endsWith('.atlassian.net')
+    ) {
+      // Attempt to find the main content container in Confluence View Mode
+      // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
+      selectors = [
+        '#main-content',
+        '#content',
+        '.ak-renderer-document',
+        '.wiki-content'
+      ];
+    } else {
+      // Generic content selectors fallback
+      selectors = [
+        'article',
+        'main',
+        '[role="main"]',
+        '#main',
+        '#content',
+        '.post-content',
+        '.article-content',
+        '.entry-content',
+        'body'
+      ];
+    }
 
     for (let selector of selectors) {
       const el = document.querySelector(selector);
@@ -318,10 +449,47 @@
     return null;
   }
 
+  function getPageTitle() {
+    const selectors = [
+      'h1#title-text',
+      'h1[data-test-id="page-title"]',
+      '.ak-page-header-title h1',
+      '#main-title h1',
+      '.crayons-article__header__meta h1',
+      '.crayons-article__main h1',
+      'h1.crayons-title',
+      'h1'
+    ];
+
+    for (const selector of selectors) {
+      const el = document.querySelector(selector);
+      if (el && el.textContent.trim()) {
+        return {
+          text: el.textContent.trim(),
+          element: el
+        };
+      }
+    }
+
+    let titleText = document.title;
+    titleText = titleText
+      .replace(/\s*-\s*Confluence\s*$/i, '')
+      .replace(/\s*-\s*DEV Community\s*$/i, '')
+      .replace(/\s*\|\s*by\s+[^|]*\|\s*[^|]+\s*$/i, '')
+      .replace(/\s*\|\s*Medium\s*$/i, '')
+      .replace(/\s*-\s*Medium\s*$/i, '')
+      .trim();
+
+    return {
+      text: titleText || 'Top',
+      element: null
+    };
+  }
+
   function parseHeadingsAndRender() {
     if (!contentArea) return;
 
-    const contentContainer = getConfluenceContentContainer();
+    const contentContainer = getContentContainer();
     if (!contentContainer) {
       contentArea.textContent = '';
       return;
@@ -330,17 +498,44 @@
     // Query headings only within the main content area to avoid site nav/sidebar
     const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
-    if (headings.length === 0) {
-      contentArea.textContent = '';
-      const emptyState = document.createElement('div');
-      emptyState.className = 'empty-state';
-      emptyState.textContent = 'No headings found on this page.';
-      contentArea.appendChild(emptyState);
-      return;
-    }
-
     const ul = document.createElement('ul');
     ul.className = 'toc-list';
+
+    // Get the page title info
+    const titleInfo = getPageTitle();
+
+    // Prepend Page Title to TOC if it's not the same element as the first heading
+    const firstHeading = headings[0];
+    const hasTitlePrepend = titleInfo.element !== firstHeading;
+
+    if (hasTitlePrepend) {
+      const titleLi = document.createElement('li');
+      titleLi.className = 'toc-item toc-level-1 toc-title-item';
+
+      const titleA = document.createElement('a');
+      titleA.className = 'toc-link';
+      titleA.href = '#';
+      titleA.textContent = titleInfo.text;
+
+      titleA.addEventListener('click', (e) => {
+        e.preventDefault();
+        history.pushState(null, null, window.location.pathname + window.location.search);
+
+        if (titleInfo.element) {
+          titleInfo.element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const originalScrollMargin = titleInfo.element.style.scrollMarginTop;
+          titleInfo.element.style.scrollMarginTop = '70px';
+          setTimeout(() => {
+            titleInfo.element.style.scrollMarginTop = originalScrollMargin;
+          }, 1000);
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+
+      titleLi.appendChild(titleA);
+      ul.appendChild(titleLi);
+    }
 
     const idCounts = {};
 
