@@ -70,12 +70,12 @@ To run the unit tests:
 
 `v2.0.0`
 
-- Added experimental support for all websites (`http://*/*` and `https://*/*`) using generic HTML semantic selectors.
-- Added split settings in the extension popup (Global vs. Site-Specific status toggles and TOC positions).
-- Added "Reset Site Settings" and "Reset All Settings" actions in the popup.
-- Added support for DEV Community (`dev.to`).
-- Added support for Medium (`medium.com` and subdomains).
-- Added dynamic page/article title item at the top of the TOC.
+- Added experimental support (Beta) for all websites using generic HTML semantic selectors.
+- Overhauled the extension popup UI with split settings (Global vs. Site-Specific status toggles and TOC position settings).
+- Added "Reset Site Settings" and "Reset All Settings" buttons in the popup, with the "Reset Site Settings" button dynamically disabled when no site-specific settings are configured.
+- Added native support for DEV Community (`dev.to`).
+- Added native support for Medium (`medium.com` and subdomains) as well as common custom-domain Medium publications (e.g., `levelup.gitconnected.com`, `python.plainenglish.io`).
+- Added a dynamic page/article title heading at the top of the Table of Contents for quick navigation back to the top of the page.
 
 `v1.1.0`
 
@@ -93,6 +93,10 @@ To run the unit tests:
 Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under the FontAwesome Free License ([https://fontawesome.com/license/free](https://fontawesome.com/license/free)). The specific icon used is the "folder-tree" solid icon.
 
 ---
-*Developed by Jules.*
-*Security hardening reviewed by Qodo and implemented by Gemini CLI.*
-*Split settings architecture, generic cross-website support, and E2E automation developed by Google Antigravity 2.0.*
+
+- *Developed by Jules using `prd.md`.*
+- *Security hardening reviewed by Qodo and implemented by Gemini CLI.*
+- *Split settings architecture, generic cross-website support, and E2E automation
+  developed by Google Antigravity 2.0.*
+- Agentic workflow files added by GitHub Copilot with thorough review and grounding done
+  by Google Antigravity 2.0.

@@ -165,9 +165,9 @@ The MVP will **not** include:
 
 ### Nice-to-have user stories
 
-9. **As a user**, I want the current section highlighted while I scroll.
-10. **As a user**, I want nested headings displayed hierarchically.
-11. **As a user**, I want my preferred UI state remembered.
+1. **As a user**, I want the current section highlighted while I scroll.
+2. **As a user**, I want nested headings displayed hierarchically.
+3. **As a user**, I want my preferred UI state remembered.
 
 ***
 
