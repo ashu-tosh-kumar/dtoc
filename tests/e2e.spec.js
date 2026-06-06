@@ -400,12 +400,9 @@ test.describe('DTOC Extension E2E Tests', () => {
     const hostLocator = page.locator('#dtoc-host');
     await expect(hostLocator).toBeAttached({ timeout: 10000 });
 
+    // By default, unsupported sites should have the TOC hidden
     const containerLocator = hostLocator.locator('css=div#dtoc-container');
-    await expect(containerLocator).toBeVisible();
-    await expect(containerLocator).toHaveClass(/experimental/);
-
-    const headerTitle = hostLocator.locator('.dtoc-title');
-    await expect(headerTitle).toHaveText('Table of Contents (Beta)');
+    await expect(containerLocator).toHaveClass(/hidden/);
 
     const popupPage = await browserContext.newPage();
 
@@ -440,8 +437,34 @@ test.describe('DTOC Extension E2E Tests', () => {
     const restoreContainer = popupPage.locator('#restore-container');
     await expect(restoreContainer).toBeVisible();
 
+    const restoreBtn = popupPage.locator('#restore-btn');
+    await expect(restoreBtn).toHaveClass(/disabled-control/);
+
     const betaBadge = popupPage.locator('#beta-badge');
     await expect(betaBadge).toBeVisible();
+
+    // The site toggle should show as inactive/off by default
+    const siteToggleBtn = popupPage.locator('#site-toggle-btn');
+    await expect(siteToggleBtn).toHaveClass(/inactive/);
+
+    // Turn the feature ON manually
+    await siteToggleBtn.click();
+    await page.waitForTimeout(1000);
+
+    // Verify it is now visible and has beta headers on the page
+    await page.bringToFront();
+    await expect(containerLocator).not.toHaveClass(/hidden/);
+    await expect(containerLocator).toHaveClass(/experimental/);
+
+    const headerTitle = hostLocator.locator('.dtoc-title');
+    await expect(headerTitle).toHaveText('Table of Contents (Beta)');
+
+    // Verify the popup toggle is updated to active/on
+    await popupPage.bringToFront();
+    await expect(siteToggleBtn).toHaveClass(/active/);
+
+    // Verify the restore button is no longer grayed out
+    await expect(restoreBtn).not.toHaveClass(/disabled-control/);
 
     await page.close();
     await popupPage.close();

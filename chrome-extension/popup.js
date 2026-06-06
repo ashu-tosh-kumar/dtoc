@@ -139,7 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Top-left: Site Quick-Toggle (reflects site-specific enabled status if overridden, otherwise true/default)
-      const siteEnabled = (siteConfig && siteConfig.enabled !== undefined) ? siteConfig.enabled : true;
+      const defaultSiteEnabled = isSupported;
+      const siteEnabled = (siteConfig && siteConfig.enabled !== undefined) ? siteConfig.enabled : defaultSiteEnabled;
       if (siteEnabled) {
         siteToggleBtn.classList.add('active');
         siteToggleBtn.classList.remove('inactive');
@@ -160,11 +161,18 @@ document.addEventListener('DOMContentLoaded', () => {
         siteToggleBtn.classList.remove('disabled-control');
         document.querySelector('.settings-panel').classList.remove('disabled-control');
         onlyForBtn.classList.remove('disabled-control');
-        restoreBtn.classList.remove('disabled-control');
-        restoreContainer.classList.remove('disabled-control');
         supportContainer.classList.remove('disabled-control');
         resetSiteBtn.classList.remove('disabled-control');
         resetAllBtn.classList.remove('disabled-control');
+
+        // Gray out restore button if disabled on this site
+        if (siteEnabled) {
+          restoreBtn.classList.remove('disabled-control');
+          restoreContainer.classList.remove('disabled-control');
+        } else {
+          restoreBtn.classList.add('disabled-control');
+          restoreContainer.classList.add('disabled-control');
+        }
       } else {
         globalOffBtn.classList.add('active');
         globalOnBtn.classList.remove('active');
@@ -195,7 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['siteSettings'], (result) => {
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
-      const currentSiteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : true;
+      const defaultSiteEnabled = isSupported;
+      const currentSiteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : defaultSiteEnabled;
       
       const newSiteEnabled = !currentSiteEnabled;
       

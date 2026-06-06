@@ -110,7 +110,8 @@
       const siteConfig = siteSettings[currentDomain] || {};
 
       const globalEnabled = result.enabled !== undefined ? result.enabled : true;
-      const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : true;
+      const defaultSiteEnabled = isSupportedSite();
+      const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : defaultSiteEnabled;
       state.enabled = globalEnabled && siteEnabled;
 
       const globalPosition = result.position || 'left';

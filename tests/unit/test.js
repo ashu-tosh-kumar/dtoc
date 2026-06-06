@@ -220,7 +220,9 @@ extensions.forEach(ext => {
         const siteConfig = siteSettings[currentDomain] || {};
 
         const globalEnabled = result.enabled !== undefined ? result.enabled : true;
-        const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : true;
+        const supportedSites = ['.atlassian.net', 'dev.to', 'medium.com'];
+        const isSupported = supportedSites.some(site => currentDomain.endsWith(site));
+        const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : isSupported;
         const enabled = globalEnabled && siteEnabled;
 
         const globalPosition = result.position || 'left';
@@ -232,7 +234,22 @@ extensions.forEach(ext => {
         return { enabled, position, closed, minimized };
       }
 
-      test("inherits global settings when site-specific settings are not configured", () => {
+      test("inherits global settings when site-specific settings are not configured on supported sites", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.enabled).toBe(true);
+        expect(resolved.position).toBe('right');
+        expect(resolved.closed).toBe(false);
+        expect(resolved.minimized).toBe(true);
+      });
+
+      test("defaults to disabled when site-specific settings are not configured on unsupported sites", () => {
         const result = {
           enabled: true,
           position: 'right',
@@ -241,13 +258,10 @@ extensions.forEach(ext => {
           siteSettings: {}
         };
         const resolved = resolveSettings(result, 'levelup.gitconnected.com');
-        expect(resolved.enabled).toBe(true);
-        expect(resolved.position).toBe('right');
-        expect(resolved.closed).toBe(false);
-        expect(resolved.minimized).toBe(true);
+        expect(resolved.enabled).toBe(false);
       });
 
-      test("overrides with site-specific settings when configured", () => {
+      test("allows enabling unsupported sites via site-specific override", () => {
         const result = {
           enabled: true,
           position: 'right',
@@ -255,13 +269,13 @@ extensions.forEach(ext => {
           minimized: false,
           siteSettings: {
             'levelup.gitconnected.com': {
-              enabled: false,
+              enabled: true,
               position: 'left'
             }
           }
         };
         const resolved = resolveSettings(result, 'levelup.gitconnected.com');
-        expect(resolved.enabled).toBe(false);
+        expect(resolved.enabled).toBe(true);
         expect(resolved.position).toBe('left');
       });
 
