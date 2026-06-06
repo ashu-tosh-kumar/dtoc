@@ -2,316 +2,135 @@
 
 ## System Overview
 
-DTOC is a browser extension for Chrome MV3 and Firefox that extracts and transforms data using custom templates. The extension architecture follows an async message-passing model between content scripts and background workers.
+DTOC (Dynamic Table of Contents) is a browser extension for Google Chrome (MV3) and Mozilla Firefox that generates a persistent, dynamic Table of Contents (TOC) overlay on supported websites (Confluence, Dev.to, Medium) and unsupported websites via manual opt-in (Beta mode).
 
-### Core Components
+Rather than using complex background script message passing, DTOC operates on a **storage-driven state synchronization architecture**. The content script and popup coordinate states entirely via `chrome.storage.local`.
 
-- **Content Script** (`chrome-extension/content.js`): Runs on web pages, intercepts DOM, executes CSS selectors, extracts data, communicates with background worker
-- **Background Service Worker** (`chrome-extension/background.js`): Persistent context, manages templates, storage operations, cross-script coordination
-- **Storage Layer** (`chrome.storage.local`): Persistent template configs, user preferences (100MB+ quota per browser)
-- **UI Components** (Popup, Options): Configuration management, template CRUD
-
-### Cross-Browser Support
-
-- **Chrome MV3**: Native support for Service Workers, chrome namespace
-- **Firefox MV2/MV3**: API compatibility via `browser` namespace or polyfills
-
-Detection pattern:
-```javascript
-const API = typeof chrome !== 'undefined' ? chrome : browser;
+```mermaid
+graph TD
+    User([User Tab]) -->|Loads| ContentScript[Content Script: content.js]
+    Popup[Popup UI: popup.js] -->|Writes Config| Storage[(chrome.storage.local)]
+    Storage -->|Triggers OnChanged| ContentScript
+    ContentScript -->|Reads State| Storage
+    ContentScript -->|DOM Queries| PageDOM[Page DOM]
+    ContentScript -->|Injects TOC UI| ShadowDOM[Shadow DOM: #dtoc-host]
 ```
 
 ---
 
-## Data Structures
+## Core Components
 
-### Template Object (Core Entity)
+1. **Content Script** (`content.js`):
+   - Injected into all matching web pages.
+   - Determines if the current URL is in view mode or edit mode.
+   - Injects a Shadow DOM element (`#dtoc-host`) containing the TOC overlay container, styles, and control buttons (minimize, close, maximize).
+   - Monitors DOM changes via a debounced `MutationObserver` and periodic checks to rebuild the heading list reactively.
+   - Synchronizes UI state dynamically when storage settings change.
+
+2. **Popup UI** (`popup.html` / `popup.js` / `popup.css`):
+   - Loaded when the user clicks the extension icon.
+   - Manages global settings (ON/OFF, position) and site-specific overrides.
+   - Displays a "Beta" badge and experimental support messages on unsupported domains.
+   - Persists all settings changes directly to `chrome.storage.local`.
+
+3. **Storage Layer** (`chrome.storage.local`):
+   - Single source of truth for synchronization.
+   - Shared between the popup and content scripts.
+
+---
+
+## Data Structures & Storage Schema
+
+DTOC stores its settings in the root of `chrome.storage.local` using the following keys:
 
 ```javascript
 {
-  id: "template-uuid-v4",
-  name: "Product Listing Extractor",
-  pattern: ".product-item", // CSS selector
-  format: "json", // text | json | csv
-  fields: [
-    {
-      name: "title",
-      selector: "h2.title",
-      attribute: "textContent", // textContent | innerText | innerHTML | data-*
-      type: "string"
+  // Global active state of the extension
+  "enabled": true, // boolean
+
+  // Global position of the TOC overlay
+  "position": "left", // "left" | "right"
+
+  // User-controlled states of the TOC overlay on the current page
+  "closed": false, // boolean
+  "minimized": false, // boolean
+
+  // Map of site-specific overrides (keys are domain names with 'www.' stripped)
+  "siteSettings": {
+    "medium.com": {
+      "enabled": true, // Override to enable/disable on this domain
+      "position": "right" // Override position for this domain (optional)
     },
-    {
-      name: "price",
-      selector: ".price",
-      attribute: "textContent",
-      type: "number",
-      transform: "parseFloat" // optional: parseFloat, parseInt, trim
-    }
-  ],
-  createdAt: "2024-01-15T10:30:00Z",
-  updatedAt: "2024-01-15T10:30:00Z",
-  enabled: true
-}
-```
-
-### Storage Schema
-
-```javascript
-{
-  "config": {
-    templates: [], // Array of Template objects
-    settings: {
-      autoExtract: false,
-      exportFormat: "json",
-      theme: "light"
+    "levelup.gitconnected.com": {
+      "enabled": true
     }
   }
 }
 ```
 
----
-
-## Message Protocol
-
-All communication between content script and background uses async message passing.
-
-### Message Format
-
-```javascript
-{
-  type: "ACTION_NAME",
-  payload: { /* action-specific data */ },
-  requestId: "uuid" // for request/response tracking
-}
-```
-
-### Standard Message Types
-
-| Type | Direction | Payload | Response |
-|------|-----------|---------|----------|
-| `EXTRACT_DATA` | Content → Background | `{ pattern: string }` | `{ data: [], format: string }` |
-| `GET_TEMPLATES` | Content → Background | `{}` | `{ templates: [] }` |
-| `SAVE_TEMPLATE` | UI → Background | `{ template: Template }` | `{ success: bool, id: string }` |
-| `DELETE_TEMPLATE` | UI → Background | `{ id: string }` | `{ success: bool }` |
-| `UPDATE_SETTINGS` | UI → Background | `{ settings: {} }` | `{ success: bool }` |
-
-### Error Response Format
-
-```javascript
-{
-  type: "ERROR",
-  payload: {
-    code: "INVALID_SELECTOR", // INVALID_SELECTOR | STORAGE_ERROR | AUTH_ERROR
-    message: "CSS selector failed: ...",
-    requestId: "uuid"
-  }
-}
-```
+### Inheritance Resolution
+When a content script initializes or storage changes, the script resolves settings using the following precedence:
+1. **Global Toggle Check**: If global `enabled` is `false`, the TOC is hidden regardless of site-specific configurations.
+2. **Site Enablement**:
+   - If domain exists in `siteSettings`: uses `siteSettings[domain].enabled`.
+   - If domain does not exist in `siteSettings`: defaults to `true` for natively supported sites (`.atlassian.net`, `dev.to`, `medium.com`), and `false` for unsupported sites.
+3. **Position**:
+   - If domain has a site override `siteSettings[domain].position`: uses overridden position.
+   - Otherwise: uses global `position`.
 
 ---
 
-## Data Flow
+## Content Parsing and Normalization
 
-### Extraction Flow (Primary Use Case)
+The extraction flow performs the following actions:
 
-```
-1. User visits web page
-2. Content script loads
-   ↓
-3. Content script requests templates: sendMessage({ type: 'GET_TEMPLATES' })
-   ↓
-4. Background retrieves from chrome.storage.local
-   ↓
-5. Content script iterates templates, executes CSS selectors on DOM
-   ↓
-6. For matching elements, extracts data using field definitions
-   ↓
-7. Formats output (JSON/CSV/Text)
-   ↓
-8. Displays extracted data to user via UI overlay or console
-```
+### 1. View Mode Detection
+To avoid cluttering text fields and editors, DTOC automatically disables itself on editing routes or homepages.
+- **Confluence**: Excludes paths containing `/edit` or `/edit-v2`, and query parameters `mode=edit`.
+- **Dev.to**: Excludes `/new`, paths ending in `/edit`, or path containing `/edit/`, and the homepage `/`.
+- **Medium**: Excludes `/new-story`, paths ending in `/edit`, or path containing `/edit/`, and the homepage `/`.
+- **Generic Sites**: Excludes editing keywords (`/edit`, `/editor`, `/write`, `/new`, `/compose`, `/draft`) and root paths.
 
-Latency target: < 1 second for DOM extraction (excludes user interaction time)
+### 2. Main Content Container Target
+TOC headings are parsed ONLY from within the main content container to prevent indexing sidebars, site navigation, and footers. The container is resolved via prioritized selectors:
+- **Confluence**: `#main-content`, `#content`, `.ak-renderer-document`, `.wiki-content`
+- **Dev.to**: `#article-body`, `.crayons-article__body`, `.crayons-article__main`
+- **Medium**: `article`
+- **Generic Sites**: `article`, `main`, `[role="main"]`, `#main`, `#content`, `.post-content`, `.article-content`, `.entry-content`, `body`
 
-### Configuration Flow
-
-```
-1. User opens Options page
-2. UI loads templates from storage: chrome.storage.local.get('config')
-3. User creates/edits template
-4. UI sends: sendMessage({ type: 'SAVE_TEMPLATE', payload: { template } })
-5. Background validates template, writes to storage
-6. Returns { success: true, id: newId }
-7. UI refreshes template list
-```
-
----
-
-## Security Model
-
-### No External Communication
-- Zero external API calls
-- No data transmission outside user's browser
-- All operations are local-only
-
-### Storage Security
-- Uses chrome.storage.local (isolated per user, per browser, per profile)
-- No sync to cloud (user can manually export/import if desired)
-- User's templates are never shared or indexed
-
-### Input Validation
-- All CSS selectors validated before execution (prevent injection)
-- Field names must be alphanumeric + underscore
-- Message types validated against allowed list
-
-### Anti-Patterns (NEVER DO)
-```javascript
-// ❌ NEVER: eval() or innerHTML with user input
-eval(userTemplate.transform);
-element.innerHTML = userData; // XSS risk
-
-// ❌ NEVER: sync storage (blocking)
-const data = chrome.storage.local.get('config'); // doesn't work
-
-// ❌ NEVER: assume message source
-onMessage((msg, sender, sendResponse) => {
-  if (msg.type === 'DELETE') deleteAllData(); // any page can send this!
-});
-
-// ❌ NEVER: unvalidated document.querySelector()
-const el = document.querySelector(userProvidedSelector); // CSS injection
-
-// ❌ NEVER: trust sender === undefined (could be any script)
-```
+### 3. Heading Normalization & Navigation
+- The content script queries `h1, h2, h3, h4, h5, h6` elements inside the resolved container.
+- **Slugification**: If a heading lacks an `id` attribute, it generates one based on its text content (e.g. `<h2>Architecture Overview</h2>` gets `id="dtoc-architecture-overview"`). Duplicate IDs are suffixed numerically.
+- **Page Title Prepend**: The page title (e.g., extracted from Confluence `h1#title-text`, Dev.to `h1.crayons-title`, or document title) is prepended to the TOC as the top item. Clicking it scrolls to the top of the page.
+- **Offsets**: A smooth-scroll action triggers `scrollIntoView()`. To account for sticky site headers, a temporary `scrollMarginTop = '70px'` is applied to the target element before navigation.
 
 ---
 
 ## Testing Strategy
 
-### Unit Tests
-- Location: `tests/specs/*.spec.js`
-- Focus: Template validation, field extraction, formatting logic
-- Framework: Playwright (real browser automation)
-- Coverage target: >80% of extraction logic
+DTOC features a dual-testing model:
 
-### E2E Tests
+### 1. Unit Tests (Jest + JSDOM)
+- **Location**: `tests/unit/test.js`
+- **Runner**: Jest (`npm run test`)
+- **Focus**: Pure logic verification using mocked environments (view mode logic, heading normalization, DOM container fallbacks, settings inheritance resolution).
 
-**Chrome Testing**
-- Real Chrome browser (Puppeteer or Playwright)
-- Test actual MV3 extension load
-- Verify message passing between scripts
-- Test DOM extraction on real pages
-
-**Firefox Testing**
-- Real Firefox browser (Playwright WebDriver)
-- Test API namespace detection (chrome vs browser)
-- Verify message passing compatibility
-- Test DOM extraction with Firefox quirks
-
-### Test Structure
-```javascript
-// Template validation
-test('should extract text from single element', async () => {
-  const selector = '.title';
-  const result = extractFromDOM(selector, 'textContent');
-  expect(result).toBe('Expected Title');
-});
-
-// Happy path extraction
-test('should extract multiple products from listing', async () => {
-  const template = createTemplateWithFields(...);
-  const results = await extractData(template);
-  expect(results.length).toBeGreaterThan(0);
-});
-
-// Edge cases
-test('should handle missing CSS selector gracefully', async () => {
-  const results = await extractData(invalidTemplate);
-  expect(results).toEqual([]);
-});
-
-test('should handle malformed field definitions', async () => {
-  expect(() => validateTemplate(badTemplate)).toThrow();
-});
-
-// Cross-browser compatibility
-test('should work in Chrome and Firefox', async ({ browserName }) => {
-  expect(['chromium', 'firefox']).toContain(browserName);
-  // run extraction, verify same results
-});
-```
-
-### Approval Criteria
-- All tests pass
-- Both Chrome and Firefox have >80% coverage
-- Happy path AND edge cases tested
-- No flaky tests (pass consistently 3+ runs)
+### 2. E2E Tests (Playwright)
+- **Location**: `tests/e2e.spec.js`
+- **Runner**: Playwright (`npm run test:e2e`)
+- **Focus**: Real browser testing. Loads the actual unpacked extensions in Chromium and Firefox and verifies:
+  - Injection of the Shadow DOM.
+  - Active/inactive UI toggling and CSS positional changes.
+  - Interaction with storage APIs.
 
 ---
 
-## Error Handling
+## Security Model
 
-All async operations (storage, messaging, DOM operations) must handle errors:
-
-```javascript
-// Good: Proper error handling
-async function getTemplates() {
-  try {
-    const { config } = await chrome.storage.local.get('config');
-    return config?.templates || [];
-  } catch (err) {
-    console.error('Storage read failed:', err);
-    return [];
-  }
-}
-
-// Messaging with error response
-function onExtractRequest(message, sender, sendResponse) {
-  try {
-    const data = extractFromDOM(message.payload.pattern);
-    sendResponse({ type: 'SUCCESS', data });
-  } catch (err) {
-    sendResponse({
-      type: 'ERROR',
-      code: 'INVALID_SELECTOR',
-      message: err.message
-    });
-  }
-}
-```
-
----
-
-## Deployment
-
-### Local Development
-1. Clone repo: `git clone ...`
-2. Run dev server: `npm run dev` (if present)
-3. Load extension in browser (Chrome: chrome://extensions, Firefox: about:debugging)
-4. Make changes, reload extension
-
-### Chrome Web Store
-- Package as .zip
-- Submit to Chrome Web Store review
-- Review typically 1-2 days
-
-### Firefox Add-ons
-- Package as .xpi
-- Submit to Mozilla review
-- Review typically 3-5 days
-
-### Version Bumping
-- Update manifest.json version
-- Update package.json version
-- Create git tag: `git tag v1.2.3`
-- Push tag: `git push origin v1.2.3`
-
----
-
-## Known Constraints
-
-- **Storage quota**: ~100MB per browser (can store 1000+ templates)
-- **Message size**: <100MB per message (practical limit ~10MB)
-- **Selector complexity**: Avoid deeply nested selectors (performance)
-- **Transform functions**: Limited to string methods (no eval)
-- **Cross-origin**: Content script can only access page DOM (no cross-site requests)
+1. **Zero Network Communication**:
+   - The extension makes absolutely zero external API calls or network requests.
+   - All user data and templates remain local to the browser.
+2. **Anti-Patterns Enforced**:
+   - **No eval()**: Dynamic code execution is strictly prohibited.
+   - **No innerHTML on User Content**: Page titles and heading texts are injected strictly using `textContent` to prevent Cross-Site Scripting (XSS).
+   - **Isolated Contexts**: The extension uses a Shadow DOM (`#dtoc-host`) to ensure site CSS does not leak into the TOC panel, and extension CSS does not affect the host page.
