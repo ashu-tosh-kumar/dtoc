@@ -15,7 +15,7 @@ Single-source-of-truth document for project context, team roles, security rules,
   2. Maintain a storage-driven, zero-latency local-only architecture.
   3. Keep DOM extraction and rendering times under 1 second.
   4. Ensure robust test coverage (Jest unit tests + Playwright cross-browser E2E tests).
-  5. Provide seamless support for Confluence, Dev.to, and Medium, with experimental support (Beta) for any other site.
+  5. Provide seamless support for all natively supported websites (see [SUPPORTED_SITES.md](../SUPPORTED_SITES.md)), with experimental support (Beta) for any other site.
 
 ---
 

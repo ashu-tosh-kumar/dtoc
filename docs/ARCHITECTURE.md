@@ -2,7 +2,7 @@
 
 ## System Overview
 
-DTOC (Dynamic Table of Contents) is a browser extension for Google Chrome (MV3) and Mozilla Firefox that generates a persistent, dynamic Table of Contents (TOC) overlay on supported websites (Confluence, Dev.to, Medium) and unsupported websites via manual opt-in (Beta mode).
+DTOC (Dynamic Table of Contents) is a browser extension for Google Chrome (MV3) and Mozilla Firefox that generates a persistent, dynamic Table of Contents (TOC) overlay on supported websites (see [SUPPORTED_SITES.md](../SUPPORTED_SITES.md)) and unsupported websites via manual opt-in (Beta mode).
 
 Rather than using complex background script message passing, DTOC operates on a **storage-driven state synchronization architecture**. The content script and popup coordinate states entirely via `chrome.storage.local`.
 
@@ -73,7 +73,7 @@ When a content script initializes or storage changes, the script resolves settin
 1. **Global Toggle Check**: If global `enabled` is `false`, the TOC is hidden regardless of site-specific configurations.
 2. **Site Enablement**:
    - If domain exists in `siteSettings`: uses `siteSettings[domain].enabled`.
-   - If domain does not exist in `siteSettings`: defaults to `true` for natively supported sites (`.atlassian.net`, `dev.to`, `medium.com`), and `false` for unsupported sites.
+   - If domain does not exist in `siteSettings`: defaults to `true` for natively supported sites (see [SUPPORTED_SITES.md](../SUPPORTED_SITES.md)), and `false` for unsupported sites.
 3. **Position**:
    - If domain has a site override `siteSettings[domain].position`: uses overridden position.
    - Otherwise: uses global `position`.

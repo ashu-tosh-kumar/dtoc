@@ -21,7 +21,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetAllBtn = document.getElementById('reset-all-btn');
 
   // Supported site patterns
-  const supportedSites = ['.atlassian.net', 'dev.to', 'medium.com'];
+  const otherSupportedSites = ['.atlassian.net', 'dev.to'];
+  const MEDIUM_DOMAINS = [
+    'levelup.gitconnected.com',
+    'plainenglish.io',
+    'uxdesign.cc',
+    'uxplanet.org',
+    'betterprogramming.pub',
+    'itnext.io',
+    'proandroiddev.com',
+    'writingcooperative.com',
+    'ehandbook.com',
+    'entrepreneurshandbook.co',
+    'dailyjs.com'
+  ];
+
+  function isMediumSite(hostname) {
+    const cleanHost = hostname.replace(/^www\./i, '');
+    return cleanHost === 'medium.com' ||
+           cleanHost.endsWith('.medium.com') ||
+           MEDIUM_DOMAINS.some(domain => 
+             cleanHost === domain || cleanHost.endsWith('.' + domain)
+           );
+  }
+
   let currentDomain = 'This Site';
   let isSupported = false;
   let siteOverrideActive = false;
@@ -60,9 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
            betaBadge.style.display = 'none';
            onlyForBtn.style.display = 'none';
            return;
-        }
+         }
 
-        isSupported = supportedSites.some(site => hostname.endsWith(site));
+        const cleanHost = hostname.replace(/^www\./i, '');
+        isSupported = otherSupportedSites.some(site => cleanHost.endsWith(site)) || isMediumSite(cleanHost);
 
         if (isSupported) {
           restoreContainer.style.display = 'flex';

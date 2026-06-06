@@ -110,10 +110,35 @@
     listenForSettingsChanges();
   }
 
+  // Constant list of Medium publication domains (excluding medium.com itself)
+  const MEDIUM_DOMAINS = [
+    'levelup.gitconnected.com',
+    'plainenglish.io',
+    'uxdesign.cc',
+    'uxplanet.org',
+    'betterprogramming.pub',
+    'itnext.io',
+    'proandroiddev.com',
+    'writingcooperative.com',
+    'ehandbook.com',
+    'entrepreneurshandbook.co',
+    'dailyjs.com'
+  ];
+
+  function isMediumSite(hostname) {
+    const cleanHost = hostname.replace(/^www\./i, '');
+    return cleanHost === 'medium.com' ||
+           cleanHost.endsWith('.medium.com') ||
+           MEDIUM_DOMAINS.some(domain => 
+             cleanHost === domain || cleanHost.endsWith('.' + domain)
+           );
+  }
+
   function isSupportedSite() {
     const hostname = window.location.hostname;
-    const supportedSites = ['.atlassian.net', 'dev.to', 'medium.com'];
-    return supportedSites.some(site => hostname.endsWith(site));
+    const cleanHost = hostname.replace(/^www\./i, '');
+    const otherSupported = ['.atlassian.net', 'dev.to'];
+    return otherSupported.some(site => cleanHost.endsWith(site)) || isMediumSite(cleanHost);
   }
 
   function isViewMode() {
@@ -125,7 +150,7 @@
       if (path === '/new' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
       if (path === '/' || path === '') return false;
-    } else if (hostname === 'medium.com' || hostname.endsWith('.medium.com')) {
+    } else if (isMediumSite(hostname)) {
       // Medium edit paths: /new-story, or ending in /edit
       if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
@@ -385,10 +410,7 @@
         '.crayons-article__body',
         '.crayons-article__main'
       ];
-    } else if (
-      window.location.hostname === 'medium.com' ||
-      window.location.hostname.endsWith('.medium.com')
-    ) {
+    } else if (isMediumSite(window.location.hostname)) {
       selectors = [
         'article'
       ];
@@ -453,7 +475,7 @@
     titleText = titleText
       .replace(/\s*-\s*Confluence\s*$/i, '')
       .replace(/\s*-\s*DEV Community\s*$/i, '')
-      .replace(/\s*\|\s*by\s+[^|]*\|\s*Medium\s*$/i, '')
+      .replace(/\s*\|\s*by\s+[^|]*\|\s*[^|]+\s*$/i, '')
       .replace(/\s*\|\s*Medium\s*$/i, '')
       .replace(/\s*-\s*Medium\s*$/i, '')
       .trim();

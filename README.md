@@ -8,11 +8,7 @@ This extension automatically generates a non-intrusive, sticky Table of Contents
 
 Watch on YouTube: <https://www.youtube.com/watch?v=fk5zKwXVzYk>
 
-Supported Websites:
-
-- Confluence Cloud (`https://*.atlassian.net/wiki/*`)
-- DEV Community (`https://dev.to/*`)
-- Medium (`https://medium.com/*`, `https://*.medium.com/*`)
+For a full list of natively supported websites (including Confluence, DEV Community, Medium, and various popular custom-domain Medium publications), please see [SUPPORTED_SITES.md](SUPPORTED_SITES.md).
 
 Supported Browsers:
 
