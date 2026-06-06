@@ -140,8 +140,8 @@ test.describe('DTOC Extension E2E Tests', () => {
 
     await popupPage.goto(`chrome-extension://${extensionId}/popup.html`);
 
-    const globalEnableToggle = popupPage.locator('#global-enable-toggle');
-    await globalEnableToggle.waitFor({ state: 'attached' });
+    const siteToggleBtn = popupPage.locator('#site-toggle-btn');
+    await siteToggleBtn.waitFor({ state: 'attached' });
     await popupPage.waitForTimeout(1000);
 
     // Restore TOC first to ensure closed state is reset
@@ -152,79 +152,84 @@ test.describe('DTOC Extension E2E Tests', () => {
     await expect(containerLocator).not.toHaveClass(/hidden/);
 
     await popupPage.bringToFront();
-    // 1. Disable global status -> TOC should hide
-    await popupPage.evaluate(() => {
-        document.getElementById('global-enable-toggle').checked = false;
-        document.getElementById('global-enable-toggle').dispatchEvent(new Event('change'));
-    });
+    // 1. Disable global status -> TOC should hide, controls should be greyed out
+    const globalOffBtn = popupPage.locator('#global-off-btn');
+    await globalOffBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/hidden/);
 
-    // Assert site controls are disabled and styled as disabled
+    // Assert site controls are greyed out
     await popupPage.bringToFront();
-    const siteEnableToggle = popupPage.locator('#site-enable-toggle');
-    const sitePositionSelect = popupPage.locator('#site-position-select');
-    await expect(siteEnableToggle).toBeDisabled();
-    await expect(sitePositionSelect).toBeDisabled();
-    await expect(popupPage.locator('#site-enable-switch')).toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#site-toggle-btn')).toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('.settings-panel')).toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#only-for-btn')).toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#reset-site-btn')).toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#reset-all-btn')).toHaveClass(/disabled-control/);
 
-    // 2. Enable global status back -> TOC should show
-    await popupPage.evaluate(() => {
-        document.getElementById('global-enable-toggle').checked = true;
-        document.getElementById('global-enable-toggle').dispatchEvent(new Event('change'));
-    });
+    // 2. Enable global status back -> TOC should show, controls should be enabled
+    await popupPage.bringToFront();
+    const globalOnBtn = popupPage.locator('#global-on-btn');
+    await globalOnBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
     await expect(containerLocator).not.toHaveClass(/hidden/);
 
-    // Assert site controls are enabled now
+    // Assert site controls are active again
     await popupPage.bringToFront();
-    await expect(siteEnableToggle).toBeEnabled();
-    await expect(sitePositionSelect).toBeEnabled();
+    await expect(popupPage.locator('#site-toggle-btn')).not.toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('.settings-panel')).not.toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#only-for-btn')).not.toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#reset-site-btn')).not.toHaveClass(/disabled-control/);
+    await expect(popupPage.locator('#reset-all-btn')).not.toHaveClass(/disabled-control/);
 
-    // 3. Disable site-specific status -> TOC should hide
-    await popupPage.evaluate(() => {
-        document.getElementById('site-enable-toggle').checked = false;
-        document.getElementById('site-enable-toggle').dispatchEvent(new Event('change'));
-    });
+    // 3. Disable site-specific status via Site Quick-Toggle -> TOC should hide
+    await popupPage.bringToFront();
+    await siteToggleBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/hidden/);
 
     // Enable site-specific status back -> TOC should show
     await popupPage.bringToFront();
-    await popupPage.evaluate(() => {
-        document.getElementById('site-enable-toggle').checked = true;
-        document.getElementById('site-enable-toggle').dispatchEvent(new Event('change'));
-    });
+    await siteToggleBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
     await expect(containerLocator).not.toHaveClass(/hidden/);
 
+    // Reset site settings to clear the override before testing global/OnlyFor settings
+    await popupPage.bringToFront();
+    await popupPage.locator('#reset-site-btn').click();
+    await page.waitForTimeout(1000);
+
     // 4. Change global position to right -> TOC should be on the right
     await popupPage.bringToFront();
-    const globalPositionSelect = popupPage.locator('#global-position-select');
-    await globalPositionSelect.selectOption('right');
+    const positionRightBtn = popupPage.locator('#position-right-btn');
+    const positionLeftBtn = popupPage.locator('#position-left-btn');
+    await positionRightBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/position-right/);
 
-    // Change global position to left, and site position to right -> TOC should remain right
+    // Now, enable "Only for" site-specific override
     await popupPage.bringToFront();
-    await globalPositionSelect.selectOption('left');
-    await sitePositionSelect.selectOption('right');
+    const onlyForBtn = popupPage.locator('#only-for-btn');
+    await onlyForBtn.click();
+    await expect(onlyForBtn).toHaveClass(/active/);
+
+    // With "Only for" active, change position to left -> site position is left, global remains right
+    await positionLeftBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
-    await expect(containerLocator).toHaveClass(/position-right/);
+    await expect(containerLocator).toHaveClass(/position-left/);
 
-    // 5. Test Reset Site Settings -> site specific setting goes back to global (left) -> TOC should be on left
+    // 5. Test Reset Site Settings -> site specific setting goes back to global (right) -> TOC should be on right
     await popupPage.bringToFront();
     const resetSiteBtn = popupPage.locator('#reset-site-btn');
     await resetSiteBtn.click();
     await page.waitForTimeout(1000);
     await page.bringToFront();
-    await expect(containerLocator).toHaveClass(/position-left/);
+    await expect(containerLocator).toHaveClass(/position-right/);
 
     // 6. Test Reset All Settings
     await popupPage.bringToFront();
@@ -233,10 +238,9 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.waitForTimeout(1000);
     
     // Assert all controls reset to default
-    await expect(globalEnableToggle).toBeChecked();
-    await expect(globalPositionSelect).toHaveValue('left');
-    await expect(siteEnableToggle).toBeChecked();
-    await expect(sitePositionSelect).toHaveValue('left');
+    await expect(popupPage.locator('#global-on-btn')).toHaveClass(/active/);
+    await expect(positionLeftBtn).toHaveClass(/active/);
+    await expect(onlyForBtn).not.toHaveClass(/active/);
 
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/position-left/);
@@ -436,8 +440,8 @@ test.describe('DTOC Extension E2E Tests', () => {
     const restoreContainer = popupPage.locator('#restore-container');
     await expect(restoreContainer).toBeVisible();
 
-    const experimentalBadge = popupPage.locator('#experimental-badge');
-    await expect(experimentalBadge).toBeVisible();
+    const betaBadge = popupPage.locator('#beta-badge');
+    await expect(betaBadge).toBeVisible();
 
     await page.close();
     await popupPage.close();

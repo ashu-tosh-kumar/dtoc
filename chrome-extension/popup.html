@@ -2,72 +2,76 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
   <title>DTOC Settings</title>
 </head>
 <body>
   <div class="header">
-    <h1>DTOC <span class="subtitle">Dynamic Table of Contents</span></h1>
+    <h1>
+      DTOC <span class="subtitle">Dynamic Table of Contents</span>
+      <span id="beta-badge" class="beta-badge" style="display: none;">Beta</span>
+    </h1>
   </div>
 
   <div class="content">
-    <div id="experimental-badge" class="experimental-badge" style="display: none;">
-      <span>⚠️ Experimental Support</span>
-      <p>Explicit support is not yet added for this website. Features might be experimental.</p>
+    <!-- Quick toggles row -->
+    <div class="quick-toggles">
+      <button id="site-toggle-btn" class="site-toggle-btn">
+        <span id="site-toggle-status" class="status-icon">✓</span>
+        <span id="site-toggle-domain">This Site</span>
+      </button>
+
+      <div class="segmented-control global-control">
+        <button id="global-on-btn" class="segment-btn">On</button>
+        <button id="global-off-btn" class="segment-btn">Off</button>
+      </div>
     </div>
 
-    <div class="settings-grid">
-      <!-- Headers -->
-      <div class="grid-header">Setting</div>
-      <div class="grid-header text-center">Global</div>
-      <div class="grid-header text-center site-header-title" id="site-header-title">SITE</div>
-
-      <!-- Extension status -->
-      <div class="grid-label">Extension Status</div>
-      <div class="grid-control">
-        <label class="switch">
-          <input type="checkbox" id="global-enable-toggle">
-          <span class="slider round"></span>
-        </label>
-      </div>
-      <div class="grid-control">
-        <label class="switch" id="site-enable-switch">
-          <input type="checkbox" id="site-enable-toggle">
-          <span class="slider round"></span>
-        </label>
-      </div>
-
+    <!-- Detailed settings panel -->
+    <div class="settings-panel">
       <!-- TOC position -->
-      <div class="grid-label">TOC Position</div>
-      <div class="grid-control">
-        <select id="global-position-select">
-          <option value="left">Left</option>
-          <option value="right">Right</option>
-        </select>
-      </div>
-      <div class="grid-control">
-        <select id="site-position-select">
-          <option value="left">Left</option>
-          <option value="right">Right</option>
-        </select>
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">TOC Position</div>
+          <div class="setting-desc">Where the TOC panel appears on screen</div>
+        </div>
+        <div class="setting-control">
+          <div class="segmented-control position-control">
+            <button id="position-left-btn" class="segment-btn" data-value="left">Left</button>
+            <button id="position-right-btn" class="segment-btn" data-value="right">Right</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div id="restore-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px; display: none; margin-top: 8px;">
-      <button id="restore-btn" class="btn">Show TOC</button>
+    <!-- Only for Site filter button -->
+    <div class="filter-action-container">
+      <button id="only-for-btn" class="only-for-btn">
+        Only for <span id="only-for-domain">This Site</span>
+      </button>
+    </div>
+
+    <!-- Restore TOC Action -->
+    <div id="restore-container" class="helper-action-row" style="display: none;">
+      <button id="restore-btn" class="btn btn-primary">Restore TOC</button>
       <small class="helper-text">Click to bring back the TOC if you closed it on the page.</small>
     </div>
 
-    <div id="support-container" class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px; display: none; margin-top: 8px;">
-      <button id="request-support-btn" class="btn">Request Website Support</button>
+    <!-- Support Action -->
+    <div id="support-container" class="helper-action-row" style="display: none;">
+      <button id="request-support-btn" class="btn btn-secondary">Request Website Support</button>
       <small class="helper-text">This website is not currently supported.</small>
     </div>
 
     <hr class="divider">
 
+    <!-- Bottom Actions Row -->
     <div class="actions-row">
-      <button id="reset-all-btn" class="btn btn-danger">Reset All Settings</button>
-      <button id="reset-site-btn" class="btn btn-secondary">Reset Site Settings</button>
+      <button id="reset-all-btn" class="btn btn-danger">Reset All</button>
+      <button id="reset-site-btn" class="btn btn-outline">Reset Site</button>
     </div>
   </div>
 
