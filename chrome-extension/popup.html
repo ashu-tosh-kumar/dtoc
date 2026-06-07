@@ -32,6 +32,21 @@
 
     <!-- Detailed settings panel -->
     <div class="settings-panel">
+      <!-- Theme Setting -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-label">Theme</div>
+          <div class="setting-desc">TOC sidebar color theme</div>
+        </div>
+        <div class="setting-control">
+          <div class="segmented-control theme-control">
+            <button id="theme-auto-btn" class="segment-btn">Auto</button>
+            <button id="theme-light-btn" class="segment-btn">Light</button>
+            <button id="theme-dark-btn" class="segment-btn">Dark</button>
+          </div>
+        </div>
+      </div>
+
       <!-- TOC position -->
       <div class="setting-row">
         <div class="setting-info">
@@ -56,7 +71,7 @@
 
     <!-- Restore TOC Action -->
     <div id="restore-container" class="helper-action-row" style="display: none;">
-      <button id="restore-btn" class="btn btn-primary">Restore TOC</button>
+      <button id="restore-btn" class="btn btn-primary">Bring Back TOC</button>
       <small class="helper-text">Click to bring back the TOC if you closed it on the page.</small>
     </div>
 

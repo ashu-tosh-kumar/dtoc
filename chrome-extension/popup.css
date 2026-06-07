@@ -483,3 +483,9 @@ input:checked + .slider:before {
 .footer .open-source-text a:hover {
   text-decoration: underline;
 }
+
+.segment-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

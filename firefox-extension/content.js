@@ -5,7 +5,8 @@
     ENABLED: 'enabled',
     POSITION: 'position',
     CLOSED: 'closed',
-    MINIMIZED: 'minimized'
+    MINIMIZED: 'minimized',
+    PINNED: 'pinned'
   };
 
   // Map storage keys to internal state property names to decouple them
@@ -13,14 +14,17 @@
     [SETTINGS_KEY.ENABLED]: 'enabled',
     [SETTINGS_KEY.POSITION]: 'position',
     [SETTINGS_KEY.CLOSED]: 'closed',
-    [SETTINGS_KEY.MINIMIZED]: 'minimized'
+    [SETTINGS_KEY.MINIMIZED]: 'minimized',
+    [SETTINGS_KEY.PINNED]: 'pinned'
   };
 
   let state = {
     enabled: true,
     position: 'left',
     closed: false,
-    minimized: false
+    minimized: true, // New default is unpinned (minimized/collapsed)
+    pinned: false,
+    theme: 'auto'
   };
 
   let shadowRoot = null;
@@ -28,9 +32,8 @@
   let contentArea = null;
 
   // Icons
-  const ICON_MINIMIZE = 'minimize';
+  const ICON_PIN = 'pin';
   const ICON_CLOSE = 'close';
-  const ICON_MAXIMIZE = 'maximize';
 
   function createIconElement(iconType) {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -41,13 +44,10 @@
     svg.setAttribute("stroke-linecap", "round");
     svg.setAttribute("stroke-linejoin", "round");
 
-    if (iconType === 'minimize') {
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", "5");
-      line.setAttribute("y1", "12");
-      line.setAttribute("x2", "19");
-      line.setAttribute("y2", "12");
-      svg.appendChild(line);
+    if (iconType === 'pin') {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M12 17v5M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.48A2 2 0 0 1 15 9.28V5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.28c0 .43-.14.85-.4 1.2l-2.8 3.5a2 2 0 0 0-.4 1.22V17z");
+      svg.appendChild(path);
     } else if (iconType === 'close') {
       const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
       line1.setAttribute("x1", "18");
@@ -62,23 +62,6 @@
       line2.setAttribute("x2", "18");
       line2.setAttribute("y2", "18");
       svg.appendChild(line2);
-    } else if (iconType === 'maximize') {
-      const paths = [
-        { x1: "8", y1: "6", x2: "21", y2: "6" },
-        { x1: "8", y1: "12", x2: "21", y2: "12" },
-        { x1: "8", y1: "18", x2: "21", y2: "18" },
-        { x1: "3", y1: "6", x2: "3.01", y2: "6" },
-        { x1: "3", y1: "12", x2: "3.01", y2: "12" },
-        { x1: "3", y1: "18", x2: "3.01", y2: "18" }
-      ];
-      paths.forEach(p => {
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", p.x1);
-        line.setAttribute("y1", p.y1);
-        line.setAttribute("x2", p.x2);
-        line.setAttribute("y2", p.y2);
-        svg.appendChild(line);
-      });
     }
 
     return svg;
@@ -103,11 +86,25 @@
         injectUI();
         applyStateToUI();
         parseHeadingsAndRender();
+        alignContainerWithTitle();
       }
       setupMutationObserver();
     });
 
     listenForSettingsChanges();
+
+    // Add prefers-color-scheme listener
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (state.theme === 'auto') {
+        applyStateToUI();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (isViewMode()) {
+        alignContainerWithTitle();
+      }
+    });
   }
 
   // Constant list of Medium publication domains (excluding medium.com itself)
@@ -163,8 +160,19 @@
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'edit') return false;
     } else {
-      // Generic site exclusions
-      if (path.includes('/edit') || path.includes('/editor') || path.includes('/write') || path.includes('/new') || path.includes('/compose') || path.includes('/draft')) return false;
+      // Generic site exclusions: check for edit/new paths as distinct segments or ends
+      const segments = path.toLowerCase().split('/');
+      const isEditKeyword = (seg) => {
+        if (seg === 'edit' || seg.startsWith('edit-') || seg === 'editor' || seg === 'write' || seg === 'compose' || seg === 'draft') return true;
+        if (seg.startsWith('new') && !seg.startsWith('news')) return true;
+        return false;
+      };
+      if (segments.some(isEditKeyword) || 
+          path.endsWith('/edit') || 
+          path.includes('/edit/') ||
+          path.includes('/editor/')) {
+        return false;
+      }
       if (path === '/' || path === '' || path === '/index.html') return false;
     }
 
@@ -174,8 +182,8 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
-    const keys = ['enabled', 'position', 'closed', 'minimized', 'siteSettings'];
-    browser.storage.local.get(keys).then((result) => {
+    const keys = ['enabled', 'position', 'closed', 'minimized', 'pinned', 'siteSettings', 'theme'];
+    browser.storage.local.get(keys, (result) => {
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
@@ -188,20 +196,93 @@
       const globalPosition = result.position || 'left';
       state.position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
 
-      state.closed = result.closed !== undefined ? result.closed : false;
-      state.minimized = result.minimized !== undefined ? result.minimized : false;
+      state.theme = result.theme || 'auto';
+
+      const hasSiteOverride = siteConfig.position !== undefined;
+      const defaultClosed = false;
+      const closedVal = hasSiteOverride && siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
+      state.closed = closedVal;
+
+      // Pin/minimize dual state resolution
+      let pinnedVal = undefined;
+      let minimizedVal = undefined;
+
+      if (hasSiteOverride) {
+        pinnedVal = siteConfig.pinned;
+        minimizedVal = siteConfig.minimized;
+      } else {
+        pinnedVal = result.pinned;
+        minimizedVal = result.minimized;
+      }
+
+      if (pinnedVal !== undefined) {
+        state.pinned = pinnedVal;
+        state.minimized = !pinnedVal;
+      } else if (minimizedVal !== undefined) {
+        state.minimized = minimizedVal;
+        state.pinned = !minimizedVal;
+      } else {
+        state.pinned = false;
+        state.minimized = true; // Default unpinned/minimized (peek strip collapsed)
+      }
 
       if (callback) callback();
     });
   }
 
   function updateSetting(storageKey, value) {
-    const stateKey = STATE_KEY_MAP[storageKey];
-    if (stateKey) {
-      state[stateKey] = value;
-      browser.storage.local.set({ [storageKey]: value });
-      applyStateToUI();
-    }
+    browser.storage.local.get(['siteSettings'], (result) => {
+      const currentDomain = window.location.hostname.replace(/^www\./i, '');
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+      const hasSiteOverride = siteConfig.position !== undefined;
+
+      // Update local state first
+      if (storageKey === 'pinned') {
+        state.pinned = value;
+        state.minimized = !value;
+      } else if (storageKey === 'minimized') {
+        state.minimized = value;
+        state.pinned = !value;
+      } else {
+        const stateKey = STATE_KEY_MAP[storageKey];
+        if (stateKey) {
+          state[stateKey] = value;
+        }
+      }
+
+      if (hasSiteOverride && (storageKey === 'pinned' || storageKey === 'minimized' || storageKey === SETTINGS_KEY.CLOSED)) {
+        if (!siteSettings[currentDomain]) {
+          siteSettings[currentDomain] = {};
+        }
+        if (storageKey === 'pinned') {
+          siteSettings[currentDomain].pinned = value;
+          siteSettings[currentDomain].minimized = !value;
+        } else if (storageKey === 'minimized') {
+          siteSettings[currentDomain].minimized = value;
+          siteSettings[currentDomain].pinned = !value;
+        } else {
+          siteSettings[currentDomain][storageKey] = value;
+        }
+        browser.storage.local.set({ siteSettings }, () => {
+          applyStateToUI();
+        });
+      } else {
+        if (storageKey === 'pinned') {
+          browser.storage.local.set({ pinned: value, minimized: !value }, () => {
+            applyStateToUI();
+          });
+        } else if (storageKey === 'minimized') {
+          browser.storage.local.set({ minimized: value, pinned: !value }, () => {
+            applyStateToUI();
+          });
+        } else {
+          browser.storage.local.set({ [storageKey]: value }, () => {
+            applyStateToUI();
+          });
+        }
+      }
+    });
   }
 
   function listenForSettingsChanges() {
@@ -233,11 +314,28 @@
     linkEl.href = cssUrl;
     shadowRoot.appendChild(linkEl);
 
-    container = document.createElement('div');
+    // Semantic Navigation Landmark
+    container = document.createElement('nav');
     container.id = 'dtoc-container';
+    container.setAttribute('aria-label', 'Table of Contents');
+    container.setAttribute('aria-expanded', 'false');
     if (!isSupportedSite()) {
       container.classList.add('experimental');
     }
+
+    // Toggle aria-expanded on hover
+    container.addEventListener('mouseenter', () => {
+      container.setAttribute('aria-expanded', 'true');
+    });
+    container.addEventListener('mouseleave', () => {
+      if (!state.pinned) {
+        container.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // 1. Expanded Panel (Header + List)
+    const expandedPanel = document.createElement('div');
+    expandedPanel.className = 'dtoc-expanded-panel';
 
     // Header
     const header = document.createElement('div');
@@ -250,17 +348,18 @@
     const controls = document.createElement('div');
     controls.className = 'dtoc-controls';
 
-    const minBtn = document.createElement('button');
-    minBtn.className = 'icon-btn';
-    minBtn.title = 'Minimize';
-    minBtn.appendChild(createIconElement(ICON_MINIMIZE));
-    minBtn.addEventListener('click', (e) => {
+    const pinBtn = document.createElement('button');
+    pinBtn.className = 'icon-btn pin-btn';
+    pinBtn.title = state.pinned ? 'Unpin TOC' : 'Pin TOC';
+    if (state.pinned) pinBtn.classList.add('active');
+    pinBtn.appendChild(createIconElement(ICON_PIN));
+    pinBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      updateSetting(SETTINGS_KEY.MINIMIZED, true);
+      updateSetting('pinned', !state.pinned);
     });
 
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'icon-btn';
+    closeBtn.className = 'icon-btn close-btn';
     closeBtn.title = 'Close';
     closeBtn.appendChild(createIconElement(ICON_CLOSE));
     closeBtn.addEventListener('click', (e) => {
@@ -268,7 +367,7 @@
       updateSetting(SETTINGS_KEY.CLOSED, true);
     });
 
-    controls.appendChild(minBtn);
+    controls.appendChild(pinBtn);
     controls.appendChild(closeBtn);
 
     header.appendChild(title);
@@ -282,24 +381,53 @@
     loadingState.textContent = 'Loading...';
     contentArea.appendChild(loadingState);
 
-    // Maximize Icon (visible only when minimized)
-    const maxIcon = document.createElement('div');
-    maxIcon.className = 'maximize-icon';
-    maxIcon.title = 'Expand TOC';
-    maxIcon.appendChild(createIconElement(ICON_MAXIMIZE));
+    expandedPanel.appendChild(header);
+    expandedPanel.appendChild(contentArea);
+    container.appendChild(expandedPanel);
 
-    container.appendChild(header);
-    container.appendChild(contentArea);
-    container.appendChild(maxIcon);
+    // 2. Collapsed Peek Strip
+    const collapsedStrip = document.createElement('div');
+    collapsedStrip.className = 'dtoc-collapsed-strip';
 
-    // Handle click on minimized container to expand
-    container.addEventListener('click', () => {
-      if (state.minimized) {
-        updateSetting(SETTINGS_KEY.MINIMIZED, false);
-      }
+    const notchesContainer = document.createElement('div');
+    notchesContainer.className = 'dtoc-notches-container';
+    collapsedStrip.appendChild(notchesContainer);
+
+    // Clicking the collapsed strip expands it permanently by pinning
+    collapsedStrip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateSetting('pinned', true);
     });
 
+    container.appendChild(collapsedStrip);
     shadowRoot.appendChild(container);
+
+    // Keyboard accessibility listener (Alt+T)
+    window.addEventListener('keydown', handleKeyDown);
+  }
+
+  function handleKeyDown(e) {
+    if (e.altKey && e.code === 'KeyT') {
+      e.preventDefault();
+      toggleKeyboardExpansion();
+    }
+  }
+
+  function toggleKeyboardExpansion() {
+    if (!container) return;
+    const isCurrentlyExpanded = container.classList.contains('keyboard-expanded') || container.classList.contains('pinned');
+    if (isCurrentlyExpanded) {
+      container.classList.remove('keyboard-expanded');
+      container.setAttribute('aria-expanded', 'false');
+      container.blur();
+    } else {
+      container.classList.add('keyboard-expanded');
+      container.setAttribute('aria-expanded', 'true');
+      const firstLink = shadowRoot.querySelector('.toc-link');
+      if (firstLink) {
+        firstLink.focus();
+      }
+    }
   }
 
   function applyStateToUI() {
@@ -311,15 +439,54 @@
       container.classList.remove('hidden');
     }
 
+    if (state.pinned) {
+      container.classList.add('pinned');
+      container.setAttribute('aria-expanded', 'true');
+    } else {
+      container.classList.remove('pinned');
+      if (!container.classList.contains('keyboard-expanded') && !container.matches(':hover')) {
+        container.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    // Keep minimized key in sync for legacy storage support
     if (state.minimized) {
       container.classList.add('minimized');
     } else {
       container.classList.remove('minimized');
     }
 
+    // Update pin button state
+    const pinBtn = shadowRoot.querySelector('.pin-btn');
+    if (pinBtn) {
+      if (state.pinned) {
+        pinBtn.classList.add('active');
+        pinBtn.title = 'Unpin TOC';
+      } else {
+        pinBtn.classList.remove('active');
+        pinBtn.title = 'Pin TOC';
+      }
+    }
+
     // Position
     container.classList.remove('position-left', 'position-right');
     container.classList.add(`position-${state.position}`);
+
+    // Theme
+    let isDark = false;
+    if (state.theme === 'dark') {
+      isDark = true;
+    } else if (state.theme === 'light') {
+      isDark = false;
+    } else {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    if (isDark) {
+      container.classList.add('theme-dark');
+    } else {
+      container.classList.remove('theme-dark');
+    }
   }
 
   // --- Reactivity & Mutation Handling ---
@@ -372,6 +539,14 @@
       const currentUrl = location.href;
       const targetNode = getContentContainer();
 
+      // If UI is supposed to be present but was removed from DOM, re-inject it
+      const hostExists = document.getElementById('dtoc-host');
+      if (!hostExists && isViewMode() && state.enabled && !state.closed) {
+        injectUI();
+        applyStateToUI();
+        parseHeadingsAndRender();
+      }
+
       if (currentUrl !== lastUrl || (targetNode && targetNode !== currentTarget)) {
         const urlChanged = currentUrl !== lastUrl;
         lastUrl = currentUrl;
@@ -419,7 +594,6 @@
       window.location.hostname.endsWith('.atlassian.net')
     ) {
       // Attempt to find the main content container in Confluence View Mode
-      // #main is a common Atlassian wrapper, but sometimes we need to look closer to the renderer
       selectors = [
         '#main-content',
         '#content',
@@ -486,6 +660,111 @@
     };
   }
 
+  // Active Heading Scrollspy Tracker
+  let scrollspyListener = null;
+
+  function setupScrollspy() {
+    if (scrollspyListener) {
+      window.removeEventListener('scroll', scrollspyListener);
+    }
+
+    const contentContainer = getContentContainer();
+    if (!contentContainer) return;
+
+    const headings = Array.from(contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6'))
+      .filter(h => h.offsetParent !== null && h.textContent.trim());
+
+    scrollspyListener = () => {
+      // Align container dynamically
+      alignContainerWithTitle();
+
+      let activeId = null;
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+
+      // Find heading closest to top of viewport but not past it
+      for (let i = 0; i < headings.length; i++) {
+        const heading = headings[i];
+        const headingTop = heading.getBoundingClientRect().top + scrollPosition;
+        if (scrollPosition >= headingTop - 120) {
+          activeId = heading.id;
+        } else {
+          break;
+        }
+      }
+
+      // If at very top, highlight page title
+      if (!activeId && headings.length > 0 && scrollPosition < 100) {
+        activeId = '';
+      }
+
+      setActiveHeading(activeId);
+    };
+
+    window.addEventListener('scroll', scrollspyListener, { passive: true });
+    scrollspyListener(); // Initialize once immediately
+  }
+
+  function setActiveHeading(activeId) {
+    if (!shadowRoot) return;
+
+    // Remove active styles from links and notches
+    const links = shadowRoot.querySelectorAll('.toc-link');
+    links.forEach(link => link.classList.remove('active'));
+
+    const notches = shadowRoot.querySelectorAll('.dtoc-notch');
+    notches.forEach(notch => notch.classList.remove('active'));
+
+    if (activeId === '' || activeId === null) {
+      const titleLink = shadowRoot.querySelector('.toc-title-item .toc-link');
+      if (titleLink) titleLink.classList.add('active');
+      const firstNotch = shadowRoot.querySelector('.dtoc-notch[data-id=""]');
+      if (firstNotch) {
+        firstNotch.classList.add('active');
+        firstNotch.scrollIntoView({ behavior: 'auto', block: 'center' });
+      }
+    } else {
+      const activeLink = shadowRoot.querySelector(`.toc-link[href="#${activeId}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active');
+        activeLink.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+      }
+
+      const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${activeId}"]`);
+      if (activeNotch) {
+        activeNotch.classList.add('active');
+        activeNotch.scrollIntoView({ behavior: 'auto', block: 'center' });
+      }
+    }
+  }
+
+  function alignContainerWithTitle() {
+    if (!container) return;
+
+    const titleInfo = getPageTitle();
+    let titleEl = titleInfo.element;
+
+    if (!titleEl) {
+      const contentContainer = getContentContainer();
+      if (contentContainer) {
+        titleEl = contentContainer.querySelector('h1, h2, h3, h4, h5, h6');
+      }
+    }
+
+    let targetCenterViewport = 120; // fallback if no title element found
+
+    if (titleEl) {
+      const rect = titleEl.getBoundingClientRect();
+      targetCenterViewport = rect.top + rect.height / 2;
+    }
+
+    const containerTop = Math.max(64, targetCenterViewport - 56);
+    container.style.top = `${containerTop}px`;
+
+    // Max height to prevent overflow, capped at 480px for a more compact Notion-like layout
+    const maxContainerHeight = Math.min(480, window.innerHeight - containerTop - 24);
+    container.style.maxHeight = `${Math.max(150, maxContainerHeight)}px`;
+  }
+
   function parseHeadingsAndRender() {
     if (!contentArea) return;
 
@@ -495,18 +774,20 @@
       return;
     }
 
-    // Query headings only within the main content area to avoid site nav/sidebar
     const headings = contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
     const ul = document.createElement('ul');
     ul.className = 'toc-list';
 
-    // Get the page title info
     const titleInfo = getPageTitle();
 
-    // Prepend Page Title to TOC if it's not the same element as the first heading
     const firstHeading = headings[0];
     const hasTitlePrepend = titleInfo.element !== firstHeading;
+
+    const notchesContainer = shadowRoot.querySelector('.dtoc-notches-container');
+    if (notchesContainer) {
+      notchesContainer.textContent = '';
+    }
 
     if (hasTitlePrepend) {
       const titleLi = document.createElement('li');
@@ -535,21 +816,31 @@
 
       titleLi.appendChild(titleA);
       ul.appendChild(titleLi);
+
+      // Add notch for title
+      if (notchesContainer) {
+        const titleNotch = document.createElement('div');
+        titleNotch.className = 'dtoc-notch dtoc-notch-level-1';
+        titleNotch.setAttribute('data-id', '');
+        titleNotch.title = titleInfo.text;
+        titleNotch.addEventListener('click', (e) => {
+          e.stopPropagation();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        notchesContainer.appendChild(titleNotch);
+      }
     }
 
     const idCounts = {};
 
     headings.forEach((heading, index) => {
-      // Skip hidden headings or headings inside specific UI widgets if necessary
       if (heading.offsetParent === null) return;
 
       const text = heading.textContent.trim();
-      if (!text) return; // Skip empty headings
+      if (!text) return;
 
-      // Normalize heading level (h1 = 1, h2 = 2, etc.)
       const level = parseInt(heading.tagName.substring(1), 10);
 
-      // Ensure heading has an ID for navigation
       let id = heading.id;
       if (!id) {
         const slug = slugify(text) || 'heading';
@@ -574,20 +865,11 @@
       a.href = `#${id}`;
       a.textContent = text;
 
-      // Handle click to scroll smoothly
       a.addEventListener('click', (e) => {
         e.preventDefault();
-
-        // Push state to history so back button works, and URL updates
         history.pushState(null, null, `#${id}`);
-
-        // Confluence might use a custom scrolling container instead of window.
-        // scrollIntoView is universally supported and works within overflow:auto containers.
         heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Slight hack for sticky header offset since scrollIntoView doesn't support offset directly
-        // We use a small timeout to let the smooth scroll finish (or partially finish),
-        // then adjust slightly if needed, or better, we temporarily use scrollMarginTop.
         const originalScrollMargin = heading.style.scrollMarginTop;
         heading.style.scrollMarginTop = '70px';
 
@@ -598,18 +880,41 @@
 
       li.appendChild(a);
       ul.appendChild(li);
+
+      // Add notch for heading
+      if (notchesContainer) {
+        const notch = document.createElement('div');
+        notch.className = `dtoc-notch dtoc-notch-level-${level}`;
+        notch.setAttribute('data-id', id);
+        notch.title = text;
+        notch.addEventListener('click', (e) => {
+          e.stopPropagation();
+          heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const originalScrollMargin = heading.style.scrollMarginTop;
+          heading.style.scrollMarginTop = '70px';
+          setTimeout(() => {
+            heading.style.scrollMarginTop = originalScrollMargin;
+          }, 1000);
+        });
+        notchesContainer.appendChild(notch);
+      }
     });
 
-    contentArea.textContent = ''; // Clear empty/loading state
+    contentArea.textContent = '';
     contentArea.appendChild(ul);
+
+    // Initial Scrollspy attachment
+    setupScrollspy();
+
+    // Align container
+    alignContainerWithTitle();
   }
 
-  // Start
-  // Use a slight delay or listen to load to ensure Confluence body exists
+  // Start initialization
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => setTimeout(init, 500));
   } else {
-    setTimeout(init, 500); // Slight delay for dynamic React renders in Confluence
+    setTimeout(init, 500);
   }
 
 })();
