@@ -303,7 +303,6 @@
 .dtoc-notches-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: flex-start;
   gap: 7px;
   width: 100%;
@@ -314,6 +313,16 @@
   box-sizing: border-box;
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+.position-left .dtoc-notches-container {
+  align-items: flex-start;
+  padding-left: 6px;
+}
+
+.position-right .dtoc-notches-container {
+  align-items: flex-end;
+  padding-right: 6px;
 }
 
 .dtoc-notches-container::-webkit-scrollbar {

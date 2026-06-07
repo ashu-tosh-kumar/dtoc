@@ -68,6 +68,16 @@ To run the unit tests:
 
 ## Changelog
 
+`v3.0.0`
+
+- Overhauled the Table of Contents layout from a solid sidebar block into a modern, non-intrusive Glassmorphism "Peek" Drawer (Hover-to-Expand Sidebar) layout.
+- Added minimized state notches that act as a passive visual indicator of heading levels and document density, flushed perfectly to the viewport edge (left or right).
+- Added dynamic vertical alignment that centers the first notch / first heading link with the page title (floating dynamically as you scroll) with no vertical jump during expansion.
+- Added preference-based `Auto` theme detection that matches your browser/system's color scheme (`prefers-color-scheme`) by default, in addition to manual light and dark theme toggles.
+- Constrained the maximum TOC height to a compact 480px with vertical scroll support inside both the notches strip and the expanded TOC panel for long documents.
+- Active heading notches now auto-scroll to the center of the minimized notch stack as you scroll through the page.
+- Scoped minimized/pinned/closed states to site-specific configs when "Only for" site-specific override is active.
+
 `v2.0.0`
 
 - Added experimental support (Beta) for all websites using generic HTML semantic selectors.
@@ -90,13 +100,16 @@ To run the unit tests:
 
 ## Credits
 
-Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under the FontAwesome Free License ([https://fontawesome.com/license/free](https://fontawesome.com/license/free)). The specific icon used is the "folder-tree" solid icon.
-
----
-
-- *Developed by Jules using `prd.md`.*
-- *Security hardening reviewed by Qodo and implemented by Gemini CLI.*
-- *Split settings architecture, generic cross-website support, and E2E automation
-  developed by Google Antigravity 2.0.*
-- Agentic workflow files added by GitHub Copilot with thorough review and grounding done
-  by Google Antigravity 2.0.
+- *Initial PRD written using [Microsoft CoPilot](https://copilot.microsoft.com/)*.
+- *Initially developed by [Google Jules](https://jules.google/) using `prd.md`.*
+- *Further development, testing, and maintenance by  [Google Antigravity](https://antigravity.google/).*
+- *Security hardening reviewed by [Qodo](https://marketplace.visualstudio.com/items?itemName=Codium.codium) in [VS Code](https://code.visualstudio.com/) and implemented by [Gemini CLI](https://geminicli.com/).*
+- *Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under
+the FontAwesome [Free License](https://fontawesome.com/license/free)). The specific
+  icon used is influenced by `folder-tree` solid icon.*
+- *Agentic workflow files added by [GitHub Copilot](https://github.com/features/copilot) with thorough review and grounding done
+  by Google Antigravity.*
+- *[From `v2.0.0`] onwards, Extension popup global vs site-specific settings UI/UX inspired by [Dark Reader](https://darkreader.org/)'s
+  browser extension.*
+- *[From `v3.0.0`] onwards, Extension UI inspired by [Notion](https://www.notion.com/)'s
+  Dynamic TOC.*
