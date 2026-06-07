@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const positionLeftBtn = document.getElementById('position-left-btn');
   const positionRightBtn = document.getElementById('position-right-btn');
   
+  const themeAutoBtn = document.getElementById('theme-auto-btn');
+  const themeLightBtn = document.getElementById('theme-light-btn');
+  const themeDarkBtn = document.getElementById('theme-dark-btn');
+  
   const onlyForBtn = document.getElementById('only-for-btn');
   const onlyForDomain = document.getElementById('only-for-domain');
   
@@ -147,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSettings = {
       enabled: true,
       position: 'left',
+      theme: 'light',
       siteSettings: {}
     };
 
@@ -227,6 +232,22 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         updatePositionSegment(result.position);
       }
+
+      // Theme Control
+      const currentTheme = result.theme || 'auto';
+      if (currentTheme === 'dark') {
+        themeDarkBtn.classList.add('active');
+        themeLightBtn.classList.remove('active');
+        themeAutoBtn.classList.remove('active');
+      } else if (currentTheme === 'light') {
+        themeLightBtn.classList.add('active');
+        themeDarkBtn.classList.remove('active');
+        themeAutoBtn.classList.remove('active');
+      } else {
+        themeAutoBtn.classList.add('active');
+        themeLightBtn.classList.remove('active');
+        themeDarkBtn.classList.remove('active');
+      }
     });
   }
 
@@ -288,6 +309,25 @@ document.addEventListener('DOMContentLoaded', () => {
   positionLeftBtn.addEventListener('click', () => handlePositionChange('left'));
   positionRightBtn.addEventListener('click', () => handlePositionChange('right'));
 
+  // Theme Toggle Clicks
+  themeAutoBtn.addEventListener('click', () => {
+    browser.storage.local.set({ theme: 'auto' }).then(() => {
+      loadAllSettings();
+    });
+  });
+
+  themeLightBtn.addEventListener('click', () => {
+    browser.storage.local.set({ theme: 'light' }).then(() => {
+      loadAllSettings();
+    });
+  });
+
+  themeDarkBtn.addEventListener('click', () => {
+    browser.storage.local.set({ theme: 'dark' }).then(() => {
+      loadAllSettings();
+    });
+  });
+
   // Bottom: "Only for <site>" Button Click
   onlyForBtn.addEventListener('click', () => {
     browser.storage.local.get(['enabled', 'position', 'siteSettings']).then((result) => {
@@ -317,19 +357,38 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   });
-
   // Restore TOC button action (only resets closed/minimized state, doesn't force enable)
   restoreBtn.addEventListener('click', () => {
-    browser.storage.local.set({ closed: false, minimized: false }).then(() => {
-      loadAllSettings();
+    browser.storage.local.get(['siteSettings']).then((result) => {
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+      const hasSiteOverride = siteConfig.position !== undefined;
 
-      const originalText = restoreBtn.textContent;
-      restoreBtn.textContent = 'Restored!';
-      setTimeout(() => {
-        restoreBtn.textContent = originalText;
-      }, 1500);
+      if (hasSiteOverride) {
+        if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
+        siteSettings[currentDomain].closed = false;
+        siteSettings[currentDomain].minimized = true;
+        siteSettings[currentDomain].pinned = false;
+        browser.storage.local.set({ siteSettings }).then(() => {
+          loadAllSettings();
+          showRestoreSuccess();
+        });
+      } else {
+        browser.storage.local.set({ closed: false, minimized: true, pinned: false }).then(() => {
+          loadAllSettings();
+          showRestoreSuccess();
+        });
+      }
     });
   });
+
+  function showRestoreSuccess() {
+    const originalText = restoreBtn.textContent;
+    restoreBtn.textContent = 'Restored!';
+    setTimeout(() => {
+      restoreBtn.textContent = originalText;
+    }, 1500);
+  }
 
   // Reset Site Settings button action
   resetSiteBtn.addEventListener('click', () => {
@@ -361,7 +420,9 @@ document.addEventListener('DOMContentLoaded', () => {
       enabled: true,
       position: 'left',
       closed: false,
-      minimized: false,
+      minimized: true,
+      pinned: false,
+      theme: 'auto',
       siteSettings: {}
     }).then(() => {
       loadAllSettings();

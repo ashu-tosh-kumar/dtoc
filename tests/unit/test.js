@@ -254,7 +254,6 @@ extensions.forEach(ext => {
         expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('body');
       });
     });
-
     describe("settings inheritance resolution logic", () => {
       function resolveSettings(result, hostname) {
         const currentDomain = hostname.replace(/^www\./i, '');
@@ -271,9 +270,18 @@ extensions.forEach(ext => {
         const position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
 
         const closed = result.closed !== undefined ? result.closed : false;
-        const minimized = result.minimized !== undefined ? result.minimized : false;
+        
+        let pinned = false;
+        let minimized = true;
+        if (result.pinned !== undefined) {
+          pinned = result.pinned;
+          minimized = !result.pinned;
+        } else if (result.minimized !== undefined) {
+          minimized = result.minimized;
+          pinned = !result.minimized;
+        }
 
-        return { enabled, position, closed, minimized };
+        return { enabled, position, closed, minimized, pinned };
       }
 
       test("inherits global settings when site-specific settings are not configured on supported sites", () => {
@@ -289,6 +297,7 @@ extensions.forEach(ext => {
         expect(resolved.position).toBe('right');
         expect(resolved.closed).toBe(false);
         expect(resolved.minimized).toBe(true);
+        expect(resolved.pinned).toBe(false);
       });
 
       test("defaults to disabled when site-specific settings are not configured on unsupported sites", () => {
