@@ -471,7 +471,8 @@
       }
     }
 
-    let titleText = document.title;
+    // Truncate to prevent DOM-based DoS/ReDoS from maliciously long title tags
+    let titleText = document.title.substring(0, 500);
     titleText = titleText
       .replace(/\s*-\s*Confluence\s*$/i, '')
       .replace(/\s*-\s*DEV Community\s*$/i, '')
@@ -543,7 +544,8 @@
       // Skip hidden headings or headings inside specific UI widgets if necessary
       if (heading.offsetParent === null) return;
 
-      const text = heading.textContent.trim();
+      // Truncate to prevent DOM-based DoS/ReDoS from maliciously long heading text
+      const text = heading.textContent.substring(0, 500).trim();
       if (!text) return; // Skip empty headings
 
       // Normalize heading level (h1 = 1, h2 = 2, etc.)
