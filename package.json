@@ -28,8 +28,5 @@
     "jest-environment-jsdom": "^30.4.1",
     "jsdom": "^29.1.1",
     "web-ext": "^10.3.0"
-  },
-  "overrides": {
-    "shell-quote": "^1.8.4"
   }
 }
