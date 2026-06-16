@@ -82,13 +82,13 @@
   function init() {
     loadSettings(() => {
       // Check if we are in view mode (exclude edit routes)
-      if (isViewMode()) {
+      if (state.enabled && isViewMode()) {
         injectUI();
         applyStateToUI();
         parseHeadingsAndRender();
         alignContainerWithTitle();
+        setupMutationObserver();
       }
-      setupMutationObserver();
     });
 
     listenForSettingsChanges();
@@ -289,7 +289,19 @@
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'local') {
         loadSettings(() => {
-          applyStateToUI();
+          if (state.enabled && isViewMode()) {
+            if (!document.getElementById('dtoc-host')) {
+              injectUI();
+              applyStateToUI();
+              parseHeadingsAndRender();
+              alignContainerWithTitle();
+              setupMutationObserver();
+            } else {
+              applyStateToUI();
+            }
+          } else {
+            applyStateToUI();
+          }
         });
       }
     });
