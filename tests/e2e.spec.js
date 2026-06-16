@@ -467,11 +467,8 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.waitForTimeout(2000);
 
     const hostLocator = page.locator('#dtoc-host');
-    await expect(hostLocator).toBeAttached({ timeout: 10000 });
-
-    // By default, unsupported sites should have the TOC hidden
-    const containerLocator = hostLocator.locator('css=nav#dtoc-container');
-    await expect(containerLocator).toHaveClass(/hidden/);
+    // By default, unsupported sites should NOT have the TOC injected/attached at all
+    await expect(hostLocator).not.toBeAttached({ timeout: 10000 });
 
     const popupPage = await browserContext.newPage();
 
@@ -522,6 +519,7 @@ test.describe('DTOC Extension E2E Tests', () => {
 
     // Verify it is now visible and has beta headers on the page
     await page.bringToFront();
+    const containerLocator = hostLocator.locator('css=nav#dtoc-container');
     await expect(containerLocator).not.toHaveClass(/hidden/);
     await expect(containerLocator).toHaveClass(/experimental/);
 
