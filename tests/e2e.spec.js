@@ -81,8 +81,14 @@ test.describe('DTOC Extension E2E Tests', () => {
     const hostLocator = page.locator('#dtoc-host');
     await expect(hostLocator).toBeAttached({ timeout: 10000 });
 
-    const containerLocator = hostLocator.locator('css=div#dtoc-container');
+    const containerLocator = hostLocator.locator('css=nav#dtoc-container');
     await expect(containerLocator).toBeVisible();
+
+    // Hover over the collapsed strip to expand the drawer
+    const collapsedStrip = hostLocator.locator('.dtoc-collapsed-strip');
+    await expect(collapsedStrip).toBeVisible();
+    await collapsedStrip.hover({ force: true });
+    await page.waitForTimeout(500);
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents');
@@ -101,18 +107,27 @@ test.describe('DTOC Extension E2E Tests', () => {
 
     expect(page.url()).toContain(href);
 
-    const minimizeBtn = hostLocator.locator('button[title="Minimize"]');
-    await minimizeBtn.click();
-
-    await expect(containerLocator).toHaveClass(/minimized/);
-
-    const maximizeIcon = hostLocator.locator('.maximize-icon');
-    await expect(maximizeIcon).toBeVisible();
-
-    await containerLocator.click();
+    // Test Pinning & Unpinning behavior instead of Minimize
+    const pinBtn = hostLocator.locator('.pin-btn');
+    await expect(pinBtn).toBeVisible();
+    await pinBtn.click(); // Pin the drawer (minimized: false, pinned: true)
+    await expect(containerLocator).toHaveClass(/pinned/);
     await expect(containerLocator).not.toHaveClass(/minimized/);
 
-    const closeBtn = hostLocator.locator('button[title="Close"]');
+    await pinBtn.click(); // Unpin the drawer (minimized: true, pinned: false)
+    await expect(containerLocator).toHaveClass(/minimized/);
+    await expect(containerLocator).not.toHaveClass(/pinned/);
+
+    // Move mouse away to let the drawer collapse
+    await page.hover('body');
+    await page.waitForTimeout(500);
+
+    // Clicking the collapsed strip pins/expands it again
+    await collapsedStrip.click({ force: true });
+    await expect(containerLocator).not.toHaveClass(/minimized/);
+    await expect(containerLocator).toHaveClass(/pinned/);
+
+    const closeBtn = hostLocator.locator('button.close-btn');
     await closeBtn.click();
     await expect(containerLocator).toHaveClass(/hidden/);
 
@@ -144,7 +159,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     await siteToggleBtn.waitFor({ state: 'attached' });
     await popupPage.waitForTimeout(1000);
 
-    // Restore TOC first to ensure closed state is reset
+    // Restore/Bring Back TOC first to ensure closed state is reset
     const restoreBtn = popupPage.locator('#restore-btn');
     await restoreBtn.click();
     await page.waitForTimeout(1000);
@@ -210,6 +225,35 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/position-right/);
 
+    // 4b. Change theme to dark -> TOC should have class theme-dark
+    await popupPage.bringToFront();
+    const themeDarkBtn = popupPage.locator('#theme-dark-btn');
+    const themeLightBtn = popupPage.locator('#theme-light-btn');
+    const themeAutoBtn = popupPage.locator('#theme-auto-btn');
+
+    // Check that auto button is enabled
+    await expect(themeAutoBtn).toBeEnabled();
+
+    // Click dark theme button
+    await themeDarkBtn.click();
+    await page.waitForTimeout(1000);
+    await page.bringToFront();
+    await expect(containerLocator).toHaveClass(/theme-dark/);
+
+    // Click light theme button
+    await popupPage.bringToFront();
+    await themeLightBtn.click();
+    await page.waitForTimeout(1000);
+    await page.bringToFront();
+    await expect(containerLocator).not.toHaveClass(/theme-dark/);
+
+    // Click dark theme button again to make sure reset all resets it
+    await popupPage.bringToFront();
+    await themeDarkBtn.click();
+    await page.waitForTimeout(1000);
+    await page.bringToFront();
+    await expect(containerLocator).toHaveClass(/theme-dark/);
+
     // Now, enable "Only for" site-specific override
     await popupPage.bringToFront();
     const onlyForBtn = popupPage.locator('#only-for-btn');
@@ -245,9 +289,17 @@ test.describe('DTOC Extension E2E Tests', () => {
     await expect(popupPage.locator('#global-on-btn')).toHaveClass(/active/);
     await expect(positionLeftBtn).toHaveClass(/active/);
     await expect(onlyForBtn).not.toHaveClass(/active/);
+    await expect(themeAutoBtn).toHaveClass(/active/);
+    await expect(themeLightBtn).not.toHaveClass(/active/);
+    await expect(themeDarkBtn).not.toHaveClass(/active/);
 
     await page.bringToFront();
     await expect(containerLocator).toHaveClass(/position-left/);
+    await expect(containerLocator).not.toHaveClass(/theme-dark/);
+
+    // Click collapsed strip to pin/expand it after reset
+    await collapsedStrip.click({ force: true });
+    await page.waitForTimeout(500);
 
     const secondLink = tocList.locator('.toc-link:not([href="#"])').nth(1);
     const secondHref = await secondLink.getAttribute('href');
@@ -257,9 +309,15 @@ test.describe('DTOC Extension E2E Tests', () => {
     }, secondHref);
     expect(page.url()).toContain(secondHref);
 
-    await minimizeBtn.click();
+    // Click pin to toggle unpinned/minimized state
+    await pinBtn.click(); // unpin
     await expect(containerLocator).toHaveClass(/minimized/);
-    await containerLocator.click();
+    
+    // Move mouse away to let the drawer collapse
+    await page.hover('body');
+    await page.waitForTimeout(500);
+    
+    await collapsedStrip.click({ force: true }); // pin/expand
     await expect(containerLocator).not.toHaveClass(/minimized/);
 
     await closeBtn.click();
@@ -307,8 +365,14 @@ test.describe('DTOC Extension E2E Tests', () => {
     const hostLocator = page.locator('#dtoc-host');
     await expect(hostLocator).toBeAttached({ timeout: 10000 });
 
-    const containerLocator = hostLocator.locator('css=div#dtoc-container');
+    const containerLocator = hostLocator.locator('css=nav#dtoc-container');
     await expect(containerLocator).toBeVisible();
+
+    // Hover over collapsed strip to expand the drawer
+    const collapsedStrip = hostLocator.locator('.dtoc-collapsed-strip');
+    await expect(collapsedStrip).toBeVisible();
+    await collapsedStrip.hover({ force: true });
+    await page.waitForTimeout(500);
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents');
@@ -316,11 +380,6 @@ test.describe('DTOC Extension E2E Tests', () => {
     const tocList = hostLocator.locator('.toc-list');
     await expect(tocList).toBeVisible();
 
-    // The first heading is <h1>, but since it is the first heading in <article>,
-    // and matching the title, let's see if firstLink has 'Section 1' or 'My Awesome Article'.
-    // In content.js: titleInfo.element is the h1. firstHeading is also h1.
-    // So hasTitlePrepend is false, meaning 'My Awesome Article' is not prepended.
-    // The first item in the list is the h1 'My Awesome Article'.
     const firstLink = tocList.locator('.toc-link').first();
     await expect(firstLink).toHaveText('My Awesome Article');
 
@@ -372,8 +431,14 @@ test.describe('DTOC Extension E2E Tests', () => {
     const hostLocator = page.locator('#dtoc-host');
     await expect(hostLocator).toBeAttached({ timeout: 10000 });
 
-    const containerLocator = hostLocator.locator('css=div#dtoc-container');
+    const containerLocator = hostLocator.locator('css=nav#dtoc-container');
     await expect(containerLocator).toBeVisible();
+
+    // Hover over collapsed strip to expand the drawer
+    const collapsedStrip = hostLocator.locator('.dtoc-collapsed-strip');
+    await expect(collapsedStrip).toBeVisible();
+    await collapsedStrip.hover({ force: true });
+    await page.waitForTimeout(500);
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents');
@@ -402,11 +467,8 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.waitForTimeout(2000);
 
     const hostLocator = page.locator('#dtoc-host');
-    await expect(hostLocator).toBeAttached({ timeout: 10000 });
-
-    // By default, unsupported sites should have the TOC hidden
-    const containerLocator = hostLocator.locator('css=div#dtoc-container');
-    await expect(containerLocator).toHaveClass(/hidden/);
+    // By default, unsupported sites should NOT have the TOC injected/attached at all
+    await expect(hostLocator).not.toBeAttached({ timeout: 10000 });
 
     const popupPage = await browserContext.newPage();
 
@@ -457,8 +519,15 @@ test.describe('DTOC Extension E2E Tests', () => {
 
     // Verify it is now visible and has beta headers on the page
     await page.bringToFront();
+    const containerLocator = hostLocator.locator('css=nav#dtoc-container');
     await expect(containerLocator).not.toHaveClass(/hidden/);
     await expect(containerLocator).toHaveClass(/experimental/);
+
+    // Hover over collapsed strip to expand the drawer
+    const collapsedStrip = hostLocator.locator('.dtoc-collapsed-strip');
+    await expect(collapsedStrip).toBeVisible();
+    await collapsedStrip.hover({ force: true });
+    await page.waitForTimeout(500);
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents (Beta)');

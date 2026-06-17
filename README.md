@@ -1,102 +1,99 @@
-# DTOC
+<p align="center">
+  <a href="https://github.com/ashu-tosh-kumar/dtoc" target="_blank" rel="noreferrer noopener">
+    <img width="160" alt="dtoc logo" src="images/icon512.png">
+  </a>
+</p>
+<p align="center">dtoc <strong>automatically parses</strong> web pages and generates a <strong>modern, interactive Table of Contents</strong> to navigate long documents effortlessly.</p>
+<br/>
+<p align="center">
+  <a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>
+  <a rel="noreferrer noopener" href="https://addons.mozilla.org/firefox/addon/dtoc/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-141e24.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white"></a>
+  <a rel="noreferrer noopener" href="https://microsoftedge.microsoft.com/addons/detail/dtoc/kibljloiohjclbilhjmlfmahhdionhgc"><img alt="Edge Addons" src="https://img.shields.io/badge/Edge-141e24.svg?&style=for-the-badge"></a>
+</p>
 
-Dynamic Table of Content.
+<h2 align="center">Dynamic Table of Content</h2>
+<br/>
+<p align="center">dtoc is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong> designed to automatically parse web pages and generate a sticky, interactive Table of Contents. Adaptively rendering on top of your reading material, dtoc features a modern hover-to-expand glassmorphic drawer layout, minimized state notch indicators for visual document density, preference-based smart light/dark theme detection, and site-specific overrides to deliver an exceptional reading and navigation experience.</p>
+<br/>
+<br/>
 
-This extension automatically generates a non-intrusive, sticky Table of Contents, allowing you to quickly navigate long documents without losing your reading context.
+## Demo
 
-<https://github.com/user-attachments/assets/958a6e77-acb1-443f-86c2-ed6ab4300a0b>
 
-Watch on YouTube: <https://www.youtube.com/watch?v=fk5zKwXVzYk>
+https://github.com/user-attachments/assets/3bc4657b-85db-49a9-8c17-e88ca9299e76
 
-For a full list of natively supported websites (including Confluence, DEV Community, Medium, and various popular custom-domain Medium publications), please see [SUPPORTED_SITES.md](SUPPORTED_SITES.md).
 
-Supported Browsers:
-
-- Chrome and all Chromium-based browsers (Edge, Brave, Arc, etc.)
-- Mozilla Firefox and Firefox based browsers like Zen browser
+*Watch the walkthrough on [YouTube](https://youtu.be/-vvvjiyMUjQ).*
 
 ## Features
 
-- **Automatic Parsing**: Detects headings (`H1-H6`) and builds a nested TOC.
-- **Page Title Navigation**: Prepends the page or article title at the top of the TOC for quick navigation back to the top of the document.
-- **Floating UI**: Stays pinned to the side of your screen while you scroll.
-- "Minimize and Close": Easily minimize the TOC to save space or close it entirely when not needed.
-- **Atlassian Theming**: Automatically adapts to Confluence's Light and Dark modes.
-- **Reactivity**: Rebuilds the TOC on the fly as Confluence SPA pages update.
-- **Privacy First**: Zero external network calls. All preferences are saved locally.
-- **Request Website Support**: A built-in Google form link to request support for websites, pre-filled with the hostname (the extension still doesn't make any external API calls by itself).
+- **Hover-to-Expand "Peek" Drawer**: Overhauled in `v3.0.0` from a solid block sidebar into a modern, non-intrusive Glassmorphism Drawer that expands when hovered and tucks away cleanly to save viewport space.
+- **Minimized Notch Indicator**: Flushed to the viewport edge (left or right), these interactive state notches serve as a passive visual indicator of heading levels and document density.
+- **Dynamic Vertical Alignment**: Centers the first notch / first heading link dynamically with the page title as you scroll, avoiding vertical jumps during expansion.
+- **Smart Auto Theme Detection**: Automatically infers light or dark mode based on actual page background/text color analysis and direct detection of Dark Reader forced dark themes, with options to toggle light/dark manually.
+- **Broad Compatibility & Site-Specific Scopes**: Built-in native optimization for **Confluence Cloud**, **DEV Community**, **Medium**, and custom Medium publications, plus a generic HTML semantic parser (Beta) to support any website. Position settings (left/right) and pinned/minimized/closed states can be configured globally or per-site.
+- **Max Height & Internal Scrolling**: Constrained to a compact 480px maximum height with scroll support within both the notches strip and the expanded TOC panel for longer documents.
+- **Security & Privacy First**: Zero external network requests. Hardened against DOM-based Denial of Service (DoS) and ReDoS by enforcing a 500-character length limit on extracted heading texts. All preferences are saved locally in browser storage.
+- **Support Request Form**: A privacy-friendly link to request native support for new hostnames, pre-filled with the hostname (the extension itself does not make any external API calls).
 
-## Privacy & Security
+## Documentation & Policies
 
-We take your data seriously. For detailed information, please see our:
+We take security and user privacy seriously:
 
 - [Privacy Policy](PRIVACY.md)
 - [Security Policy](SECURITY.md)
+- [Natively Supported Sites](SUPPORTED_SITES.md)
+- [Changelog](CHANGELOG.md)
+- [Credits & Design Inspiration](CREDITS.md)
 
-## Getting Started
+## Manual Installation
 
-### Chrome Web Store
-
-Download and install from Chrome Web Store: [Dynamic Table of Content](https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl?authuser=0&hl=en)
-
-### Microsoft Edge Add-ons
-
-Download and install from Microsoft Edge Add-ons: [Dynamic Table of Content](https://microsoftedge.microsoft.com/addons/detail/dtoc/kibljloiohjclbilhjmlfmahhdionhgc)
-
-### Mozilla Firefox Add-ons
-
-Download and install from Mozilla Firefox Add-ons: [Dynamic Table of Content](https://addons.mozilla.org/en-US/firefox/addon/dtoc/)
-
-### Manual Installation
-
-To install the extension manually from source:
+To install the extension manually from source for development:
 
 1. Clone or download this repository.
 2. Open Chrome (or any Chromium-based browser like Edge, Brave, Arc) and navigate to `chrome://extensions/`.
-3. Enable "Developer mode" in the top right corner.
-4. Click "Load unpacked" and select the folder containing this repository.
-5. The extension will now automatically run on supported websites.
+3. Enable **Developer mode** in the top right corner.
+4. Click **Load unpacked** and select the `chrome-extension` directory of this repository.
+5. (Optional) For Firefox, navigate to `about:debugging`, click **This Firefox**, select **Load Temporary Add-on...**, and select the `firefox-extension/manifest.json` file.
 
 ## Development & Testing
 
 This project is built using Vanilla JavaScript, HTML, and CSS. No build step is required to run the extension.
 
-To run the unit tests:
+### Setup
 
-1. Install dependencies: `npm install`
-2. Run tests: `npm test`
+Install development dependencies (Jest, Playwright, web-ext):
 
-## Changelog
+```bash
+npm install
+```
 
-`v2.0.0`
+### Run Unit Tests
 
-- Added experimental support (Beta) for all websites using generic HTML semantic selectors.
-- Overhauled the extension popup UI with split settings (Global vs. Site-Specific status toggles and TOC position settings).
-- Added "Reset Site Settings" and "Reset All Settings" buttons in the popup, with the "Reset Site Settings" button dynamically disabled when no site-specific settings are configured.
-- Added native support for DEV Community (`dev.to`).
-- Added native support for Medium (`medium.com` and subdomains) as well as common custom-domain Medium publications (e.g., `levelup.gitconnected.com`, `python.plainenglish.io`).
-- Added a dynamic page/article title heading at the top of the Table of Contents for quick navigation back to the top of the page.
+We use Jest to run unit tests:
 
-`v1.1.0`
+```bash
+npm test
+```
 
-- Added ability to request support for new websites directly from the extension popup (links to a Google Form).
-- Extracted hostname is passed to the Form to maintain user privacy.
-- Displays Open Source text in the extension popup footer.
+### Run End-to-End Tests
 
-`v1.0.0`
+We use Playwright to run E2E browser tests:
 
-- Initial release with core features.
-- Supports Confluence Cloud and adapts to Light/Dark themes.
+```bash
+# Install required browser binaries if not already installed
+npx playwright install chromium
 
-## Credits
+# Run the E2E tests
+npm run test:e2e
+```
 
-Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under the FontAwesome Free License ([https://fontawesome.com/license/free](https://fontawesome.com/license/free)). The specific icon used is the "folder-tree" solid icon.
+### Build Distribution Packages
 
----
+To build the distribution ZIP files for release:
 
-- *Developed by Jules using `prd.md`.*
-- *Security hardening reviewed by Qodo and implemented by Gemini CLI.*
-- *Split settings architecture, generic cross-website support, and E2E automation
-  developed by Google Antigravity 2.0.*
-- Agentic workflow files added by GitHub Copilot with thorough review and grounding done
-  by Google Antigravity 2.0.
+```bash
+npm run build
+```
+
+This script packages Chrome and Firefox extensions separately into their respective `web-ext-artifacts/` subdirectories. For more details on the codebase and release process, see the [Development Guide](docs/DEVELOPMENT_GUIDE.md).

@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const positionLeftBtn = document.getElementById('position-left-btn');
   const positionRightBtn = document.getElementById('position-right-btn');
   
+  const themeAutoBtn = document.getElementById('theme-auto-btn');
+  const themeLightBtn = document.getElementById('theme-light-btn');
+  const themeDarkBtn = document.getElementById('theme-dark-btn');
+  
   const onlyForBtn = document.getElementById('only-for-btn');
   const onlyForDomain = document.getElementById('only-for-domain');
   
@@ -57,10 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function updatePositionSegment(pos) {
     if (pos === 'right') {
       positionRightBtn.classList.add('active');
+      positionRightBtn.setAttribute('aria-pressed', 'true');
       positionLeftBtn.classList.remove('active');
+      positionLeftBtn.setAttribute('aria-pressed', 'false');
     } else {
       positionLeftBtn.classList.add('active');
+      positionLeftBtn.setAttribute('aria-pressed', 'true');
       positionRightBtn.classList.remove('active');
+      positionRightBtn.setAttribute('aria-pressed', 'false');
     }
   }
 
@@ -147,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSettings = {
       enabled: true,
       position: 'left',
+      theme: 'auto',
       siteSettings: {}
     };
 
@@ -157,11 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       siteOverrideActive = hasSiteOverride;
 
-      // Update "Only for" button style
+      // Update "Only for" button style and state
       if (siteOverrideActive) {
         onlyForBtn.classList.add('active');
+        onlyForBtn.setAttribute('aria-pressed', 'true');
       } else {
         onlyForBtn.classList.remove('active');
+        onlyForBtn.setAttribute('aria-pressed', 'false');
       }
 
       // Top-left: Site Quick-Toggle (reflects site-specific enabled status if overridden, otherwise true/default)
@@ -171,17 +182,21 @@ document.addEventListener('DOMContentLoaded', () => {
         siteToggleBtn.classList.add('active');
         siteToggleBtn.classList.remove('inactive');
         siteToggleStatus.textContent = '✓';
+        siteToggleBtn.setAttribute('aria-pressed', 'true');
       } else {
         siteToggleBtn.classList.add('inactive');
         siteToggleBtn.classList.remove('active');
         siteToggleStatus.textContent = '✗';
+        siteToggleBtn.setAttribute('aria-pressed', 'false');
       }
 
       // Top-right: Global ON/OFF segmented control & Control Greying logic
       const globalEnabled = result.enabled !== undefined ? result.enabled : true;
       if (globalEnabled) {
         globalOnBtn.classList.add('active');
+        globalOnBtn.setAttribute('aria-pressed', 'true');
         globalOffBtn.classList.remove('active');
+        globalOffBtn.setAttribute('aria-pressed', 'false');
         
         // Remove disabled styling
         siteToggleBtn.classList.remove('disabled-control');
@@ -207,7 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else {
         globalOffBtn.classList.add('active');
+        globalOffBtn.setAttribute('aria-pressed', 'true');
         globalOnBtn.classList.remove('active');
+        globalOnBtn.setAttribute('aria-pressed', 'false');
         
         // Add disabled styling (grey out all other controls)
         siteToggleBtn.classList.add('disabled-control');
@@ -226,6 +243,31 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePositionSegment(pos);
       } else {
         updatePositionSegment(result.position);
+      }
+
+      // Theme Control
+      const currentTheme = result.theme || 'auto';
+      if (currentTheme === 'dark') {
+        themeDarkBtn.classList.add('active');
+        themeDarkBtn.setAttribute('aria-pressed', 'true');
+        themeLightBtn.classList.remove('active');
+        themeLightBtn.setAttribute('aria-pressed', 'false');
+        themeAutoBtn.classList.remove('active');
+        themeAutoBtn.setAttribute('aria-pressed', 'false');
+      } else if (currentTheme === 'light') {
+        themeLightBtn.classList.add('active');
+        themeLightBtn.setAttribute('aria-pressed', 'true');
+        themeDarkBtn.classList.remove('active');
+        themeDarkBtn.setAttribute('aria-pressed', 'false');
+        themeAutoBtn.classList.remove('active');
+        themeAutoBtn.setAttribute('aria-pressed', 'false');
+      } else {
+        themeAutoBtn.classList.add('active');
+        themeAutoBtn.setAttribute('aria-pressed', 'true');
+        themeLightBtn.classList.remove('active');
+        themeLightBtn.setAttribute('aria-pressed', 'false');
+        themeDarkBtn.classList.remove('active');
+        themeDarkBtn.setAttribute('aria-pressed', 'false');
       }
     });
   }
@@ -288,6 +330,25 @@ document.addEventListener('DOMContentLoaded', () => {
   positionLeftBtn.addEventListener('click', () => handlePositionChange('left'));
   positionRightBtn.addEventListener('click', () => handlePositionChange('right'));
 
+  // Theme Toggle Clicks
+  themeAutoBtn.addEventListener('click', () => {
+    chrome.storage.local.set({ theme: 'auto' }, () => {
+      loadAllSettings();
+    });
+  });
+
+  themeLightBtn.addEventListener('click', () => {
+    chrome.storage.local.set({ theme: 'light' }, () => {
+      loadAllSettings();
+    });
+  });
+
+  themeDarkBtn.addEventListener('click', () => {
+    chrome.storage.local.set({ theme: 'dark' }, () => {
+      loadAllSettings();
+    });
+  });
+
   // Bottom: "Only for <site>" Button Click
   onlyForBtn.addEventListener('click', () => {
     chrome.storage.local.get(['enabled', 'position', 'siteSettings'], (result) => {
@@ -320,16 +381,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Restore TOC button action (only resets closed/minimized state, doesn't force enable)
   restoreBtn.addEventListener('click', () => {
-    chrome.storage.local.set({ closed: false, minimized: false }, () => {
-      loadAllSettings();
+    chrome.storage.local.get(['siteSettings'], (result) => {
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+      const hasSiteOverride = siteConfig.position !== undefined;
 
-      const originalText = restoreBtn.textContent;
-      restoreBtn.textContent = 'Restored!';
-      setTimeout(() => {
-        restoreBtn.textContent = originalText;
-      }, 1500);
+      if (hasSiteOverride) {
+        if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
+        siteSettings[currentDomain].closed = false;
+        siteSettings[currentDomain].minimized = true;
+        siteSettings[currentDomain].pinned = false;
+        chrome.storage.local.set({ siteSettings }, () => {
+          loadAllSettings();
+          showRestoreSuccess();
+        });
+      } else {
+        chrome.storage.local.set({ closed: false, minimized: true, pinned: false }, () => {
+          loadAllSettings();
+          showRestoreSuccess();
+        });
+      }
     });
   });
+
+  function showRestoreSuccess() {
+    const originalText = restoreBtn.textContent;
+    restoreBtn.textContent = 'Restored!';
+    setTimeout(() => {
+      restoreBtn.textContent = originalText;
+    }, 1500);
+  }
 
   // Reset Site Settings button action
   resetSiteBtn.addEventListener('click', () => {
@@ -361,7 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
       enabled: true,
       position: 'left',
       closed: false,
-      minimized: false,
+      minimized: true,
+      pinned: false,
+      theme: 'auto',
       siteSettings: {}
     }, () => {
       loadAllSettings();

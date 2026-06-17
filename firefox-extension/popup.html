@@ -19,29 +19,44 @@
   <div class="content">
     <!-- Quick toggles row -->
     <div class="quick-toggles">
-      <button id="site-toggle-btn" class="site-toggle-btn">
-        <span id="site-toggle-status" class="status-icon">✓</span>
+      <button id="site-toggle-btn" class="site-toggle-btn" aria-pressed="true">
+        <span id="site-toggle-status" class="status-icon" aria-hidden="true">✓</span>
         <span id="site-toggle-domain">This Site</span>
       </button>
 
-      <div class="segmented-control global-control">
-        <button id="global-on-btn" class="segment-btn">On</button>
-        <button id="global-off-btn" class="segment-btn">Off</button>
+      <div class="segmented-control global-control" role="group" aria-label="Global Extension State">
+        <button id="global-on-btn" class="segment-btn" aria-pressed="true">On</button>
+        <button id="global-off-btn" class="segment-btn" aria-pressed="false">Off</button>
       </div>
     </div>
 
     <!-- Detailed settings panel -->
     <div class="settings-panel">
+      <!-- Theme Setting -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <div id="theme-label" class="setting-label">Theme</div>
+          <div class="setting-desc">TOC sidebar color theme</div>
+        </div>
+        <div class="setting-control">
+          <div class="segmented-control theme-control" role="group" aria-labelledby="theme-label">
+            <button id="theme-auto-btn" class="segment-btn" aria-pressed="true">Auto</button>
+            <button id="theme-light-btn" class="segment-btn" aria-pressed="false">Light</button>
+            <button id="theme-dark-btn" class="segment-btn" aria-pressed="false">Dark</button>
+          </div>
+        </div>
+      </div>
+
       <!-- TOC position -->
       <div class="setting-row">
         <div class="setting-info">
-          <div class="setting-label">TOC Position</div>
+          <div id="position-label" class="setting-label">TOC Position</div>
           <div class="setting-desc">Where the TOC panel appears on screen</div>
         </div>
         <div class="setting-control">
-          <div class="segmented-control position-control">
-            <button id="position-left-btn" class="segment-btn" data-value="left">Left</button>
-            <button id="position-right-btn" class="segment-btn" data-value="right">Right</button>
+          <div class="segmented-control position-control" role="group" aria-labelledby="position-label">
+            <button id="position-left-btn" class="segment-btn" data-value="left" aria-pressed="true">Left</button>
+            <button id="position-right-btn" class="segment-btn" data-value="right" aria-pressed="false">Right</button>
           </div>
         </div>
       </div>
@@ -49,14 +64,14 @@
 
     <!-- Only for Site filter button -->
     <div class="filter-action-container">
-      <button id="only-for-btn" class="only-for-btn">
+      <button id="only-for-btn" class="only-for-btn" aria-pressed="false">
         Only for <span id="only-for-domain">This Site</span>
       </button>
     </div>
 
     <!-- Restore TOC Action -->
     <div id="restore-container" class="helper-action-row" style="display: none;">
-      <button id="restore-btn" class="btn btn-primary">Restore TOC</button>
+      <button id="restore-btn" class="btn btn-primary">Bring Back TOC</button>
       <small class="helper-text">Click to bring back the TOC if you closed it on the page.</small>
     </div>
 

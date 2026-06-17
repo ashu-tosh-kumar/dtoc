@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "dtoc",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Dynamic Table of Content.",
   "permissions": [
     "storage",
@@ -25,7 +25,12 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "dtoc Settings"
+    "default_title": "dtoc Settings",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "icons": {
     "16": "icons/icon16.png",

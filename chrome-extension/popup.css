@@ -7,9 +7,10 @@
   --text-secondary: #9aa8b6;
   --text-disabled: #4e5c6c;
   
-  --accent-color: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-glow: rgba(59, 130, 246, 0.25);
+  --accent-color: #2563eb; /* WCAG AA compliant for white text background */
+  --accent-hover: #1d4ed8;
+  --accent-glow: rgba(37, 99, 235, 0.25);
+  --accent-text: #60a5fa; /* High-contrast blue for links/text on dark backgrounds */
   
   --success-bg: rgba(16, 185, 129, 0.15);
   --success-border: #10b981;
@@ -475,11 +476,37 @@ input:checked + .slider:before {
 }
 
 .footer .open-source-text a {
-  color: var(--accent-color);
+  color: var(--accent-text);
   text-decoration: none;
   font-weight: 500;
 }
 
 .footer .open-source-text a:hover {
   text-decoration: underline;
+}
+
+.segment-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Keyboard accessibility focus rings */
+button:focus,
+a:focus {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+/* Specific button style overrides for rounded focus rings */
+.segment-btn:focus-visible {
+  outline-offset: -2px;
+}
+.site-toggle-btn:focus-visible {
+  outline-offset: 1px;
 }
