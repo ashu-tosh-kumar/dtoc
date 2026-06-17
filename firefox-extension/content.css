@@ -333,17 +333,17 @@
 
 .dtoc-notch {
   height: 2px;
-  background-color: rgba(55, 53, 47, 0.16);
+  background-color: rgba(55, 53, 47, 0.20);
   border-radius: 1px;
   transition: width 0.2s, background-color 0.2s;
 }
 
-.dtoc-notch.dtoc-notch-level-1 { width: 22px; background-color: rgba(55, 53, 47, 0.22); }
-.dtoc-notch.dtoc-notch-level-2 { width: 18px; background-color: rgba(55, 53, 47, 0.18); }
-.dtoc-notch.dtoc-notch-level-3 { width: 14px; background-color: rgba(55, 53, 47, 0.14); }
-.dtoc-notch.dtoc-notch-level-4 { width: 11px; background-color: rgba(55, 53, 47, 0.11); }
-.dtoc-notch.dtoc-notch-level-5 { width: 8px; background-color: rgba(55, 53, 47, 0.09); }
-.dtoc-notch.dtoc-notch-level-6 { width: 6px; background-color: rgba(55, 53, 47, 0.07); }
+.dtoc-notch.dtoc-notch-level-1 { width: 22px; background-color: rgba(55, 53, 47, 0.35); }
+.dtoc-notch.dtoc-notch-level-2 { width: 18px; background-color: rgba(55, 53, 47, 0.30); }
+.dtoc-notch.dtoc-notch-level-3 { width: 14px; background-color: rgba(55, 53, 47, 0.25); }
+.dtoc-notch.dtoc-notch-level-4 { width: 11px; background-color: rgba(55, 53, 47, 0.20); }
+.dtoc-notch.dtoc-notch-level-5 { width: 8px; background-color: rgba(55, 53, 47, 0.16); }
+.dtoc-notch.dtoc-notch-level-6 { width: 6px; background-color: rgba(55, 53, 47, 0.12); }
 
 .dtoc-notch:hover {
   background-color: rgba(55, 53, 47, 0.8) !important;
@@ -427,22 +427,22 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-.theme-dark .dtoc-notch {
-  background-color: rgba(255, 255, 255, 0.15);
+.page-dark .dtoc-notch {
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
-.theme-dark .dtoc-notch.dtoc-notch-level-1 { width: 22px; background-color: rgba(255, 255, 255, 0.25); }
-.theme-dark .dtoc-notch.dtoc-notch-level-2 { width: 18px; background-color: rgba(255, 255, 255, 0.20); }
-.theme-dark .dtoc-notch.dtoc-notch-level-3 { width: 14px; background-color: rgba(255, 255, 255, 0.16); }
-.theme-dark .dtoc-notch.dtoc-notch-level-4 { width: 11px; background-color: rgba(255, 255, 255, 0.13); }
-.theme-dark .dtoc-notch.dtoc-notch-level-5 { width: 8px; background-color: rgba(255, 255, 255, 0.10); }
-.theme-dark .dtoc-notch.dtoc-notch-level-6 { width: 6px; background-color: rgba(255, 255, 255, 0.08); }
+.page-dark .dtoc-notch.dtoc-notch-level-1 { width: 22px; background-color: rgba(255, 255, 255, 0.45); }
+.page-dark .dtoc-notch.dtoc-notch-level-2 { width: 18px; background-color: rgba(255, 255, 255, 0.38); }
+.page-dark .dtoc-notch.dtoc-notch-level-3 { width: 14px; background-color: rgba(255, 255, 255, 0.32); }
+.page-dark .dtoc-notch.dtoc-notch-level-4 { width: 11px; background-color: rgba(255, 255, 255, 0.26); }
+.page-dark .dtoc-notch.dtoc-notch-level-5 { width: 8px; background-color: rgba(255, 255, 255, 0.20); }
+.page-dark .dtoc-notch.dtoc-notch-level-6 { width: 6px; background-color: rgba(255, 255, 255, 0.15); }
 
-.theme-dark .dtoc-notch:hover {
+.page-dark .dtoc-notch:hover {
   background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
-.theme-dark .dtoc-notch.active {
+.page-dark .dtoc-notch.active {
   background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
