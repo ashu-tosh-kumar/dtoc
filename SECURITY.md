@@ -2,13 +2,13 @@
 
 ## Supported Versions
 
-`dtoc` will receive security updates for each of 1 minor versions within 1 major versions.
+`dtoc` only supports the latest active release version. Security updates are published directly to the latest release branch (e.g., if the current version is `3.0.0`, security updates will be rolled out as `3.0.1`, `3.0.2`, etc.; if the current version is `3.1.0`, updates will be rolled out as `3.1.1`, `3.1.2`, etc.). Older major or minor versions are not actively maintained for security patches.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.2.x   | :white_check_mark: |
-| 1.1.x   | :white_check_mark: |
-| 1.0.x   | :x:                |
+| 3.x.x   | :white_check_mark: |
+| 2.x.x   | :x:                |
+| 1.x.x   | :x:                |
 
 ## Security Hardening
 
