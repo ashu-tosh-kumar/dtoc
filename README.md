@@ -73,7 +73,7 @@ To run the unit tests:
 - Overhauled the Table of Contents layout from a solid sidebar block into a modern, non-intrusive Glassmorphism "Peek" Drawer (Hover-to-Expand Sidebar) layout.
 - Added minimized state notches that act as a passive visual indicator of heading levels and document density, flushed perfectly to the viewport edge (left or right).
 - Added dynamic vertical alignment that centers the first notch / first heading link with the page title (floating dynamically as you scroll) with no vertical jump during expansion.
-- Added preference-based `Auto` theme detection that matches your browser/system's color scheme (`prefers-color-scheme`) by default, in addition to manual light and dark theme toggles.
+- Added preference-based "Smart Auto" theme detection that dynamically infers dark/light mode based on page background/text color analysis and direct detection of Dark Reader forced dark themes, in addition to manual light and dark theme toggles.
 - Constrained the maximum TOC height to a compact 480px with vertical scroll support inside both the notches strip and the expanded TOC panel for long documents.
 - Active heading notches now auto-scroll to the center of the minimized notch stack as you scroll through the page.
 - Scoped minimized/pinned/closed states to site-specific configs when "Only for" site-specific override is active.
@@ -101,7 +101,7 @@ To run the unit tests:
 ## Credits
 
 - *Initial PRD written using [Microsoft CoPilot](https://copilot.microsoft.com/)*.
-- *Initially developed by [Google Jules](https://jules.google/) using `prd.md`.*
+- *Initially developed by [Google Jules](https://jules.google/) using [docs/PRD.md](docs/PRD.md).*
 - *Further development, testing, and maintenance by  [Google Antigravity](https://antigravity.google/).*
 - *Security hardening reviewed by [Qodo](https://marketplace.visualstudio.com/items?itemName=Codium.codium) in [VS Code](https://code.visualstudio.com/) and implemented by [Gemini CLI](https://geminicli.com/).*
 - *Icons are provided by [FontAwesome](https://fontawesome.com/) and are licensed under
