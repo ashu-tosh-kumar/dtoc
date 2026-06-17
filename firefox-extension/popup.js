@@ -61,10 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function updatePositionSegment(pos) {
     if (pos === 'right') {
       positionRightBtn.classList.add('active');
+      positionRightBtn.setAttribute('aria-pressed', 'true');
       positionLeftBtn.classList.remove('active');
+      positionLeftBtn.setAttribute('aria-pressed', 'false');
     } else {
       positionLeftBtn.classList.add('active');
+      positionLeftBtn.setAttribute('aria-pressed', 'true');
       positionRightBtn.classList.remove('active');
+      positionRightBtn.setAttribute('aria-pressed', 'false');
     }
   }
 
@@ -162,11 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       siteOverrideActive = hasSiteOverride;
 
-      // Update "Only for" button style
+      // Update "Only for" button style and state
       if (siteOverrideActive) {
         onlyForBtn.classList.add('active');
+        onlyForBtn.setAttribute('aria-pressed', 'true');
       } else {
         onlyForBtn.classList.remove('active');
+        onlyForBtn.setAttribute('aria-pressed', 'false');
       }
 
       // Top-left: Site Quick-Toggle (reflects site-specific enabled status if overridden, otherwise true/default)
@@ -176,17 +182,21 @@ document.addEventListener('DOMContentLoaded', () => {
         siteToggleBtn.classList.add('active');
         siteToggleBtn.classList.remove('inactive');
         siteToggleStatus.textContent = '✓';
+        siteToggleBtn.setAttribute('aria-pressed', 'true');
       } else {
         siteToggleBtn.classList.add('inactive');
         siteToggleBtn.classList.remove('active');
         siteToggleStatus.textContent = '✗';
+        siteToggleBtn.setAttribute('aria-pressed', 'false');
       }
 
       // Top-right: Global ON/OFF segmented control & Control Greying logic
       const globalEnabled = result.enabled !== undefined ? result.enabled : true;
       if (globalEnabled) {
         globalOnBtn.classList.add('active');
+        globalOnBtn.setAttribute('aria-pressed', 'true');
         globalOffBtn.classList.remove('active');
+        globalOffBtn.setAttribute('aria-pressed', 'false');
         
         // Remove disabled styling
         siteToggleBtn.classList.remove('disabled-control');
@@ -212,7 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else {
         globalOffBtn.classList.add('active');
+        globalOffBtn.setAttribute('aria-pressed', 'true');
         globalOnBtn.classList.remove('active');
+        globalOnBtn.setAttribute('aria-pressed', 'false');
         
         // Add disabled styling (grey out all other controls)
         siteToggleBtn.classList.add('disabled-control');
@@ -237,16 +249,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentTheme = result.theme || 'auto';
       if (currentTheme === 'dark') {
         themeDarkBtn.classList.add('active');
+        themeDarkBtn.setAttribute('aria-pressed', 'true');
         themeLightBtn.classList.remove('active');
+        themeLightBtn.setAttribute('aria-pressed', 'false');
         themeAutoBtn.classList.remove('active');
+        themeAutoBtn.setAttribute('aria-pressed', 'false');
       } else if (currentTheme === 'light') {
         themeLightBtn.classList.add('active');
+        themeLightBtn.setAttribute('aria-pressed', 'true');
         themeDarkBtn.classList.remove('active');
+        themeDarkBtn.setAttribute('aria-pressed', 'false');
         themeAutoBtn.classList.remove('active');
+        themeAutoBtn.setAttribute('aria-pressed', 'false');
       } else {
         themeAutoBtn.classList.add('active');
+        themeAutoBtn.setAttribute('aria-pressed', 'true');
         themeLightBtn.classList.remove('active');
+        themeLightBtn.setAttribute('aria-pressed', 'false');
         themeDarkBtn.classList.remove('active');
+        themeDarkBtn.setAttribute('aria-pressed', 'false');
       }
     });
   }
