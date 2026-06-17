@@ -19,7 +19,9 @@
 
 ## Demo
 
-<https://github.com/ashu-tosh-kumar/dtoc/raw/main/videos/chrome-showcase-crop.mp4>
+
+https://github.com/user-attachments/assets/3bc4657b-85db-49a9-8c17-e88ca9299e76
+
 
 *Watch the walkthrough on [YouTube](https://youtu.be/-vvvjiyMUjQ).*
 
