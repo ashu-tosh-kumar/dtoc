@@ -1,6 +1,14 @@
 // Immediately invoked function expression to avoid polluting the global namespace
 (() => {
   // --- Constants & State ---
+  // Security: Prevent DOM-based DoS / ReDoS by limiting extracted text length
+  const MAX_TEXT_LENGTH = 500;
+  function sanitizeText(text) {
+    if (!text) return '';
+    const trimmed = text.trim();
+    return trimmed.length > MAX_TEXT_LENGTH ? trimmed.substring(0, MAX_TEXT_LENGTH) + '...' : trimmed;
+  }
+
   const SETTINGS_KEY = {
     ENABLED: 'enabled',
     POSITION: 'position',
@@ -793,13 +801,13 @@
       const el = document.querySelector(selector);
       if (el && el.textContent.trim()) {
         return {
-          text: el.textContent.trim(),
+          text: sanitizeText(el.textContent),
           element: el
         };
       }
     }
 
-    let titleText = document.title;
+    let titleText = document.title ? document.title.substring(0, MAX_TEXT_LENGTH) : '';
     titleText = titleText
       .replace(/\s*-\s*Confluence\s*$/i, '')
       .replace(/\s*-\s*DEV Community\s*$/i, '')
@@ -826,7 +834,7 @@
     if (!contentContainer) return;
 
     const headings = Array.from(contentContainer.querySelectorAll('h1, h2, h3, h4, h5, h6'))
-      .filter(h => h.offsetParent !== null && h.textContent.trim());
+      .filter(h => h.offsetParent !== null && sanitizeText(h.textContent));
 
     scrollspyListener = () => {
       // Align container dynamically
@@ -990,7 +998,7 @@
     headings.forEach((heading, index) => {
       if (heading.offsetParent === null) return;
 
-      const text = heading.textContent.trim();
+      const text = sanitizeText(heading.textContent);
       if (!text) return;
 
       const level = parseInt(heading.tagName.substring(1), 10);
