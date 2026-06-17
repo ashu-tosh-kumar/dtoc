@@ -78,7 +78,7 @@ We take your privacy seriously. **dtoc** is 100% local-only and offline-first:
 
 ### 🔗 **Links & Support**
 *   [GitHub Repository](https://github.com/ashu-tosh-kumar/dtoc)
-*   [YouTube Video Showcase](https://www.youtube.com/watch?v=fk5zKwXVzYk)
+*   [YouTube Video Showcase](https://youtu.be/-vvvjiyMUjQ)
 ```
 
 ---
@@ -90,7 +90,7 @@ The add-on is entirely local, offline-first, contains no remote data gathering o
 
 Links and references:
 - GitHub Repository: https://github.com/ashu-tosh-kumar/dtoc
-- Showcase/Walkthrough Video: https://www.youtube.com/watch?v=fk5zKwXVzYk
+- Showcase/Walkthrough Video: https://youtu.be/-vvvjiyMUjQ
 - Public Testing Page (Confluence - no login required):
   https://chauhanshilpa602.atlassian.net/wiki/external/ZTUwMWMzZDYxMjk5NDcxYTgxMWQzMTdlNzc1NTFmMTc
 
