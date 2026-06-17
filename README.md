@@ -77,6 +77,7 @@ To run the unit tests:
 - Constrained the maximum TOC height to a compact 480px with vertical scroll support inside both the notches strip and the expanded TOC panel for long documents.
 - Active heading notches now auto-scroll to the center of the minimized notch stack as you scroll through the page.
 - Scoped minimized/pinned/closed states to site-specific configs when "Only for" site-specific override is active.
+- Hardened extension security against DOM-based Denial of Service (DoS) and Regular Expression Denial of Service (ReDoS) by enforcing a 500-character length limit on extracted page titles and heading texts.
 
 `v2.0.0`
 
