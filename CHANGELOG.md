@@ -12,6 +12,11 @@ All notable changes to this project will be documented in this file.
 - **Active Heading Auto-Centering**: Active heading notches now auto-scroll to the center of the minimized notch stack as you scroll through the page.
 - **Scoped States**: Scoped minimized/pinned/closed states to site-specific configs when "Only for" site-specific override is active.
 - **Security Hardening**: Hardened extension security against DOM-based Denial of Service (DoS) and Regular Expression Denial of Service (ReDoS) by enforcing a 500-character length limit on extracted page titles and heading texts.
+- **Accessibility Enhancements**: Improved keyboard and screen-reader accessibility in the extension settings popup with clear focus indicator rings (`:focus-visible`), interactive `aria-pressed` states, standard ARIA roles, and semantic labels.
+- **Page Jump & Auto-Scroll Fixes**: Resolved page jumps during load/reload by clearing `dtoc-` prefixed fragment hashes from the URL on init. Constrained elements auto-scrolling during scroll-spy activation to their local scroll container boundary, preventing page scroll pollution.
+- **Disabled Sites Fix**: Prevented initialization of the UI and observers on disabled websites to avoid unnecessary background processing.
+- **Rebranding & Fresh Iconography**: Rebranded the extension with a new logo and iconography, standardizing browser icons and cleaning up deprecated theme-specific icon resources.
+- **Documentation & Assets Centralization**: Re-organized documentation by splitting the changelog and credits into dedicated files, and added central store listings (Chrome Web Store, Firefox Add-ons, Edge Add-ons) and screenshots.
 
 ## [v2.0.0] - 2026-06-17
 
