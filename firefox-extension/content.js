@@ -88,6 +88,14 @@
   // --- Initialization ---
 
   function init() {
+    // Clear dtoc-generated URL fragments to prevent browser scroll-to-hash on
+    // reload. Only clear fragments with the "dtoc-" prefix (IDs we assigned);
+    // native heading IDs are left intact so site-default behaviour is preserved.
+    const initHash = window.location.hash?.substring(1);
+    if (initHash && initHash.startsWith('dtoc-')) {
+      history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+
     loadSettings(() => {
       // Check if we are in view mode (exclude edit routes)
       if (state.enabled && isViewMode()) {
@@ -866,6 +874,31 @@
     scrollspyListener(); // Initialize once immediately
   }
 
+  // Scroll an element into view within its own scrollable ancestor only,
+  // without affecting the main page scroll position.
+  function scrollWithinContainer(element, mode) {
+    if (!element) return;
+    const parent = element.parentElement;
+    if (!parent) return;
+
+    if (mode === 'center') {
+      const parentRect = parent.getBoundingClientRect();
+      const elRect = element.getBoundingClientRect();
+      const desiredScrollTop =
+        element.offsetTop - parent.offsetTop - parentRect.height / 2 + elRect.height / 2;
+      parent.scrollTop = desiredScrollTop;
+    } else {
+      // 'nearest' — only scroll if the element is outside the visible area
+      const parentRect = parent.getBoundingClientRect();
+      const elRect = element.getBoundingClientRect();
+      if (elRect.top < parentRect.top) {
+        parent.scrollTop -= parentRect.top - elRect.top;
+      } else if (elRect.bottom > parentRect.bottom) {
+        parent.scrollTop += elRect.bottom - parentRect.bottom;
+      }
+    }
+  }
+
   function setActiveHeading(activeId) {
     if (!shadowRoot) return;
 
@@ -882,19 +915,19 @@
       const firstNotch = shadowRoot.querySelector('.dtoc-notch[data-id=""]');
       if (firstNotch) {
         firstNotch.classList.add('active');
-        firstNotch.scrollIntoView({ behavior: 'auto', block: 'center' });
+        scrollWithinContainer(firstNotch, 'center');
       }
     } else {
       const activeLink = shadowRoot.querySelector(`.toc-link[href="#${activeId}"]`);
       if (activeLink) {
         activeLink.classList.add('active');
-        activeLink.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        scrollWithinContainer(activeLink, 'nearest');
       }
 
       const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${activeId}"]`);
       if (activeNotch) {
         activeNotch.classList.add('active');
-        activeNotch.scrollIntoView({ behavior: 'auto', block: 'center' });
+        scrollWithinContainer(activeNotch, 'center');
       }
     }
   }
@@ -1029,7 +1062,7 @@
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        history.pushState(null, null, `#${id}`);
+        history.replaceState(null, null, `#${id}`);
         heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         const originalScrollMargin = heading.style.scrollMarginTop;
