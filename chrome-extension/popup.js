@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSettings = {
       enabled: true,
       position: 'left',
-      theme: 'light',
+      theme: 'auto',
       siteSettings: {}
     };
 
