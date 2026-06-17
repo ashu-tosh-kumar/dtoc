@@ -379,7 +379,7 @@
     host.style.setProperty('margin', '0', 'important');
     document.body.appendChild(host);
 
-    shadowRoot = host.attachShadow({ mode: 'closed' });
+    shadowRoot = host.attachShadow({ mode: 'open' });
 
     // Fetch CSS file
     const cssUrl = browser.runtime.getURL('content.css');
@@ -425,6 +425,8 @@
     const pinBtn = document.createElement('button');
     pinBtn.className = 'icon-btn pin-btn';
     pinBtn.title = state.pinned ? 'Unpin TOC' : 'Pin TOC';
+    pinBtn.setAttribute('aria-label', state.pinned ? 'Unpin Table of Contents' : 'Pin Table of Contents');
+    pinBtn.setAttribute('aria-pressed', state.pinned ? 'true' : 'false');
     if (state.pinned) pinBtn.classList.add('active');
     pinBtn.appendChild(createIconElement(ICON_PIN));
     pinBtn.addEventListener('click', (e) => {
@@ -435,6 +437,7 @@
     const closeBtn = document.createElement('button');
     closeBtn.className = 'icon-btn close-btn';
     closeBtn.title = 'Close';
+    closeBtn.setAttribute('aria-label', 'Close Table of Contents');
     closeBtn.appendChild(createIconElement(ICON_CLOSE));
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -462,15 +465,35 @@
     // 2. Collapsed Peek Strip
     const collapsedStrip = document.createElement('div');
     collapsedStrip.className = 'dtoc-collapsed-strip';
+    collapsedStrip.setAttribute('role', 'button');
+    collapsedStrip.setAttribute('tabindex', '0');
+    collapsedStrip.setAttribute('aria-label', 'Expand Table of Contents');
 
     const notchesContainer = document.createElement('div');
     notchesContainer.className = 'dtoc-notches-container';
+    notchesContainer.setAttribute('aria-hidden', 'true');
     collapsedStrip.appendChild(notchesContainer);
 
     // Clicking the collapsed strip expands it permanently by pinning
     collapsedStrip.addEventListener('click', (e) => {
       e.stopPropagation();
       updateSetting('pinned', true);
+      setTimeout(() => {
+        const firstLink = shadowRoot.querySelector('.toc-link');
+        if (firstLink) firstLink.focus();
+      }, 100);
+    });
+
+    collapsedStrip.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        updateSetting('pinned', true);
+        setTimeout(() => {
+          const firstLink = shadowRoot.querySelector('.toc-link');
+          if (firstLink) firstLink.focus();
+        }, 100);
+      }
     });
 
     container.appendChild(collapsedStrip);
@@ -623,9 +646,13 @@
       if (state.pinned) {
         pinBtn.classList.add('active');
         pinBtn.title = 'Unpin TOC';
+        pinBtn.setAttribute('aria-pressed', 'true');
+        pinBtn.setAttribute('aria-label', 'Unpin Table of Contents');
       } else {
         pinBtn.classList.remove('active');
         pinBtn.title = 'Pin TOC';
+        pinBtn.setAttribute('aria-pressed', 'false');
+        pinBtn.setAttribute('aria-label', 'Pin Table of Contents');
       }
     }
 
@@ -902,16 +929,22 @@
   function setActiveHeading(activeId) {
     if (!shadowRoot) return;
 
-    // Remove active styles from links and notches
+    // Remove active styles and attributes from links and notches
     const links = shadowRoot.querySelectorAll('.toc-link');
-    links.forEach(link => link.classList.remove('active'));
+    links.forEach(link => {
+      link.classList.remove('active');
+      link.removeAttribute('aria-current');
+    });
 
     const notches = shadowRoot.querySelectorAll('.dtoc-notch');
     notches.forEach(notch => notch.classList.remove('active'));
 
     if (activeId === '' || activeId === null) {
       const titleLink = shadowRoot.querySelector('.toc-title-item .toc-link');
-      if (titleLink) titleLink.classList.add('active');
+      if (titleLink) {
+        titleLink.classList.add('active');
+        titleLink.setAttribute('aria-current', 'true');
+      }
       const firstNotch = shadowRoot.querySelector('.dtoc-notch[data-id=""]');
       if (firstNotch) {
         firstNotch.classList.add('active');
@@ -921,6 +954,7 @@
       const activeLink = shadowRoot.querySelector(`.toc-link[href="#${activeId}"]`);
       if (activeLink) {
         activeLink.classList.add('active');
+        activeLink.setAttribute('aria-current', 'true');
         scrollWithinContainer(activeLink, 'nearest');
       }
 
