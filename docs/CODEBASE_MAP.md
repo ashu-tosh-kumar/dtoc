@@ -36,7 +36,9 @@ dtoc/
 │   ├── ARCHITECTURE.md         # System design, state flows, logic detail
 │   ├── PROJECT_BRIEF.md        # Team handbook, stacks, security rules
 │   ├── DEVELOPMENT_GUIDE.md    # Local setup, build, and deploy guide
-│   └── CODEBASE_MAP.md         # This file
+│   ├── CODEBASE_MAP.md         # This file
+│   ├── PRD.md                  # Product Requirements Document
+│   └── NEW_SITES_FEASIBILITY.md# Feasibility analysis for extension expansion
 │
 ├── .github/                    # AI Agent and GitHub configuration
 │   ├── copilot-instructions.md # Generic AI instruction file

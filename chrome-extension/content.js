@@ -100,6 +100,43 @@
       }
     });
 
+    // Observer for body/html theme changes (e.g. classes or attributes like data-theme)
+    const pageThemeObserver = new MutationObserver(() => {
+      if (isViewMode() && container) {
+        applyStateToUI();
+      }
+    });
+    
+    pageThemeObserver.observe(document.documentElement, { 
+      attributes: true, 
+      attributeFilter: ['class', 'style', 'data-theme', 'data-color-mode'] 
+    });
+    
+    if (document.body) {
+      pageThemeObserver.observe(document.body, { 
+        attributes: true, 
+        attributeFilter: ['class', 'style'] 
+      });
+    }
+
+    // Observer for Dark Reader extension toggling (injects/removes <style class="darkreader"> in <head>)
+    if (document.head) {
+      const darkReaderObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of [...mutation.addedNodes, ...mutation.removedNodes]) {
+            if ((node.nodeName === 'STYLE' && node.classList?.contains('darkreader')) ||
+                (node.nodeName === 'META' && node.getAttribute?.('name') === 'darkreader')) {
+              if (isViewMode() && container) {
+                applyStateToUI();
+              }
+              return;
+            }
+          }
+        }
+      });
+      darkReaderObserver.observe(document.head, { childList: true });
+    }
+
     window.addEventListener('resize', () => {
       if (isViewMode()) {
         alignContainerWithTitle();
@@ -315,9 +352,18 @@
 
     const host = document.createElement('div');
     host.id = 'dtoc-host';
+    // Protect host from Dark Reader: it lives in the light DOM and Dark Reader
+    // will try to set a dark background on it, which breaks our transparent notches.
+    host.style.setProperty('background', 'transparent', 'important');
+    host.style.setProperty('border', 'none', 'important');
+    host.style.setProperty('box-shadow', 'none', 'important');
+    host.style.setProperty('display', 'block', 'important');
+    host.style.setProperty('position', 'static', 'important');
+    host.style.setProperty('padding', '0', 'important');
+    host.style.setProperty('margin', '0', 'important');
     document.body.appendChild(host);
 
-    shadowRoot = host.attachShadow({ mode: 'open' });
+    shadowRoot = host.attachShadow({ mode: 'closed' });
 
     // Fetch CSS file
     const cssUrl = chrome.runtime.getURL('content.css');
@@ -442,6 +488,93 @@
     }
   }
 
+  function isPageDark() {
+    if (!document.body || !document.documentElement) return false;
+
+    // 0. Direct Dark Reader detection — Dark Reader in Dynamic mode doesn't
+    //    change body/html backgroundColor; it uses CSS variables and granular
+    //    style overrides, so background-color sampling misses it entirely.
+    if (document.querySelector('meta[name="darkreader"]') ||
+        document.documentElement.hasAttribute('data-darkreader-mode') ||
+        document.querySelector('style.darkreader, style.darkreader--sync')) {
+      return true;
+    }
+
+    // Helper to parse rgb/rgba color string
+    function parseColor(colorStr) {
+      if (!colorStr || colorStr === 'transparent') return null;
+      const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+      if (!match) return null;
+      return {
+        r: parseInt(match[1], 10),
+        g: parseInt(match[2], 10),
+        b: parseInt(match[3], 10),
+        a: match[4] !== undefined ? parseFloat(match[4]) : 1
+      };
+    }
+
+    // Helper to calculate brightness (0-255)
+    function getBrightness(color) {
+      if (!color || color.a === 0) return null;
+      return (color.r * 299 + color.g * 587 + color.b * 114) / 1000;
+    }
+
+    // 1. Check content container background first (it's the reading area)
+    const contentContainer = getContentContainer();
+    if (contentContainer) {
+      const contentStyle = window.getComputedStyle(contentContainer);
+      const contentBg = parseColor(contentStyle.backgroundColor);
+      if (contentBg && contentBg.a > 0.1) {
+        const bgBrightness = getBrightness(contentBg);
+        if (bgBrightness !== null) {
+          return bgBrightness < 128;
+        }
+      }
+    }
+
+    // 2. Fallback to body and documentElement background colors
+    const bodyStyle = window.getComputedStyle(document.body);
+    const htmlStyle = window.getComputedStyle(document.documentElement);
+
+    const bodyBg = parseColor(bodyStyle.backgroundColor);
+    const htmlBg = parseColor(htmlStyle.backgroundColor);
+
+    let bgBrightness = null;
+    if (bodyBg && bodyBg.a > 0.1) {
+      bgBrightness = getBrightness(bodyBg);
+    } else if (htmlBg && htmlBg.a > 0.1) {
+      bgBrightness = getBrightness(htmlBg);
+    }
+
+    if (bgBrightness !== null) {
+      return bgBrightness < 128;
+    }
+
+    // 3. Fallback: check text color of content container (light text means dark page)
+    if (contentContainer) {
+      const contentStyle = window.getComputedStyle(contentContainer);
+      const contentColor = parseColor(contentStyle.color);
+      if (contentColor && contentColor.a > 0.1) {
+        const textBrightness = getBrightness(contentColor);
+        if (textBrightness !== null) {
+          return textBrightness > 150;
+        }
+      }
+    }
+
+    // 4. Fallback: check text color of body
+    const bodyColor = parseColor(bodyStyle.color);
+    if (bodyColor && bodyColor.a > 0.1) {
+      const textBrightness = getBrightness(bodyColor);
+      if (textBrightness !== null) {
+        return textBrightness > 150;
+      }
+    }
+
+    // 5. Secondary fallback: prefers-color-scheme
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
   function applyStateToUI() {
     if (!container) return;
 
@@ -491,13 +624,22 @@
     } else if (state.theme === 'light') {
       isDark = false;
     } else {
-      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      isDark = isPageDark();
     }
 
     if (isDark) {
       container.classList.add('theme-dark');
     } else {
       container.classList.remove('theme-dark');
+    }
+
+    // Set page-dark/page-light for notches contrast (independent of container theme)
+    if (isPageDark()) {
+      container.classList.add('page-dark');
+      container.classList.remove('page-light');
+    } else {
+      container.classList.add('page-light');
+      container.classList.remove('page-dark');
     }
   }
 
