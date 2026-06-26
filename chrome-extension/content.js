@@ -9,6 +9,10 @@
     return trimmed.length > MAX_TEXT_LENGTH ? trimmed.substring(0, MAX_TEXT_LENGTH) + '...' : trimmed;
   }
 
+  function escapeCSSSelector(id) {
+    return id ? id.replace(/["\\]/g, '\\$&') : '';
+  }
+
   const SETTINGS_KEY = {
     ENABLED: 'enabled',
     POSITION: 'position',
@@ -951,14 +955,14 @@
         scrollWithinContainer(firstNotch, 'center');
       }
     } else {
-      const activeLink = shadowRoot.querySelector(`.toc-link[href="#${activeId}"]`);
+      const activeLink = shadowRoot.querySelector(`.toc-link[href="#${escapeCSSSelector(activeId)}"]`);
       if (activeLink) {
         activeLink.classList.add('active');
         activeLink.setAttribute('aria-current', 'true');
         scrollWithinContainer(activeLink, 'nearest');
       }
 
-      const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${activeId}"]`);
+      const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${escapeCSSSelector(activeId)}"]`);
       if (activeNotch) {
         activeNotch.classList.add('active');
         scrollWithinContainer(activeNotch, 'center');
