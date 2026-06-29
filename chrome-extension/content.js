@@ -926,6 +926,10 @@
     }
   }
 
+  function escapeSelector(str) {
+    return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
   function setActiveHeading(activeId) {
     if (!shadowRoot) return;
 
@@ -951,14 +955,15 @@
         scrollWithinContainer(firstNotch, 'center');
       }
     } else {
-      const activeLink = shadowRoot.querySelector(`.toc-link[href="#${activeId}"]`);
+      const escapedId = escapeSelector(activeId);
+      const activeLink = shadowRoot.querySelector(`.toc-link[href="#${escapedId}"]`);
       if (activeLink) {
         activeLink.classList.add('active');
         activeLink.setAttribute('aria-current', 'true');
         scrollWithinContainer(activeLink, 'nearest');
       }
 
-      const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${activeId}"]`);
+      const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${escapedId}"]`);
       if (activeNotch) {
         activeNotch.classList.add('active');
         scrollWithinContainer(activeNotch, 'center');
