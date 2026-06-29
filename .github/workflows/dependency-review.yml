@@ -1,7 +1,10 @@
-name: 'Dependency Review'
+# Scans dependency manifest changes on PRs and blocks pull requests that
+# introduce known-vulnerable dependencies. Native GitHub action, no external service.
+name: Dependency Review
+
 on:
   pull_request:
-    branches: [ "development", "main" ]
+    branches: ["development"]
 
 permissions:
   contents: read
@@ -10,7 +13,10 @@ jobs:
   dependency-review:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout Repository'
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: 'Dependency Review'
+      - name: Dependency Review
         uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
