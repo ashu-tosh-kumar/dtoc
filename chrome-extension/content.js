@@ -930,6 +930,15 @@
     return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   }
 
+  function safeQuerySelector(parent, selector) {
+    try {
+      return parent.querySelector(selector);
+    } catch (e) {
+      console.warn(`[dtoc] Invalid selector: ${selector}`, e);
+      return null;
+    }
+  }
+
   function setActiveHeading(activeId) {
     if (!shadowRoot) return;
 
@@ -956,14 +965,14 @@
       }
     } else {
       const escapedId = escapeSelector(activeId);
-      const activeLink = shadowRoot.querySelector(`.toc-link[href="#${escapedId}"]`);
+      const activeLink = safeQuerySelector(shadowRoot, `.toc-link[href="#${escapedId}"]`);
       if (activeLink) {
         activeLink.classList.add('active');
         activeLink.setAttribute('aria-current', 'true');
         scrollWithinContainer(activeLink, 'nearest');
       }
 
-      const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${escapedId}"]`);
+      const activeNotch = safeQuerySelector(shadowRoot, `.dtoc-notch[data-id="${escapedId}"]`);
       if (activeNotch) {
         activeNotch.classList.add('active');
         scrollWithinContainer(activeNotch, 'center');
