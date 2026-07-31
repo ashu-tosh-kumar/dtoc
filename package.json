@@ -23,10 +23,10 @@
   },
   "homepage": "https://github.com/ashu-tosh-kumar/dtoc#readme",
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
-    "jsdom": "^29.1.1",
-    "web-ext": "^10.4.0"
+    "jsdom": "^30.0.0",
+    "web-ext": "^10.5.0"
   }
 }
