@@ -9,6 +9,10 @@
     return trimmed.length > MAX_TEXT_LENGTH ? trimmed.substring(0, MAX_TEXT_LENGTH) + '...' : trimmed;
   }
 
+  function escapeCSSSelector(id) {
+    return id ? id.replace(/["\\]/g, '\\$&') : '';
+  }
+
   const SETTINGS_KEY = {
     ENABLED: 'enabled',
     POSITION: 'position',
