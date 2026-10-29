@@ -10,10 +10,10 @@ Any AI platform or chat assistant (such as Google Antigravity, Jules, Kiro, Clau
 
 | Persona | Focus Area | Primary Work | Quality Gate / Constraint | Instruction Source |
 |---------|------------|--------------|---------------------------|--------------------|
-| **Product Manager** (Remy) | Product Management | Writes feature requirements, plans sprints, triages issues | Cannot write code or test code | [.github/agents/product-manager.agent.md](file:///Users/ashutosh/projects/My/dtoc/.github/agents/product-manager.agent.md) |
-| **Dev Engineer** (Nova/Sage) | Code Implementation | Writes feature code and Jest unit tests | Cannot approve own work; must pass QA review | [.github/agents/dev-engineer.agent.md](file:///Users/ashutosh/projects/My/dtoc/.github/agents/dev-engineer.agent.md) |
-| **QA Engineer** (Ivy) | Quality Assurance | Reviews code, writes Playwright E2E tests, manual checks | Cannot write feature code; cannot approve own work | [.github/agents/qa-engineer.agent.md](file:///Users/ashutosh/projects/My/dtoc/.github/agents/qa-engineer.agent.md) |
-| **Marketing / Content** | Content Writer | Documentation updates, release notes, changelogs | Cannot modify implementation code | [.github/agents/marketing.agent.md](file:///Users/ashutosh/projects/My/dtoc/.github/agents/marketing.agent.md) |
+| **Product Manager** (Remy) | Product Management | Writes feature requirements, plans sprints, triages issues | Cannot write code or test code | [.github/agents/product-manager.agent.md](../.github/agents/product-manager.agent.md) |
+| **Dev Engineer** (Nova/Sage) | Code Implementation | Writes feature code and Jest unit tests | Cannot approve own work; must pass QA review | [.github/agents/dev-engineer.agent.md](../.github/agents/dev-engineer.agent.md) |
+| **QA Engineer** (Ivy) | Quality Assurance | Reviews code, writes Playwright E2E tests, manual checks | Cannot write feature code; cannot approve own work | [.github/agents/qa-engineer.agent.md](../.github/agents/qa-engineer.agent.md) |
+| **Marketing / Content** | Content Writer | Documentation updates, release notes, changelogs | Cannot modify implementation code | [.github/agents/marketing.agent.md](../.github/agents/marketing.agent.md) |
 
 ---
 
