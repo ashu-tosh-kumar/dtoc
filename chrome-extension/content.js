@@ -9,9 +9,6 @@
     return trimmed.length > MAX_TEXT_LENGTH ? trimmed.substring(0, MAX_TEXT_LENGTH) + '...' : trimmed;
   }
 
-  function escapeCSSSelector(id) {
-    return id ? id.replace(/["\\]/g, '\\$&') : '';
-  }
 
   const SETTINGS_KEY = {
     ENABLED: 'enabled',
@@ -934,12 +931,15 @@
     return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   }
 
-  function safeQuerySelector(parent, selector) {
+  function safeQuerySelector(root, selector) {
     try {
-      return parent.querySelector(selector);
+      return root.querySelector(selector);
     } catch (e) {
-      console.warn(`[dtoc] Invalid selector: ${selector}`, e);
-      return null;
+      if (e instanceof DOMException) {
+        console.warn(`[dtoc] Invalid selector prevented: ${selector}`, e);
+        return null;
+      }
+      throw e;
     }
   }
 

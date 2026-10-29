@@ -8,7 +8,7 @@
 **Learning:** Browser extension UI frequently synchronizes with user-generated document content (e.g., Markdown headers). When these values are passed directly into CSS selectors (like attribute selectors `[href="..."]` or `[data-id="..."]`), standard character sequences can prematurely terminate the selector string, causing exceptions.
 **Prevention:** Always escape user-controlled or dynamically extracted identifiers (like `\` and `"`) before interpolating them into attribute values inside `querySelector` or `querySelectorAll`.
 
-## 2026-07-03 - Prevent DOM-based DoS in querySelector via Try/Catch
-**Vulnerability:** User-controlled heading IDs were interpolated directly into a DOM query string (`shadowRoot.querySelector('.toc-link[href="#${activeId}"]')`). While basic escaping was added, unhandled characters could still cause `querySelector` to throw an uncaught DOMException, which breaks the scrollspy listener and halts execution (DoS).
-**Learning:** String replacement escaping is often insufficient to guarantee CSS selector validity across all possible user inputs. A malformed selector can still crash the extension's content script execution.
-**Prevention:** In addition to escaping, always wrap dynamically constructed CSS selector queries (e.g., using `querySelector` or `querySelectorAll` with user input) in a `try...catch` block to ensure exceptions are caught and handled gracefully, preventing execution halts.
+## 2026-07-10 - Prevent DOM-based DoS in querySelector using Safe Wrapper
+**Vulnerability:** Even when user-controlled strings (like heading IDs) are correctly escaped, extremely edge-case malformed characters or unexpected input lengths could still theoretically trigger a DOMException in `querySelector` when interpolating into attribute selectors, halting execution (DoS).
+**Learning:** In a browser extension, it's safer to not rely solely on proactive escaping (which can be bypassed by unforeseen edge cases). Using defensive `try/catch` wrappers around native DOM parsing methods provides an essential fallback layer of security.
+**Prevention:** Wrap `querySelector` (and similar native DOM methods that accept user-generated selector strings) in a `safeQuerySelector` function that catches `DOMException` and gracefully degrades (e.g., returning `null`) instead of crashing the content script.
