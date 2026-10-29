@@ -12,6 +12,7 @@ DTOC ("Dynamic Table of Content") is a browser extension (Chrome MV3 + Firefox M
 npm install              # Jest, Playwright, web-ext — no runtime deps
 npm test                 # Jest unit tests (tests/unit/test.js)
 npx jest -t "name"       # single unit test by name
+npm run lint             # ESLint (eslint.config.js); also enforces no-eval and no-unsanitized innerHTML
 npm run test:e2e         # Playwright E2E (tests/e2e.spec.js); needs `npx playwright install chromium` once
 npm run build-chrome     # zip chrome-extension/ -> chrome-extension/web-ext-artifacts/
 npm run build-firefox    # web-ext build firefox-extension/ -> firefox-extension/web-ext-artifacts/
@@ -54,7 +55,7 @@ Design detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). File map: [docs/COD
 
 ## Quality gates
 
-1. **Dev:** `npm test` passes; security constraints followed; Chrome and Firefox trees and manifests in sync.
+1. **Dev:** `npm run lint` has no errors; `npm test` passes; security constraints followed; Chrome and Firefox trees and manifests in sync.
 2. **QA:** `npm run test:e2e` passes; core-logic coverage > 80%; UI verified manually in Chromium and Firefox.
 3. **Product:** QA approval recorded on the PR; docs updated.
 
