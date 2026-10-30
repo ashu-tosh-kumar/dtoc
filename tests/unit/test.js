@@ -187,7 +187,7 @@ extensions.forEach(ext => {
       }
 
       function getContentContainer(hostname = 'mocked.atlassian.net') {
-        let selectors = [];
+        let selectors;
         if (isHostOrSubdomain(hostname, 'dev.to')) {
           selectors = [
             '#article-body',

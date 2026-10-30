@@ -257,16 +257,8 @@
       state.closed = closedVal;
 
       // Pin/minimize dual state resolution
-      let pinnedVal = undefined;
-      let minimizedVal = undefined;
-
-      if (hasSiteOverride) {
-        pinnedVal = siteConfig.pinned;
-        minimizedVal = siteConfig.minimized;
-      } else {
-        pinnedVal = result.pinned;
-        minimizedVal = result.minimized;
-      }
+      const pinnedVal = hasSiteOverride ? siteConfig.pinned : result.pinned;
+      const minimizedVal = hasSiteOverride ? siteConfig.minimized : result.minimized;
 
       if (pinnedVal !== undefined) {
         state.pinned = pinnedVal;
@@ -661,7 +653,7 @@
     container.classList.add(`position-${state.position}`);
 
     // Theme
-    let isDark = false;
+    let isDark;
     if (state.theme === 'dark') {
       isDark = true;
     } else if (state.theme === 'light') {
@@ -772,7 +764,7 @@
   // --- Parsing & Navigation ---
 
   function getContentContainer() {
-    let selectors = [];
+    let selectors;
     if (
       window.location.hostname === 'dev.to' ||
       window.location.hostname.endsWith('.dev.to')
