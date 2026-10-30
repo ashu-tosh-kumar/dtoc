@@ -926,8 +926,13 @@
     try {
       return parent.querySelector(selector);
     } catch (e) {
-      console.warn(`[dtoc] Invalid selector: ${selector}`, e);
-      return null;
+      // Malformed selectors (e.g. from page-controlled IDs) degrade to "not found";
+      // anything else is a real bug and must surface.
+      if (e instanceof DOMException) {
+        console.warn(`[dtoc] Invalid selector: ${selector}`, e);
+        return null;
+      }
+      throw e;
     }
   }
 

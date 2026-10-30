@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 const extensions = ['chrome-extension', 'firefox-extension'];
 
@@ -372,6 +373,52 @@ extensions.forEach(ext => {
         expect(resolved.enabled).toBe(false);
         expect(resolved.position).toBe('left');
       });
+    });
+  });
+});
+
+extensions.forEach(ext => {
+  describe(`safeQuerySelector in ${ext}`, () => {
+    // Run the real functions from content.js rather than a copy
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', ext, 'content.js'), 'utf8');
+    const grab = name => source.match(new RegExp(`  function ${name}\\([\\s\\S]*?\n  }\n`))[0];
+    const sandbox = { console: { warn: jest.fn() }, DOMException };
+    vm.createContext(sandbox);
+    vm.runInContext(`${grab('escapeSelector')}\n${grab('safeQuerySelector')}`, sandbox);
+    const { escapeSelector, safeQuerySelector } = sandbox;
+
+    beforeEach(() => {
+      sandbox.console.warn.mockClear();
+      document.body.innerHTML = '<a class="toc-link" href="#intro">Intro</a>';
+    });
+
+    test("returns the matching element for a valid selector", () => {
+      expect(safeQuerySelector(document, '.toc-link[href="#intro"]')).not.toBeNull();
+    });
+
+    test("returns null when nothing matches", () => {
+      expect(safeQuerySelector(document, '.toc-link[href="#missing"]')).toBeNull();
+    });
+
+    test.each([
+      ['unescaped quote', 'a"b'],
+      ['trailing backslash', 'a\\'],
+      ['newline', 'a\nb'],
+      ['unbalanced bracket', 'a"]['],
+    ])("does not throw for malicious id: %s", (_name, id) => {
+      expect(() => safeQuerySelector(document, `.toc-link[href="#${id}"]`)).not.toThrow();
+      expect(() => safeQuerySelector(document, `.toc-link[href="#${escapeSelector(id)}"]`)).not.toThrow();
+    });
+
+    test("returns null and warns on a DOMException", () => {
+      expect(safeQuerySelector(document, '.toc-link[href=')).toBeNull();
+      expect(sandbox.console.warn).toHaveBeenCalled();
+    });
+
+    test("rethrows errors that are not DOMException", () => {
+      const boom = new TypeError('boom');
+      const parent = { querySelector: () => { throw boom; } };
+      expect(() => safeQuerySelector(parent, '.x')).toThrow(boom);
     });
   });
 });
