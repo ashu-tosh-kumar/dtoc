@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "dtoc",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Generate a floating, sticky Table of Contents on Confluence, Medium, Dev.to, Wikipedia, and any web page.",
   "permissions": [
     "storage",

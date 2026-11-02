@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.0] - 2026-11-03
+
+- **Native Wikipedia Support**: Added native support for Wikipedia (`wikipedia.org` and subdomains like `en.wikipedia.org`) out of the box, with dedicated content container parsing (`#mw-content-text .mw-parser-output`) and article title detection (`#firstHeading`).
+- **Privacy Compliance Hardening**: Removed external Google Fonts requests (`fonts.googleapis.com` / `fonts.gstatic.com`) from the settings popup, guaranteeing 100% local-only operation and full adherence to the zero-network-requests privacy promise.
+- **Supply-Chain & CI Security**: Pinned all GitHub Actions across CI, Scorecard, and Dependency Review workflows to immutable 40-character commit SHAs.
+- **Security Policy & Disclosure**: Enhanced `SECURITY.md` with direct links to GitHub Security Advisories and issue reporting for coordinated vulnerability disclosure.
+- **Store & Project Metadata**: Overhauled browser extension manifest descriptions across Chrome and Firefox with clear, search-friendly summaries; standardized `package.json` and `package-lock.json` with project name, MIT license, author attribution, and tags.
+- **UI Polish**: Replaced dashed border on unsupported/experimental sites with a subtle solid glassmorphic accent border (`rgba(255, 153, 0, 0.5)`).
+- **Documentation & Assets**: Consolidated and resized web store screenshots to standardized 1280x800 and 1400x560 assets, added GitHub social preview card, and linked author's Dev.to article in `README.md`.
+
 ## [v3.0.0] - 2026-06-17
 
 - **UI Overhaul**: Redesigned the Table of Contents layout from a solid sidebar block into a modern, non-intrusive Glassmorphism "Peek" Drawer (Hover-to-Expand Sidebar) layout.
