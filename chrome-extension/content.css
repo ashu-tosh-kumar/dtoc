@@ -368,7 +368,7 @@
 #dtoc-container.experimental.pinned,
 #dtoc-container.experimental.keyboard-expanded,
 #dtoc-container.experimental:hover {
-  border: 1px dashed rgba(255, 153, 0, 0.6);
+  border: 1px solid rgba(255, 153, 0, 0.5);
   box-shadow: 0 8px 32px 0 rgba(255, 153, 0, 0.12);
 }
 
@@ -457,7 +457,7 @@
 #dtoc-container.theme-dark.experimental.pinned,
 #dtoc-container.theme-dark.experimental.keyboard-expanded,
 #dtoc-container.theme-dark.experimental:hover {
-  border: 1px dashed rgba(255, 153, 0, 0.8);
+  border: 1px solid rgba(255, 153, 0, 0.6);
   box-shadow: 0 8px 32px 0 rgba(255, 153, 0, 0.18);
 }
 

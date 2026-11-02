@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "dtoc",
   "version": "3.0.0",
-  "description": "Dynamic Table of Content.",
+  "description": "Generate a floating, sticky Table of Contents on Confluence, Medium, Dev.to, Wikipedia, and any web page.",
   "permissions": [
     "storage",
     "activeTab"

@@ -12,7 +12,12 @@ This file is the single source of truth for websites natively supported by the D
 - **Pattern**: `dev.to` (and subdomains)
 - **Context**: Tech articles and blog posts.
 
-## 3. Medium (Official & Custom Domains)
+## 3. Wikipedia
+
+- **Pattern**: `wikipedia.org` (and subdomains like `en.wikipedia.org`, `*.wikipedia.org`)
+- **Context**: Reference and encyclopedic articles.
+
+## 4. Medium (Official & Custom Domains)
 
 - **Official Domains**: `medium.com` and its subdomains (e.g., `*.medium.com`).
 - **Custom-Domain Publications**: The following popular publications hosted on Medium under custom domains:
