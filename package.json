@@ -1,7 +1,7 @@
 {
-  "name": "app",
+  "name": "dtoc",
   "version": "3.0.0",
-  "description": "Dynamic Table of Content for Confluence.",
+  "description": "Dynamic Table of Content browser extension for modern web navigation.",
   "main": "chrome-extension/content.js",
   "scripts": {
     "test": "jest tests/unit",
@@ -15,9 +15,17 @@
     "type": "git",
     "url": "git+https://github.com/ashu-tosh-kumar/dtoc.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "table-of-contents",
+    "browser-extension",
+    "confluence",
+    "medium",
+    "dev-to",
+    "wikipedia",
+    "productivity"
+  ],
+  "author": "Ashutosh Kumar",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/ashu-tosh-kumar/dtoc/issues"

@@ -187,7 +187,7 @@
   function isSupportedSite() {
     const hostname = window.location.hostname;
     const cleanHost = hostname.replace(/^www\./i, '');
-    const otherSupported = ['.atlassian.net', 'dev.to'];
+    const otherSupported = ['.atlassian.net', 'dev.to', 'wikipedia.org'];
     return otherSupported.some(site => cleanHost.endsWith(site)) || isMediumSite(cleanHost);
   }
 
@@ -205,6 +205,11 @@
       if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
       if (path === '/' || path === '') return false;
+    } else if (hostname === 'wikipedia.org' || hostname.endsWith('.wikipedia.org')) {
+      // Wikipedia edit paths and main page
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') && params.get('action') !== 'view') return false;
+      if (path === '/' || path === '/wiki/Main_Page') return false;
     } else if (hostname === 'atlassian.net' || hostname.endsWith('.atlassian.net')) {
       // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
       if (path.includes('/edit') || path.includes('/edit-v2')) return false;
@@ -779,6 +784,16 @@
         'article'
       ];
     } else if (
+      window.location.hostname === 'wikipedia.org' ||
+      window.location.hostname.endsWith('.wikipedia.org')
+    ) {
+      selectors = [
+        '#mw-content-text .mw-parser-output',
+        '#mw-content-text',
+        '#bodyContent',
+        '#content'
+      ];
+    } else if (
       window.location.hostname === 'atlassian.net' ||
       window.location.hostname.endsWith('.atlassian.net')
     ) {
@@ -814,6 +829,7 @@
 
   function getPageTitle() {
     const selectors = [
+      '#firstHeading',
       'h1#title-text',
       'h1[data-test-id="page-title"]',
       '.ak-page-header-title h1',
