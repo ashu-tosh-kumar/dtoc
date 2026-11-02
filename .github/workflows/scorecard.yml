@@ -8,6 +8,8 @@ on:
     - cron: "20 7 * * 2"
   push:
     branches: ["development"]
+  pull_request:
+    branches: ["development"]
 
 # Declare default permissions as read only.
 permissions: read-all
