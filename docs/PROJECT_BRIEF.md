@@ -120,6 +120,7 @@ For every release, the following steps must be followed:
 3. **Build**:
    - Run `npm run build` to build and package both extensions.
    - Outputs: `chrome-extension/web-ext-artifacts/dtoc-chrome-vX.Y.Z.zip` and `firefox-extension/web-ext-artifacts/dtoc-firefox-vX.Y.Z.zip`.
-4. **Tag**: Create and push git tag (`git tag vX.Y.Z` && `git push origin vX.Y.Z`).
-5. **Publish**: Upload files to Chrome Web Store Developer Console and Mozilla Add-ons Developer Hub.
-6. **Announce**: Update `README.md` and create `docs/RELEASE_NOTES_vX.Y.Z.md`.
+4. **Doc Sync**: Review `git diff <last-tag>..HEAD` and update all docs (`CHANGELOG.md`, `SUPPORTED_SITES.md`, `README.md`, `docs/ARCHITECTURE.md`, `docs/CODEBASE_MAP.md`, `docs/RELEASE_NOTES_vX.Y.Z.md`, and store copy in `docs/store-listings/`).
+5. **Tag**: Create and push git tag (`git tag vX.Y.Z` && `git push origin vX.Y.Z`).
+6. **Publish**: Submit extension packages and sync store metadata using `docs/store-listings/` on Chrome Web Store Developer Console, Mozilla Add-ons Hub, and Microsoft Partner Center.
+7. **Announce**: Share release notes and update showcase links.

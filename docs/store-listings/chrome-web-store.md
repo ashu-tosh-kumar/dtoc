@@ -1,6 +1,6 @@
-# Chrome Web Store Listing Metadata (v3.0.0)
+# Chrome Web Store Listing Metadata (v3.1.0)
 
-This file contains the centralized metadata for the Chrome Web Store listing of `dtoc`. Use this content to update the store listing when publishing version 3.0.0.
+This file contains the centralized metadata for the Chrome Web Store listing of `dtoc`. Use this content to update the store listing when publishing version 3.1.0.
 
 ---
 
@@ -17,10 +17,10 @@ This file contains the centralized metadata for the Chrome Web Store listing of 
 * **Proposed Value**:
 
 ```text
-Generate a floating, sticky Table of Contents on Confluence, Medium, Dev.to, and any website for seamless document navigation.
+Generate a floating, sticky Table of Contents on Confluence, Wikipedia, Medium, Dev.to, and any website for seamless document navigation.
 ```
 
-* **Character Count**: 127 characters
+* **Character Count**: 130 characters
 
 ---
 
@@ -37,16 +37,14 @@ Tired of scrolling back and forth on long Confluence pages, lengthy DEV.to guide
 
 Whether you are a developer reviewing technical documentation, a researcher reading deep-dive articles, or a project manager navigating Confluence wiki spaces, dtoc keeps you oriented and saves you hours of scroll fatigue.
 
-*** WHAT'S NEW IN V3.0.0 ***
-• Modern Glassmorphism Drawer: Overhauled the layout into a sleek, non-intrusive hover-to-expand drawer that peek-slides when you hover near the screen edge.
-• Passive Notch Indicator: Flushed perfectly to the edge of the viewport, minimized notch markers act as a visual heatmap of heading levels and document density.
-• Smart Auto-Theme Detection: Intelligently analyzes page background/text colors and detects Dark Reader overrides to seamlessly match the website's theme (Light, Dark, or Auto).
-• Dynamic Vertical Centering: Aligns the notches stack dynamically to the first heading/page title, preventing layout jumps during panel expansion.
-• Compact Scrollable Layout: Constrained height to a compact 480px, enabling independent vertical scrolling for both the notch-strip and the expanded panel.
-• Active Heading Autocentering: The active heading notch automatically centers in the minimized notch stack as you scroll through the page.
+*** WHAT'S NEW IN V3.1.0 ***
+• Native Wikipedia Support: Wikipedia (wikipedia.org and all language subdomains) is now natively supported out of the box — no Beta toggle required.
+• Privacy Hardening: Removed external Google Fonts requests from the settings popup, guaranteeing 100% local-only, zero-network operation across all surfaces.
+• Security Hardening: Introduced safe DOM query helpers (escapeSelector + safeQuerySelector) to prevent CSS selector injection and ReDoS from page-controlled heading IDs. GitHub Actions supply-chain fully pinned to immutable commit SHAs.
+• UI Polish: Replaced dashed border on experimental sites with a subtle solid glassmorphic accent border, consistent with the v3.0.0 drawer design.
 
 *** KEY FEATURES ***
-• Zero-Setup Automatic Outlines: Automatically detects document structures and compiles a nested, interactive sidebar on Confluence, DEV Community, and Medium (including custom-domain publications).
+• Zero-Setup Automatic Outlines: Automatically detects document structures and compiles a nested, interactive sidebar on Confluence, Wikipedia, DEV Community, and Medium (including custom-domain publications).
 • Universal Site Toggle (Beta): Use the quick-toggle in the extension popup to instantly enable dtoc on ANY website or blog.
 • Sticky & Floating Sidebar: Remains fixed to the side of your viewport, giving you instant navigation access with a single click.
 • Left/Right Position Control: Customize your preferred dock position (left or right side of the screen) globally or per-hostname.

@@ -57,7 +57,14 @@ Design detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). File map: [docs/COD
 
 1. **Dev:** `npm run lint` has no errors; `npm test` passes; security constraints followed; Chrome and Firefox trees and manifests in sync.
 2. **QA:** `npm run test:e2e` passes; core-logic coverage > 80%; UI verified manually in Chromium and Firefox.
-3. **Product:** QA approval recorded on the PR; docs updated.
+3. **Product & Release:** QA approval recorded on the PR. Whenever preparing or performing a release, inspect the git diff between the last release tag and latest release commit (`git diff <last-tag>..HEAD`), and ensure all relevant documentation is updated accordingly:
+   - `CHANGELOG.md`: document user-facing and internal changes with release date.
+   - `SUPPORTED_SITES.md`: update if any supported sites or URL patterns changed.
+   - `README.md`: ensure feature lists, store links, badges, and documentation links reflect current state.
+   - `docs/ARCHITECTURE.md`: update view-mode detection, selectors, and security models if parsing or runtime logic changed.
+   - `docs/CODEBASE_MAP.md`: update if files, folders, or scripts were added/moved.
+   - `docs/RELEASE_NOTES_v<version>.md`: create release summary artifact.
+   - `docs/store-listings/`: update metadata for Chrome Web Store, Microsoft Edge Add-ons, Mozilla Firefox Add-ons, and YouTube showcase (version numbers, "What's New", supported site lists, permission justifications, reviewer notes).
 
 Role-based personas (Product Manager, Dev, QA, Marketing) and their handoff workflow: [docs/AGENT_TEAM.md](docs/AGENT_TEAM.md), with persona files in [.github/agents/](.github/agents/).
 

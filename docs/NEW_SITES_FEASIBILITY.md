@@ -2,6 +2,8 @@
 
 This document outlines the feasibility of expanding our Table of Contents (TOC) extension to support additional high-traffic websites that host long-form content but lack a native, sticky TOC.
 
+> **Note**: Sites marked `[SUPPORTED]` have graduated from this feasibility list and are now natively supported. See [SUPPORTED_SITES.md](../SUPPORTED_SITES.md) for the full list of active native sites.
+
 ## 1. Medium [SUPPORTED]
 
 **Target User Base & Demographics:**
@@ -18,7 +20,20 @@ Medium periodically updates its DOM structure and obfuscates CSS class names. We
 
 ---
 
-## 2. Substack
+## 2. Wikipedia [SUPPORTED]
+
+**Target User Base & Demographics:**
+Hundreds of millions of readers globally across all knowledge domains. Wikipedia is the de facto reference resource for encyclopedic, long-form articles.
+
+**Ease of Implementation:**
+High. Wikipedia renders standard HTML within a predictable content container (`#mw-content-text .mw-parser-output`) that has been stable for years. Article headings use standard `h1`–`h6` tags, and the article title is reliably found at `#firstHeading`.
+
+**Resolution:**
+Native support added in **v3.1.0**. View mode detection excludes edit/history actions (`?action!=view`) and the Main Page. See [ARCHITECTURE.md](ARCHITECTURE.md) for selector details.
+
+---
+
+## 3. Substack
 
 **Target User Base & Demographics:**
 Rapidly growing platform for independent writers, journalists, and newsletter creators. Content is heavily skewed towards long-form essays and deep dives.
@@ -34,7 +49,7 @@ Substack heavily monetizes through paywalls. Our extension must gracefully handl
 
 ---
 
-## 3. Dev.to (DEV Community) [SUPPORTED]
+## 4. Dev.to (DEV Community) [SUPPORTED]
 
 **Target User Base & Demographics:**
 Millions of software developers and tech enthusiasts reading tutorials, guides, and opinion pieces.
@@ -50,7 +65,7 @@ Many Dev.to authors *do* manually create a TOC at the beginning of their article
 
 ---
 
-## 4. GitHub Repositories (READMEs) & Wikis
+## 5. GitHub Repositories (READMEs) & Wikis
 
 **Target User Base & Demographics:**
 Virtually every software developer. Extensive use of long-form Markdown files for project documentation.
@@ -66,7 +81,7 @@ GitHub recently introduced a native, sticky TOC sidebar for README files on the 
 
 ---
 
-## 5. Reddit (Long-form Text Posts)
+## 6. Reddit (Long-form Text Posts)
 
 **Target User Base & Demographics:**
 Huge general audience. Subreddits dedicated to stories, legal advice, deep dives, and technical explanations frequently feature massive walls of text.
