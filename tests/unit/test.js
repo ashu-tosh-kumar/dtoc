@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 const extensions = ['chrome-extension', 'firefox-extension'];
 
@@ -67,6 +68,10 @@ extensions.forEach(ext => {
         } else if (isMediumSite(normalizedHostname)) {
           if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
           if (path === '/' || path === '') return false;
+        } else if (isAllowedHost('wikipedia.org')) {
+          const params = new URLSearchParams(search);
+          if (params.get('action') && params.get('action') !== 'view') return false;
+          if (path === '/' || path === '/wiki/Main_Page') return false;
         } else if (isAllowedHost('atlassian.net')) {
           if (path.includes('/edit') || path.includes('/edit-v2')) return false;
           const params = new URLSearchParams(search);
@@ -187,7 +192,7 @@ extensions.forEach(ext => {
       }
 
       function getContentContainer(hostname = 'mocked.atlassian.net') {
-        let selectors = [];
+        let selectors;
         if (isHostOrSubdomain(hostname, 'dev.to')) {
           selectors = [
             '#article-body',
@@ -198,6 +203,8 @@ extensions.forEach(ext => {
           selectors = [
             'article'
           ];
+        } else if (isHostOrSubdomain(hostname, 'wikipedia.org')) {
+          selectors = ['#mw-content-text .mw-parser-output', '#mw-content-text', '#bodyContent', '#content'];
         } else if (isHostOrSubdomain(hostname, 'atlassian.net')) {
           selectors = ['#main-content', '#content', '.ak-renderer-document', '.wiki-content'];
         } else {
@@ -244,6 +251,11 @@ extensions.forEach(ext => {
         expect(getContentContainer('levelup.gitconnected.com').tagName.toLowerCase()).toBe('article');
       });
 
+      test("finds #mw-content-text for Wikipedia", () => {
+        document.body.innerHTML = '<div id="mw-content-text"><div class="mw-parser-output">Wiki Content</div></div>';
+        expect(getContentContainer('en.wikipedia.org').textContent).toBe('Wiki Content');
+      });
+
       test("finds main element for generic site", () => {
         document.body.innerHTML = '<main>Generic Main</main>';
         expect(getContentContainer('generic.com').tagName.toLowerCase()).toBe('main');
@@ -261,7 +273,7 @@ extensions.forEach(ext => {
         const siteConfig = siteSettings[currentDomain] || {};
 
         const globalEnabled = result.enabled !== undefined ? result.enabled : true;
-        const otherSupported = ['.atlassian.net', 'dev.to'];
+        const otherSupported = ['.atlassian.net', 'dev.to', 'wikipedia.org'];
         const isSupported = otherSupported.some(site => currentDomain.endsWith(site)) || isMediumSite(currentDomain);
         const siteEnabled = siteConfig.enabled !== undefined ? siteConfig.enabled : isSupported;
         const enabled = globalEnabled && siteEnabled;
@@ -300,6 +312,18 @@ extensions.forEach(ext => {
         expect(resolved.pinned).toBe(false);
       });
 
+      test("defaults to enabled when site-specific settings are not configured on Wikipedia", () => {
+        const result = {
+          enabled: true,
+          position: 'right',
+          closed: false,
+          minimized: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'en.wikipedia.org');
+        expect(resolved.enabled).toBe(true);
+      });
+
       test("defaults to disabled when site-specific settings are not configured on unsupported sites", () => {
         const result = {
           enabled: true,
@@ -308,7 +332,7 @@ extensions.forEach(ext => {
           minimized: true,
           siteSettings: {}
         };
-        const resolved = resolveSettings(result, 'wikipedia.org');
+        const resolved = resolveSettings(result, 'example.com');
         expect(resolved.enabled).toBe(false);
       });
 
@@ -331,13 +355,13 @@ extensions.forEach(ext => {
           closed: false,
           minimized: false,
           siteSettings: {
-            'wikipedia.org': {
+            'example.com': {
               enabled: true,
               position: 'left'
             }
           }
         };
-        const resolved = resolveSettings(result, 'wikipedia.org');
+        const resolved = resolveSettings(result, 'example.com');
         expect(resolved.enabled).toBe(true);
         expect(resolved.position).toBe('left');
       });
@@ -347,13 +371,13 @@ extensions.forEach(ext => {
           enabled: false,
           position: 'right',
           siteSettings: {
-            'wikipedia.org': {
+            'example.com': {
               enabled: true,
               position: 'left'
             }
           }
         };
-        const resolved = resolveSettings(result, 'wikipedia.org');
+        const resolved = resolveSettings(result, 'example.com');
         expect(resolved.enabled).toBe(false);
       });
       
@@ -372,6 +396,52 @@ extensions.forEach(ext => {
         expect(resolved.enabled).toBe(false);
         expect(resolved.position).toBe('left');
       });
+    });
+  });
+});
+
+extensions.forEach(ext => {
+  describe(`safeQuerySelector in ${ext}`, () => {
+    // Run the real functions from content.js rather than a copy
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', ext, 'content.js'), 'utf8');
+    const grab = name => source.match(new RegExp(`  function ${name}\\([\\s\\S]*?\n  }\n`))[0];
+    const sandbox = { console: { warn: jest.fn() }, DOMException };
+    vm.createContext(sandbox);
+    vm.runInContext(`${grab('escapeSelector')}\n${grab('safeQuerySelector')}`, sandbox);
+    const { escapeSelector, safeQuerySelector } = sandbox;
+
+    beforeEach(() => {
+      sandbox.console.warn.mockClear();
+      document.body.innerHTML = '<a class="toc-link" href="#intro">Intro</a>';
+    });
+
+    test("returns the matching element for a valid selector", () => {
+      expect(safeQuerySelector(document, '.toc-link[href="#intro"]')).not.toBeNull();
+    });
+
+    test("returns null when nothing matches", () => {
+      expect(safeQuerySelector(document, '.toc-link[href="#missing"]')).toBeNull();
+    });
+
+    test.each([
+      ['unescaped quote', 'a"b'],
+      ['trailing backslash', 'a\\'],
+      ['newline', 'a\nb'],
+      ['unbalanced bracket', 'a"]['],
+    ])("does not throw for malicious id: %s", (_name, id) => {
+      expect(() => safeQuerySelector(document, `.toc-link[href="#${id}"]`)).not.toThrow();
+      expect(() => safeQuerySelector(document, `.toc-link[href="#${escapeSelector(id)}"]`)).not.toThrow();
+    });
+
+    test("returns null and warns on a DOMException", () => {
+      expect(safeQuerySelector(document, '.toc-link[href=')).toBeNull();
+      expect(sandbox.console.warn).toHaveBeenCalled();
+    });
+
+    test("rethrows errors that are not DOMException", () => {
+      const boom = new TypeError('boom');
+      const parent = { querySelector: () => { throw boom; } };
+      expect(() => safeQuerySelector(parent, '.x')).toThrow(boom);
     });
   });
 });

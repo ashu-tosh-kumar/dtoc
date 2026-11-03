@@ -22,4 +22,4 @@ This extension follows strict security and privacy standards:
 
 ## Reporting a Vulnerability
 
-Please create a new issue detailing the security vulnerability.
+Please report vulnerabilities privately via [GitHub Security Advisories](https://github.com/ashu-tosh-kumar/dtoc/security/advisories/new) or by opening an issue on [GitHub Issues](https://github.com/ashu-tosh-kumar/dtoc/issues). We appreciate responsible disclosure and aim to respond to security reports within 48 hours.

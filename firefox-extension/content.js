@@ -187,7 +187,7 @@
   function isSupportedSite() {
     const hostname = window.location.hostname;
     const cleanHost = hostname.replace(/^www\./i, '');
-    const otherSupported = ['.atlassian.net', 'dev.to'];
+    const otherSupported = ['.atlassian.net', 'dev.to', 'wikipedia.org'];
     return otherSupported.some(site => cleanHost.endsWith(site)) || isMediumSite(cleanHost);
   }
 
@@ -205,6 +205,11 @@
       if (path === '/new-story' || path.endsWith('/edit') || path.includes('/edit/')) return false;
       // Exclude home page
       if (path === '/' || path === '') return false;
+    } else if (hostname === 'wikipedia.org' || hostname.endsWith('.wikipedia.org')) {
+      // Wikipedia edit paths and main page
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') && params.get('action') !== 'view') return false;
+      if (path === '/' || path === '/wiki/Main_Page') return false;
     } else if (hostname === 'atlassian.net' || hostname.endsWith('.atlassian.net')) {
       // Confluence typically has '/edit' in the URL or 'editMode' in the body class when editing
       if (path.includes('/edit') || path.includes('/edit-v2')) return false;
@@ -257,16 +262,8 @@
       state.closed = closedVal;
 
       // Pin/minimize dual state resolution
-      let pinnedVal = undefined;
-      let minimizedVal = undefined;
-
-      if (hasSiteOverride) {
-        pinnedVal = siteConfig.pinned;
-        minimizedVal = siteConfig.minimized;
-      } else {
-        pinnedVal = result.pinned;
-        minimizedVal = result.minimized;
-      }
+      const pinnedVal = hasSiteOverride ? siteConfig.pinned : result.pinned;
+      const minimizedVal = hasSiteOverride ? siteConfig.minimized : result.minimized;
 
       if (pinnedVal !== undefined) {
         state.pinned = pinnedVal;
@@ -661,7 +658,7 @@
     container.classList.add(`position-${state.position}`);
 
     // Theme
-    let isDark = false;
+    let isDark;
     if (state.theme === 'dark') {
       isDark = true;
     } else if (state.theme === 'light') {
@@ -772,7 +769,7 @@
   // --- Parsing & Navigation ---
 
   function getContentContainer() {
-    let selectors = [];
+    let selectors;
     if (
       window.location.hostname === 'dev.to' ||
       window.location.hostname.endsWith('.dev.to')
@@ -785,6 +782,16 @@
     } else if (isMediumSite(window.location.hostname)) {
       selectors = [
         'article'
+      ];
+    } else if (
+      window.location.hostname === 'wikipedia.org' ||
+      window.location.hostname.endsWith('.wikipedia.org')
+    ) {
+      selectors = [
+        '#mw-content-text .mw-parser-output',
+        '#mw-content-text',
+        '#bodyContent',
+        '#content'
       ];
     } else if (
       window.location.hostname === 'atlassian.net' ||
@@ -822,6 +829,7 @@
 
   function getPageTitle() {
     const selectors = [
+      '#firstHeading',
       'h1#title-text',
       'h1[data-test-id="page-title"]',
       '.ak-page-header-title h1',
@@ -926,6 +934,24 @@
     }
   }
 
+  function escapeSelector(str) {
+    return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
+  function safeQuerySelector(parent, selector) {
+    try {
+      return parent.querySelector(selector);
+    } catch (e) {
+      // Malformed selectors (e.g. from page-controlled IDs) degrade to "not found";
+      // anything else is a real bug and must surface.
+      if (e instanceof DOMException) {
+        console.warn(`[dtoc] Invalid selector: ${selector}`, e);
+        return null;
+      }
+      throw e;
+    }
+  }
+
   function setActiveHeading(activeId) {
     if (!shadowRoot) return;
 
@@ -951,14 +977,15 @@
         scrollWithinContainer(firstNotch, 'center');
       }
     } else {
-      const activeLink = shadowRoot.querySelector(`.toc-link[href="#${activeId}"]`);
+      const escapedId = escapeSelector(activeId);
+      const activeLink = safeQuerySelector(shadowRoot, `.toc-link[href="#${escapedId}"]`);
       if (activeLink) {
         activeLink.classList.add('active');
         activeLink.setAttribute('aria-current', 'true');
         scrollWithinContainer(activeLink, 'nearest');
       }
 
-      const activeNotch = shadowRoot.querySelector(`.dtoc-notch[data-id="${activeId}"]`);
+      const activeNotch = safeQuerySelector(shadowRoot, `.dtoc-notch[data-id="${escapedId}"]`);
       if (activeNotch) {
         activeNotch.classList.add('active');
         scrollWithinContainer(activeNotch, 'center');

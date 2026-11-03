@@ -11,6 +11,16 @@
   <a rel="noreferrer noopener" href="https://microsoftedge.microsoft.com/addons/detail/dtoc/kibljloiohjclbilhjmlfmahhdionhgc"><img alt="Edge Addons" src="https://img.shields.io/badge/Edge-141e24.svg?&style=for-the-badge"></a>
 </p>
 
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store Version" src="https://img.shields.io/chrome-web-store/v/iikddlbkfdmlbhlfhgdkoebpimljflfl?style=flat-square&label=chrome"></a>
+  <a href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store Users" src="https://img.shields.io/chrome-web-store/users/iikddlbkfdmlbhlfhgdkoebpimljflfl?style=flat-square&label=users"></a>
+  <a href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store Rating" src="https://img.shields.io/chrome-web-store/rating/iikddlbkfdmlbhlfhgdkoebpimljflfl?style=flat-square&label=rating"></a>
+  <a href="https://addons.mozilla.org/firefox/addon/dtoc/"><img alt="Firefox Add-on Version" src="https://img.shields.io/amo/v/dtoc?style=flat-square&label=firefox"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/ashu-tosh-kumar/dtoc?style=flat-square&color=blue"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/ashu-tosh-kumar/dtoc"><img alt="OpenSSF Scorecard" src="https://img.shields.io/ossf-scorecard/github.com/ashu-tosh-kumar/dtoc?style=flat-square&label=openssf%20scorecard"></a>
+</p>
+<!-- OpenSSF Best Practices: register this repo at https://www.bestpractices.dev/en/projects/new then add: <a href="https://www.bestpractices.dev/projects/PROJECT_ID"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/PROJECT_ID/badge"></a> -->
+
 <h2 align="center">Dynamic Table of Content</h2>
 <br/>
 <p align="center">dtoc is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong> designed to automatically parse web pages and generate a sticky, interactive Table of Contents. Adaptively rendering on top of your reading material, dtoc features a modern hover-to-expand glassmorphic drawer layout, minimized state notch indicators for visual document density, preference-based smart light/dark theme detection, and site-specific overrides to deliver an exceptional reading and navigation experience.</p>
@@ -19,11 +29,11 @@
 
 ## Demo
 
-
 https://github.com/user-attachments/assets/3bc4657b-85db-49a9-8c17-e88ca9299e76
 
-
 *Watch the walkthrough on [YouTube](https://youtu.be/-vvvjiyMUjQ).*
+
+Dev.to Article: [I vibe-coded an extension that auto-generates Table of Contents for any web page](https://dev.to/atkumar/i-vibe-coded-an-extension-that-auto-generates-table-of-contents-for-any-web-page-1c9g)
 
 ## Features
 
@@ -31,7 +41,7 @@ https://github.com/user-attachments/assets/3bc4657b-85db-49a9-8c17-e88ca9299e76
 - **Minimized Notch Indicator**: Flushed to the viewport edge (left or right), these interactive state notches serve as a passive visual indicator of heading levels and document density.
 - **Dynamic Vertical Alignment**: Centers the first notch / first heading link dynamically with the page title as you scroll, avoiding vertical jumps during expansion.
 - **Smart Auto Theme Detection**: Automatically infers light or dark mode based on actual page background/text color analysis and direct detection of Dark Reader forced dark themes, with options to toggle light/dark manually.
-- **Broad Compatibility & Site-Specific Scopes**: Built-in native optimization for **Confluence Cloud**, **DEV Community**, **Medium**, and custom Medium publications, plus a generic HTML semantic parser (Beta) to support any website. Position settings (left/right) and pinned/minimized/closed states can be configured globally or per-site.
+- **Broad Compatibility & Site-Specific Scopes**: Built-in native optimization for **Confluence Cloud**, **DEV Community**, **Wikipedia**, **Medium**, and custom Medium publications, plus a generic HTML semantic parser (Beta) to support any website. Position settings (left/right) and pinned/minimized/closed states can be configured globally or per-site.
 - **Max Height & Internal Scrolling**: Constrained to a compact 480px maximum height with scroll support within both the notches strip and the expanded TOC panel for longer documents.
 - **Security & Privacy First**: Zero external network requests. Hardened against DOM-based Denial of Service (DoS) and ReDoS by enforcing a 500-character length limit on extracted heading texts. All preferences are saved locally in browser storage.
 - **Support Request Form**: A privacy-friendly link to request native support for new hostnames, pre-filled with the hostname (the extension itself does not make any external API calls).

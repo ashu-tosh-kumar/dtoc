@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetAllBtn = document.getElementById('reset-all-btn');
 
   // Supported site patterns
-  const otherSupportedSites = ['.atlassian.net', 'dev.to'];
+  const otherSupportedSites = ['.atlassian.net', 'dev.to', 'wikipedia.org'];
   const MEDIUM_DOMAINS = [
     'levelup.gitconnected.com',
     'plainenglish.io',
