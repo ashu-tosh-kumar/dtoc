@@ -89,6 +89,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     await expect(collapsedStrip).toBeVisible();
     await collapsedStrip.hover({ force: true });
     await page.waitForTimeout(500);
+    await containerLocator.hover();
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents');
@@ -373,6 +374,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     await expect(collapsedStrip).toBeVisible();
     await collapsedStrip.hover({ force: true });
     await page.waitForTimeout(500);
+    await containerLocator.hover();
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents');
@@ -439,6 +441,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     await expect(collapsedStrip).toBeVisible();
     await collapsedStrip.hover({ force: true });
     await page.waitForTimeout(500);
+    await containerLocator.hover();
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents');
@@ -460,10 +463,114 @@ test.describe('DTOC Extension E2E Tests', () => {
     await page.close();
   });
 
-  test('Experimental website interactions (Wikipedia)', async () => {
+  test('Supported website interactions (Wikipedia)', async () => {
     test.setTimeout(120000);
     const page = await browserContext.newPage();
-    await page.goto('https://en.wikipedia.org/wiki/Main_Page', { waitUntil: 'domcontentloaded' });
+
+    await page.route('https://en.wikipedia.org/wiki/Artificial_intelligence', async route => {
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Artificial intelligence - Wikipedia</title>
+        </head>
+        <body>
+          <h1 id="firstHeading">Artificial intelligence</h1>
+          <div id="bodyContent">
+            <div id="mw-content-text">
+              <div class="mw-parser-output">
+                <p>Overview of AI.</p>
+                <h2>History</h2>
+                <p>History details.</p>
+                <h3>Early work</h3>
+                <p>Early work details.</p>
+                <h2>Ethics</h2>
+                <p>Ethical considerations.</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: html,
+      });
+    });
+
+    await page.goto('https://en.wikipedia.org/wiki/Artificial_intelligence');
+    await page.waitForSelector('h1, h2, h3', { timeout: 10000 });
+    await page.waitForTimeout(2000);
+
+    const hostLocator = page.locator('#dtoc-host');
+    await expect(hostLocator).toBeAttached({ timeout: 10000 });
+
+    const containerLocator = hostLocator.locator('css=nav#dtoc-container');
+    await expect(containerLocator).toBeVisible();
+    await expect(containerLocator).not.toHaveClass(/experimental/);
+
+    // Hover over collapsed strip to expand the drawer
+    const collapsedStrip = hostLocator.locator('.dtoc-collapsed-strip');
+    await expect(collapsedStrip).toBeVisible();
+    await collapsedStrip.hover({ force: true });
+    await page.waitForTimeout(500);
+    await containerLocator.hover();
+
+    const headerTitle = hostLocator.locator('.dtoc-title');
+    await expect(headerTitle).toHaveText('Table of Contents');
+
+    const tocList = hostLocator.locator('.toc-list');
+    await expect(tocList).toBeVisible();
+
+    const firstLink = tocList.locator('.toc-link').first();
+    await expect(firstLink).toHaveText('Artificial intelligence');
+
+    const secondLink = tocList.locator('.toc-link:not([href="#"])').first();
+    await expect(secondLink).toHaveText('History');
+
+    const href = await secondLink.getAttribute('href');
+    await secondLink.click();
+
+    await page.waitForFunction((expectedHash) => {
+      return window.location.hash === expectedHash;
+    }, href);
+
+    expect(page.url()).toContain(href);
+    await page.close();
+  });
+
+  test('Experimental website interactions (Unsupported site)', async () => {
+    test.setTimeout(120000);
+    const targetUrl = 'https://news.ycombinator.com/item?id=12345';
+    const page = await browserContext.newPage();
+
+    await page.route(targetUrl, async route => {
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Experimental Discussion - Hacker News</title>
+        </head>
+        <body>
+          <main>
+            <h1>Discussion Topic</h1>
+            <h2>Comments Section</h2>
+            <p>Some comment text</p>
+            <h3>Sub-thread A</h3>
+            <p>More details</p>
+          </main>
+        </body>
+        </html>
+      `;
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        body: html,
+      });
+    });
+
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 
     const hostLocator = page.locator('#dtoc-host');
@@ -472,25 +579,25 @@ test.describe('DTOC Extension E2E Tests', () => {
 
     const popupPage = await browserContext.newPage();
 
-    await popupPage.addInitScript(() => {
+    await popupPage.addInitScript((url) => {
       window.chrome = window.chrome || {};
       window.chrome.tabs = window.chrome.tabs || {};
       const originalQuery = window.chrome.tabs.query;
       window.chrome.tabs.query = function(queryInfo, callback) {
         if (callback) {
           if (queryInfo.active && queryInfo.currentWindow) {
-            callback([{ url: 'https://en.wikipedia.org/wiki/Main_Page' }]);
+            callback([{ url }]);
             return;
           }
           return originalQuery(queryInfo, callback);
         } else {
           if (queryInfo.active && queryInfo.currentWindow) {
-            return Promise.resolve([{ url: 'https://en.wikipedia.org/wiki/Main_Page' }]);
+            return Promise.resolve([{ url }]);
           }
           return originalQuery(queryInfo);
         }
       };
-    });
+    }, targetUrl);
 
     await popupPage.goto(`chrome-extension://${extensionId}/popup.html`);
 
@@ -528,6 +635,7 @@ test.describe('DTOC Extension E2E Tests', () => {
     await expect(collapsedStrip).toBeVisible();
     await collapsedStrip.hover({ force: true });
     await page.waitForTimeout(500);
+    await containerLocator.hover();
 
     const headerTitle = hostLocator.locator('.dtoc-title');
     await expect(headerTitle).toHaveText('Table of Contents (Beta)');
