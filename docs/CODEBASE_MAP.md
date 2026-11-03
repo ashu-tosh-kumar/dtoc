@@ -41,7 +41,12 @@ dtoc/
 │   ├── CODEBASE_MAP.md         # This file
 │   ├── AGENT_TEAM.md           # AI agent roles, handoff workflow, quality gates
 │   ├── PRD.md                  # Product Requirements Document (historical reference)
-│   └── NEW_SITES_FEASIBILITY.md# Feasibility analysis for extension expansion
+│   ├── NEW_SITES_FEASIBILITY.md# Feasibility analysis for extension expansion
+│   └── store-listings/         # Web store (Chrome, Edge, Firefox) & YouTube showcase copy
+│       ├── chrome-web-store.md # Chrome Web Store listing metadata & justifications
+│       ├── edge-add-ons.md     # Microsoft Edge Add-ons listing metadata & keywords
+│       ├── firefox-add-ons.md  # Mozilla Add-ons listing metadata & reviewer notes
+│       └── youtube-showcase.md # YouTube showcase video metadata, tags, and agentic SEO
 │
 ├── .github/                    # GitHub configuration
 │   ├── copilot-instructions.md # Adapter → AGENTS.md (do not edit directly)

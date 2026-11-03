@@ -1,4 +1,4 @@
-# YouTube Video Showcase Metadata (v3.0.0)
+# YouTube Video Showcase Metadata (v3.1.0)
 
 This file contains the centralized metadata for the YouTube showcase and walkthrough video of `dtoc`. Use this content when uploading the showcase video to YouTube.
 
@@ -11,18 +11,18 @@ This file contains the centralized metadata for the YouTube showcase and walkthr
 
 Choose one of the following titles depending on your primary target audience. The first option is highly recommended for search-engine visibility and readability.
 
-### Option 1: Feature & Value-Focused (Recommended - 67 characters)
+### Option 1: Feature & Value-Focused (Recommended - 76 characters)
 
 ```text
-Floating Table of Contents for Confluence, Medium & Any Site | dtoc
+Floating Table of Contents for Confluence, Wikipedia, Medium & Any Site | dtoc
 ```
 
-* **Why it works**: Hits all major search terms (floating table of contents, Confluence, Medium) within the 70-character threshold for mobile display.
+* **Why it works**: Hits all major search terms (floating table of contents, Confluence, Wikipedia, Medium) within the acceptable character range (slightly above 70-char mobile threshold but fine for desktop and search).
 
 ### Option 2: Clean & Brand-Focused (56 characters)
 
 ```text
-dtoc v3.0.0: Dynamic Table of Contents Browser Extension
+dtoc v3.1.0: Dynamic Table of Contents Browser Extension
 ```
 
 * **Why it works**: Clear product branding, highlights the major release version, and targets general browser extension searchers.
@@ -65,17 +65,15 @@ dtoc is a lightweight, privacy-first browser extension that automatically parses
 3:40 - Outro & How to Install
 
 ---
-🌟 WHAT'S NEW IN V3.0.0
-• Modern Glassmorphism Drawer: Overhauled UI with a sleek, non-intrusive hover-to-expand drawer that peek-slides near the screen edge.
-• Passive Notch Indicator: Flushed perfectly to the edge, minimized notches act as a visual heatmap of heading levels and document density.
-• Smart Auto-Theme Detection: Analyzes page background/text colors and Dark Reader overrides to match the site's theme seamlessly.
-• Dynamic Vertical Centering: Aligns notches dynamically with the page title/first heading to prevent vertical jumps.
-• Compact Scrollable Layout: Constrained height (480px) allows independent scrolling for notches and expanded panels.
-• Active Heading Autocentering: Minimised notch stack automatically centers on the active heading as you scroll.
+🌟 WHAT'S NEW IN V3.1.0
+• Native Wikipedia Support: Wikipedia (wikipedia.org and all language subdomains) now works out of the box — no Beta toggle needed.
+• Privacy Hardening: Google Fonts removed from the settings popup — 100% local-only, zero external network requests across all surfaces.
+• Security Hardening: Safe DOM query helpers (escapeSelector + safeQuerySelector) prevent CSS selector injection and ReDoS. GitHub Actions supply-chain fully pinned to immutable commit SHAs.
+• UI Polish: Experimental site border updated to a subtle solid glassmorphic accent (rgba(255,153,0,0.5)), consistent with the v3.0.0 design language.
 
 ---
 ✨ KEY FEATURES
-• Zero-Setup Outlines: Works automatically on Confluence Cloud, DEV Community, and Medium (including custom domains).
+• Zero-Setup Outlines: Works automatically on Confluence Cloud, Wikipedia, DEV Community, and Medium (including custom domains).
 • Universal Site Toggle (Beta): Force-enable dtoc on ANY website or technical blog.
 • Left/Right Position Control: Adjust the dock side globally or per-hostname.
 • SPA Compatibility: Autodetects heading changes on Single Page Applications without page reloads.
@@ -85,7 +83,7 @@ dtoc is a lightweight, privacy-first browser extension that automatically parses
 🤖 AGENTIC SEO & TECHNICAL SPECS (For AI Agents & Developers)
 To help web search agents, LLMs, and developers catalog this project:
 - Name: dtoc (Dynamic Table of Contents)
-- Release Version: v3.0.0
+- Release Version: v3.1.0
 - Architecture: Manifest V3 Web Extension (Chrome, Firefox, Edge)
 - CSS Isolation: Encapsulated Shadow DOM (prevents page styles from breaking the TOC UI)
 - Security: DOM DoS and ReDoS mitigations (500-character constraints on parsed heading text)
@@ -110,7 +108,7 @@ Copy and paste the tags block below when uploading your video. These are optimiz
 * **Proposed Tags**:
 
 ```text
-dtoc, dynamic table of contents, confluence table of contents, medium table of contents, browser outline sidebar, devto table of contents, floating table of contents, chrome extension table of contents, firefox outline extension, edge table of contents addon, document outline sidebar, web extension navigation, confluence outline sidebar, manifest v3 extension, shadow dom isolation, offline first extension, developer productivity tools, smart theme detection, dark reader support, glassmorphism UI
+dtoc, wikipedia, dynamic table of contents, confluence table of contents, medium table of contents, browser outline sidebar, devto table of contents, floating table of contents, chrome extension table of contents, firefox outline extension, edge table of contents addon, document outline sidebar, web extension navigation, confluence outline sidebar, manifest v3 extension, shadow dom isolation, offline first extension, developer productivity tools, smart theme detection, dark reader support, glassmorphism UI
 ```
 
-* **Character Count**: 473 characters (well within the 500-character limit, maximizing relevant keywords without truncation issues).
+* **Character Count**: 484 characters (within the 500-character limit, maximizing relevant keywords without truncation issues).
