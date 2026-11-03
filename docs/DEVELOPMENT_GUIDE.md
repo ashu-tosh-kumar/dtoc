@@ -113,7 +113,7 @@ npm run test:e2e
 
 When preparing a release:
 1. Verify all tests pass.
-2. Bump version in `package.json` (e.g. `npm version patch|minor|major`).
+2. Bump version in `package.json` and both `chrome-extension/manifest.json` and `firefox-extension/manifest.json` (e.g. `npm version patch|minor|major`).
 3. Build distribution packages:
    ```bash
    npm run build
@@ -121,9 +121,21 @@ When preparing a release:
    This creates:
    - Chrome ZIP: `chrome-extension/web-ext-artifacts/dtoc-chrome-v<version>.zip`
    - Firefox ZIP: `firefox-extension/web-ext-artifacts/dtoc-firefox-v<version>.zip`
-4. Create release tag and push it:
+4. Update documentation by reviewing the git diff against the previous release (`git diff <last-tag>..HEAD`):
+   - **`CHANGELOG.md`**: Add a `## [vX.Y.Z] - YYYY-MM-DD` section summarising all changes.
+   - **`SUPPORTED_SITES.md`**: Add or update entries for any newly supported sites.
+   - **`docs/ARCHITECTURE.md`**: Update "View Mode Detection", "Main Content Container Target", and "Heading Normalization" if parsing logic changed for any site; update "Security Model" if new security helpers were introduced.
+   - **`docs/CODEBASE_MAP.md`**: Reflect any new files, renamed files, or structural changes in the directory tree.
+   - **`docs/store-listings/`**: Review and update copy across `chrome-web-store.md`, `edge-add-ons.md`, `firefox-add-ons.md`, and `youtube-showcase.md` (version header, "What's New", supported websites, permission justifications, testing notes).
+   - **`README.md`**: Update the Features list if user-facing behaviour changed, and verify store links/badges.
+   - **`docs/RELEASE_NOTES_v<version>.md`**: Create a new release notes file summarising what was shipped (see existing CHANGELOG entries for style).
+5. Create release tag and push it:
    ```bash
-   git push origin main --tags
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
    ```
-5. Submit files to Chrome Developer Dashboard and Mozilla Add-ons Hub.
-6. Document in a new `docs/RELEASE_NOTES_v<version>.md` file.
+6. Submit packages and updated store listings:
+   - Use `docs/store-listings/chrome-web-store.md` to update Chrome Web Store Developer Dashboard.
+   - Use `docs/store-listings/edge-add-ons.md` to update Microsoft Partner Center (Edge Add-ons).
+   - Use `docs/store-listings/firefox-add-ons.md` to update Mozilla Add-ons Developer Hub (AMO).
+   - Use `docs/store-listings/youtube-showcase.md` if publishing or updating video showcase metadata.

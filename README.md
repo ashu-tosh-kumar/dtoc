@@ -55,6 +55,19 @@ We take security and user privacy seriously:
 - [Natively Supported Sites](SUPPORTED_SITES.md)
 - [Changelog](CHANGELOG.md)
 - [Credits & Design Inspiration](CREDITS.md)
+- [Technical Architecture](docs/ARCHITECTURE.md)
+- [Store Listings & Showcase Metadata](docs/store-listings/)
+
+## Store Listings & YouTube Showcase
+
+Centralized copy and reviewer instructions for web store listings and the walkthrough video are maintained in [`docs/store-listings/`](docs/store-listings/):
+
+- [Chrome Web Store Listing](docs/store-listings/chrome-web-store.md) — Title, descriptions, permission justifications, and testing instructions.
+- [Microsoft Edge Add-ons Listing](docs/store-listings/edge-add-ons.md) — Title, short/detailed descriptions, search keywords, and reviewer notes.
+- [Mozilla Firefox Add-ons Listing](docs/store-listings/firefox-add-ons.md) — Summary, markdown description, and whiteboard reviewer notes.
+- [YouTube Video Showcase](docs/store-listings/youtube-showcase.md) — Video titles, description, timestamps, tags, and agentic SEO block.
+
+> **Note for Contributors & Maintainers**: On every release, review the git diff against the previous release to ensure these store listings and showcase metadata are updated with new features, supported websites, and accurate version details before submission.
 
 ## Manual Installation
 
