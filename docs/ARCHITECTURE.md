@@ -89,6 +89,7 @@ To avoid cluttering text fields and editors, DTOC automatically disables itself 
 - **Confluence**: Excludes paths containing `/edit` or `/edit-v2`, and query parameters `mode=edit`.
 - **Dev.to**: Excludes `/new`, paths ending in `/edit`, or path containing `/edit/`, and the homepage `/`.
 - **Medium**: Excludes `/new-story`, paths ending in `/edit`, or path containing `/edit/`, and the homepage `/`.
+- **Wikipedia**: Excludes any `?action=` query parameter that is not `view` (e.g. `?action=edit`, `?action=history`), and the root path `/` and `/wiki/Main_Page`.
 - **Generic Sites**: Excludes editing keywords (`/edit`, `/editor`, `/write`, `/new`, `/compose`, `/draft`) and root paths.
 
 ### 2. Main Content Container Target
@@ -96,12 +97,13 @@ TOC headings are parsed ONLY from within the main content container to prevent i
 - **Confluence**: `#main-content`, `#content`, `.ak-renderer-document`, `.wiki-content`
 - **Dev.to**: `#article-body`, `.crayons-article__body`, `.crayons-article__main`
 - **Medium**: `article`
+- **Wikipedia**: `#mw-content-text .mw-parser-output`, `#mw-content-text`, `#bodyContent`, `#content`
 - **Generic Sites**: `article`, `main`, `[role="main"]`, `#main`, `#content`, `.post-content`, `.article-content`, `.entry-content`, `body`
 
 ### 3. Heading Normalization & Navigation
 - The content script queries `h1, h2, h3, h4, h5, h6` elements inside the resolved container.
 - **Slugification**: If a heading lacks an `id` attribute, it generates one based on its text content (e.g. `<h2>Architecture Overview</h2>` gets `id="dtoc-architecture-overview"`). Duplicate IDs are suffixed numerically.
-- **Page Title Prepend**: The page title (e.g., extracted from Confluence `h1#title-text`, Dev.to `h1.crayons-title`, or document title) is prepended to the TOC as the top item. Clicking it scrolls to the top of the page.
+- **Page Title Prepend**: The page title (e.g., extracted from Wikipedia `#firstHeading`, Confluence `h1#title-text`, Dev.to `h1.crayons-title`, or document title) is prepended to the TOC as the top item. Clicking it scrolls to the top of the page.
 - **Offsets**: A smooth-scroll action triggers `scrollIntoView()`. To account for sticky site headers, a temporary `scrollMarginTop = '70px'` is applied to the target element before navigation.
 
 ---
@@ -134,3 +136,7 @@ DTOC features a dual-testing model:
    - **No eval()**: Dynamic code execution is strictly prohibited.
    - **No innerHTML on User Content**: Page titles and heading texts are injected strictly using `textContent` to prevent Cross-Site Scripting (XSS).
    - **Isolated Contexts**: The extension uses a Shadow DOM (`#dtoc-host`) to ensure site CSS does not leak into the TOC panel, and extension CSS does not affect the host page.
+3. **Safe DOM Queries (`safeQuerySelector` + `escapeSelector`)**:
+   - `escapeSelector(str)` escapes `\` and `"` in page-derived strings (e.g. heading `id` attributes) before they are interpolated into CSS attribute selectors (e.g. `[href="#..."]`, `[data-id="..."]`). This prevents CSS selector injection and ReDoS via pathological input.
+   - `safeQuerySelector(parent, selector)` wraps `parent.querySelector(selector)` in a try/catch. It silently returns `null` **only** for `DOMException` (malformed selectors originating from page-controlled IDs), and re-throws every other error so real bugs still surface.
+   - **Rule**: Any `querySelector` / `querySelectorAll` call that uses a dynamic, page-derived value (e.g. a heading's `id`) must pass through `escapeSelector` first and be executed via `safeQuerySelector`. Never build selectors by string concatenation without escaping.
