@@ -43,6 +43,27 @@ test.describe('DTOC Extension E2E Tests', () => {
     await browserContext.close();
   });
 
+  test.beforeEach(async () => {
+    // Close any leftover pages from previous tests
+    for (const p of browserContext.pages()) {
+      await p.close().catch(() => {});
+    }
+
+    // Reset extension storage to default state before every test
+    const setupPage = await browserContext.newPage();
+    await setupPage.goto(`chrome-extension://${extensionId}/popup.html`);
+    await setupPage.evaluate(() => {
+      return new Promise((resolve) => {
+        if (window.chrome && window.chrome.storage && window.chrome.storage.local) {
+          window.chrome.storage.local.clear(resolve);
+        } else {
+          resolve();
+        }
+      });
+    });
+    await setupPage.close();
+  });
+
   test('Supported website interactions (Confluence)', async () => {
     test.setTimeout(120000);
     const page = await browserContext.newPage();
@@ -323,6 +344,12 @@ test.describe('DTOC Extension E2E Tests', () => {
 
     await closeBtn.click();
     await expect(containerLocator).toHaveClass(/hidden/);
+
+    await popupPage.bringToFront();
+    await restoreBtn.click();
+    await page.waitForTimeout(500);
+    await page.bringToFront();
+    await expect(containerLocator).not.toHaveClass(/hidden/);
 
     await page.close();
     await popupPage.close();
