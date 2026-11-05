@@ -22,4 +22,15 @@ This extension follows strict security and privacy standards:
 
 ## Reporting a Vulnerability
 
-Please report vulnerabilities privately via [GitHub Security Advisories](https://github.com/ashu-tosh-kumar/dtoc/security/advisories/new) or by opening an issue on [GitHub Issues](https://github.com/ashu-tosh-kumar/dtoc/issues). We appreciate responsible disclosure and aim to respond to security reports within 48 hours.
+If you discover a security vulnerability, please do not disclose it publicly or open a public issue. Instead, report it securely by submitting a private advisory:
+
+- **Security Advisory URL**: [Submit a Vulnerability Report](https://github.com/ashu-tosh-kumar/dtoc/security/advisories/new)
+
+### Vulnerability Disclosure Policy & Timelines
+
+We take the security of this project seriously and adhere to coordinated vulnerability disclosure best practices:
+
+- **Initial Response & Acknowledgment**: Vulnerability reports will be acknowledged within 48 hours of receipt.
+- **Assessment**: The maintainer will investigate and validate the vulnerability within 7 days.
+- **Fix & Remediation**: A patch will be prepared and tested in private advisory workspaces.
+- **Disclosure Timeline**: A patched version and public security advisory disclosing the vulnerability will be published within 90 days of the initial report, or sooner once a fix has been verified.

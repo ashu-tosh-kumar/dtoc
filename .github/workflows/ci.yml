@@ -1,7 +1,9 @@
-# Lint and unit tests on every PR. Runs entirely on the runner; no external services.
+# Lint and unit tests on every PR and push. Runs entirely on the runner; no external services.
 name: CI
 
 on:
+  push:
+    branches: ["development", "main"]
   pull_request:
     branches: ["development", "main"]
 
@@ -14,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Setup Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.0.0
         with:
