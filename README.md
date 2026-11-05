@@ -12,12 +12,14 @@
 </p>
 
 <p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/ashu-tosh-kumar/dtoc?style=flat-square&color=blue"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/ashu-tosh-kumar/dtoc"><img alt="OpenSSF Scorecard" src="https://img.shields.io/ossf-scorecard/github.com/ashu-tosh-kumar/dtoc?style=flat-square&label=openssf%20scorecard"></a>
+  <a href="https://github.com/ashu-tosh-kumar/dtoc/releases"><img alt="Release" src="https://img.shields.io/github/v/release/ashu-tosh-kumar/dtoc?style=flat-square&color=blue"></a>
   <a href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store Version" src="https://img.shields.io/chrome-web-store/v/iikddlbkfdmlbhlfhgdkoebpimljflfl?style=flat-square&label=chrome"></a>
   <a href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store Users" src="https://img.shields.io/chrome-web-store/users/iikddlbkfdmlbhlfhgdkoebpimljflfl?style=flat-square&label=users"></a>
   <a href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store Rating" src="https://img.shields.io/chrome-web-store/rating/iikddlbkfdmlbhlfhgdkoebpimljflfl?style=flat-square&label=rating"></a>
   <a href="https://addons.mozilla.org/firefox/addon/dtoc/"><img alt="Firefox Add-on Version" src="https://img.shields.io/amo/v/dtoc?style=flat-square&label=firefox"></a>
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/ashu-tosh-kumar/dtoc?style=flat-square&color=blue"></a>
-  <a href="https://scorecard.dev/viewer/?uri=github.com/ashu-tosh-kumar/dtoc"><img alt="OpenSSF Scorecard" src="https://img.shields.io/ossf-scorecard/github.com/ashu-tosh-kumar/dtoc?style=flat-square&label=openssf%20scorecard"></a>
+  <a href="https://github.com/ashu-tosh-kumar/dtoc/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ashu-tosh-kumar/dtoc/actions/workflows/ci.yml/badge.svg"></a>
 </p>
 <!-- OpenSSF Best Practices: register this repo at https://www.bestpractices.dev/en/projects/new then add: <a href="https://www.bestpractices.dev/projects/PROJECT_ID"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/PROJECT_ID/badge"></a> -->
 
@@ -57,6 +59,11 @@ We take security and user privacy seriously:
 - [Credits & Design Inspiration](CREDITS.md)
 - [Technical Architecture](docs/ARCHITECTURE.md)
 - [Store Listings & Showcase Metadata](docs/store-listings/)
+- [Standards & Codification (`ai-docs`)](https://github.com/ashu-tosh-kumar/ai-docs) — DTOC complies with the standards detailed in `ai-docs`.
+
+## Standards & Agentic Readiness
+
+DTOC adheres to the standards codified in [`ai-docs`](https://github.com/ashu-tosh-kumar/ai-docs) — a repository-independent, agent-independent, and cross-platform place to document, codify, and enforce software engineering standards, CI/CD security baselines, and agentic workflows. Instructions for AI coding assistants are centralized in the vendor-neutral [`AGENTS.md`](AGENTS.md), while tool-specific adapters (`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.cursorrules`, `.continue/rules/dtoc.md`) serve as lightweight pointers.
 
 ## Store Listings & YouTube Showcase
 
