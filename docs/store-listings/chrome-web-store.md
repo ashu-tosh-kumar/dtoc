@@ -8,6 +8,7 @@ This file contains the centralized metadata for the Chrome Web Store listing of 
 
 * **Field Limit**: 45 characters
 * **Proposed Value**: `dtoc - Dynamic Table of Contents` (32 characters)
+* **Official Homepage / Website**: `https://uncommonlydone.com/tools/dtoc`
 
 ---
 

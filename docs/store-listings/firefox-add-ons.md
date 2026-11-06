@@ -2,6 +2,8 @@
 
 This file contains the centralized metadata for the Mozilla Firefox Add-ons (AMO) Store listing of `dtoc`. Use this content to update the store listing when publishing version 3.1.0.
 
+* **Official Homepage / Website**: `https://uncommonlydone.com/tools/dtoc`
+
 ---
 
 ## 1. Summary

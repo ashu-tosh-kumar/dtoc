@@ -4,8 +4,10 @@
   </a>
 </p>
 <p align="center">dtoc <strong>automatically parses</strong> web pages and generates a <strong>modern, interactive Table of Contents</strong> to navigate long documents effortlessly.</p>
+<p align="center">Interactive showcase &amp; guides: <a href="https://uncommonlydone.com/tools/dtoc"><strong>uncommonlydone.com/tools/dtoc</strong></a></p>
 <br/>
 <p align="center">
+  <a rel="noreferrer noopener" href="https://uncommonlydone.com/tools/dtoc"><img alt="Interactive Showcase" src="https://img.shields.io/badge/Showcase-uncommonlydone.com%2Ftools%2Fdtoc-c42b2f.svg?&style=for-the-badge"></a>
   <a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>
   <a rel="noreferrer noopener" href="https://addons.mozilla.org/firefox/addon/dtoc/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-141e24.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white"></a>
   <a rel="noreferrer noopener" href="https://microsoftedge.microsoft.com/addons/detail/dtoc/kibljloiohjclbilhjmlfmahhdionhgc"><img alt="Edge Addons" src="https://img.shields.io/badge/Edge-141e24.svg?&style=for-the-badge"></a>
@@ -33,7 +35,7 @@
 
 https://github.com/user-attachments/assets/3bc4657b-85db-49a9-8c17-e88ca9299e76
 
-*Watch the walkthrough on [YouTube](https://youtu.be/-vvvjiyMUjQ).*
+*Watch the walkthrough on [YouTube](https://youtu.be/-vvvjiyMUjQ) or explore the interactive showcase on [uncommonlydone.com/tools/dtoc](https://uncommonlydone.com/tools/dtoc).*
 
 Dev.to Article: [I vibe-coded an extension that auto-generates Table of Contents for any web page](https://dev.to/atkumar/i-vibe-coded-an-extension-that-auto-generates-table-of-contents-for-any-web-page-1c9g)
 
