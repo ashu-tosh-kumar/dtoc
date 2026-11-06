@@ -12,10 +12,10 @@ This file contains the centralized metadata for the Mozilla Firefox Add-ons (AMO
 * **Proposed Value**:
 
 ```text
-Generate a floating, interactive Table of Contents outline on Confluence Cloud, Wikipedia, Medium, Dev.to, and any website. Effortlessly navigate long articles, wikis, and documentation with smart theme detection, glassmorphism UI, and zero tracking.
+Add a floating table of contents to Confluence, Wikipedia, Medium, DEV and any long page. Jump to any section in one click, never lose your place. Free, open source, no tracking, nothing leaves your browser.
 ```
 
-* **Character Count**: 249 characters
+* **Character Count**: 207 characters
 
 ---
 
@@ -25,58 +25,77 @@ Generate a floating, interactive Table of Contents outline on Confluence Cloud, 
 * **Proposed Value**:
 
 ```markdown
-### **dtoc** — Dynamic Table of Contents & Outline Sidebar
-Effortlessly navigate long articles, wikis, technical blogs, and documentation on any website.
+### **dtoc**: Table of Contents for Any Web Page
+**Never get lost in a long web page again.**
 
-Tired of scrolling back and forth on long Confluence pages, DEV.to guides, or Medium articles? **dtoc** is a lightweight, privacy-first browser extension that automatically parses page headings (`H1`–`H6`) to build a beautiful, floating Table of Contents outline sidebar.
+dtoc adds a clean, clickable table of contents to Confluence, Wikipedia, Medium, DEV and any long article, so you always know where you are and can jump to any section in one click. Free, open source, and nothing leaves your browser.
 
-Whether you are a developer reviewing technical documentation, a researcher reading deep-dive articles, or a project manager navigating Confluence wiki spaces, **dtoc** keeps you oriented and saves you hours of scroll fatigue.
-
----
-
-### 🚀 **What's New in v3.1.0**
-*   **Native Wikipedia Support**: Wikipedia (`wikipedia.org` and all language subdomains) is now natively supported — no Beta toggle required.
-*   **Privacy Hardening**: Removed external Google Fonts requests from the settings popup, guaranteeing 100% local-only operation across all surfaces.
-*   **Security Hardening**: Introduced `escapeSelector` + `safeQuerySelector` helpers to prevent CSS selector injection and ReDoS from page-controlled heading IDs. GitHub Actions supply-chain fully pinned to immutable commit SHAs.
-*   **UI Polish**: Replaced dashed border on experimental sites with a subtle solid glassmorphic accent border, consistent with the v3.0.0 drawer design.
+Picture a long Confluence design doc and you need the section on rollout risks. You scroll, overshoot, scroll back, and lose your place. dtoc gives every long page the outline that Confluence, Medium and much of the web are missing.
 
 ---
 
-### ✨ **Key Features**
-*   **Zero-Setup Automatic Outlines**: Automatically detects document structures and compiles a nested, interactive sidebar on Confluence, Wikipedia, DEV Community, and Medium (including custom-domain publications).
-*   **Universal Site Toggle (Beta)**: Use the quick-toggle in the extension popup to instantly enable **dtoc** on *any* website or blog.
-*   **Sticky & Floating Sidebar**: Remains fixed to the side of your viewport, giving you instant navigation access with a single click.
-*   **Left/Right Position Control**: Customize your preferred dock position (left or right side of the screen) globally or per-hostname.
-*   **Article Title Navigation**: Click the top article header in the TOC to immediately return to the absolute top of the page.
-*   **SPA Compatibility**: Fully supports Single Page Applications (like Confluence and Medium) by automatically rebuilding the heading tree on dynamic content updates without a reload.
-*   **Minimizable and Closable**: Hide the panel or collapse it into passive notches for a completely distraction-free reading experience.
+### **What You Get**
+*   Jump anywhere in one click: a clickable outline built from the page's own headings.
+*   Always know where you are: the section you are reading is highlighted as you scroll.
+*   Stays out of your way: a slim drawer tucks to the edge of the page and opens when you hover.
+*   Matches the page: automatic light or dark theme, with a manual override.
+*   Always up to date: the outline refreshes as dynamic pages change, with no reload.
+*   Your layout, your way: dock it left or right, globally or per site. Hide or minimize it any time.
 
 ---
 
-### 🛠️ **Technical Specifications (For AI Agents & Developers)**
-*   **Architecture**: Strict Manifest V3 implementation with zero background script/service worker memory overhead.
-*   **Style Isolation**: Uses Shadow DOM encapsulation to prevent target page CSS styles from breaking the TOC UI.
-*   **Performance**: Lightweight parsing engine finishes DOM indexing in under 1 second.
-*   **Safety Hardened**: Built-in DOM DoS and ReDoS mitigations (500-character constraints on extracted nodes).
+### **Works Where You Read**
+*   Confluence Cloud: review long docs and wiki pages without losing your place.
+*   Wikipedia (all languages): navigate long articles, no setup needed.
+*   Medium and custom-domain publications: skim a long read, then dive into the part you care about.
+*   DEV Community: move through long guides and tutorials in one click.
+*   Any other website (Beta): works on pages with standard headings. Turn it on for a site from the extension menu.
 
 ---
 
-### 🛡️ **Privacy & Security**
-We take your privacy seriously. **dtoc** is 100% local-only and offline-first:
-*   **Zero external network calls** (no analytics, no telemetry, no tracking).
-*   Extension data and preferences are saved exclusively in your local browser storage.
-*   Strict Content Security Policy (CSP).
+### **Who It's For**
+*   Engineers and product managers reviewing long Confluence docs, specs and runbooks.
+*   Students and researchers reading long Wikipedia entries and articles.
+*   Writers and editors checking the structure of a piece at a glance.
+*   Anyone on a work laptop who needs open-source, fully local software their security team can audit.
 
 ---
 
-### ℹ️ **Permissions Explained**
-*   `Read and change your data on all websites`: Required to run the content script that parses heading tags and renders the floating outline overlay on supported and user-enabled pages.
-*   `storage`: Required to persist user preferences (TOC position, closed/minimized state, per-site overrides) locally.
-*   `activeTab`: Used to safely check the current tab's hostname in the settings popup, allowing you to customize settings for the active site or request support.
+### **Private By Design**
+dtoc has no server, no account, and no analytics:
+*   Makes no external network requests.
+*   Keeps your settings only in your browser.
+*   Open source under the MIT license, with a public security policy.
 
 ---
 
-### 🔗 **Links & Support**
+### **What's New In v3.1.0**
+*   Wikipedia now works out of the box on every language, with no Beta toggle.
+*   Fully local: removed the last external font request from the settings popup, so dtoc makes zero network requests.
+*   Safer on any page: hardened against malicious or oversized page headings.
+*   Cleaner look on Beta sites: a subtle solid accent border replaces the dashed one.
+
+---
+
+### **Permissions Explained**
+*   "Read and change your data on all websites": Required to run the content script that parses heading tags and renders the floating outline overlay on supported and user-enabled pages.
+*   "storage": Required to persist user preferences (TOC position, closed/minimized state, per-site overrides) locally.
+*   "activeTab": Used to safely check the current tab's hostname in the settings popup, allowing you to customize settings for the active site or request support.
+
+---
+
+### **Quick Answers**
+*   **Does it work on Confluence?** Yes. Confluence Cloud has dedicated support.
+*   **Is it free?** Yes, free and open source.
+*   **Does it collect data?** No.
+*   **Why is the outline empty on a page?** Some pages have no real heading tags. Request support for a site from the extension menu.
+
+For developers: Manifest V3, no background script, Shadow DOM style isolation, MIT licensed.
+
+---
+
+### **Links & Support**
+*   [Guide, screenshots & FAQ](https://uncommonlydone.com/tools/dtoc)
 *   [GitHub Repository](https://github.com/ashu-tosh-kumar/dtoc)
 *   [YouTube Video Showcase](https://youtu.be/-vvvjiyMUjQ)
 ```

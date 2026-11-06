@@ -3,7 +3,7 @@
     <img width="160" alt="dtoc logo" src="images/icon512.png">
   </a>
 </p>
-<p align="center">dtoc <strong>automatically parses</strong> web pages and generates a <strong>modern, interactive Table of Contents</strong> to navigate long documents effortlessly.</p>
+<p align="center"><strong>Never get lost in a long web page again.</strong> dtoc adds a clean, clickable <strong>table of contents</strong> to Confluence, Wikipedia, Medium, DEV and any long page. Free, open source, and nothing leaves your browser.</p>
 <p align="center">Interactive showcase &amp; guides: <a href="https://uncommonlydone.com/tools/dtoc"><strong>uncommonlydone.com/tools/dtoc</strong></a></p>
 <br/>
 <p align="center">
@@ -27,7 +27,7 @@
 
 <h2 align="center">Dynamic Table of Content</h2>
 <br/>
-<p align="center">dtoc is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong> designed to automatically parse web pages and generate a sticky, interactive Table of Contents. Adaptively rendering on top of your reading material, dtoc features a modern hover-to-expand glassmorphic drawer layout, minimized state notch indicators for visual document density, preference-based smart light/dark theme detection, and site-specific overrides to deliver an exceptional reading and navigation experience.</p>
+<p align="center">dtoc is a free, <strong>open-source</strong> (MIT) <strong>browser extension</strong> that builds a sticky, interactive table of contents from the headings on the page you are reading. Jump to any section in one click, always see where you are, and keep your reading space: the outline tucks away and opens when you hover. It runs entirely on your device, with no account, no analytics and no network requests.</p>
 <br/>
 <br/>
 
@@ -39,16 +39,46 @@ https://github.com/user-attachments/assets/3bc4657b-85db-49a9-8c17-e88ca9299e76
 
 Dev.to Article: [I vibe-coded an extension that auto-generates Table of Contents for any web page](https://dev.to/atkumar/i-vibe-coded-an-extension-that-auto-generates-table-of-contents-for-any-web-page-1c9g)
 
-## Features
+## Why dtoc
 
-- **Hover-to-Expand "Peek" Drawer**: Overhauled in `v3.0.0` from a solid block sidebar into a modern, non-intrusive Glassmorphism Drawer that expands when hovered and tucks away cleanly to save viewport space.
-- **Minimized Notch Indicator**: Flushed to the viewport edge (left or right), these interactive state notches serve as a passive visual indicator of heading levels and document density.
-- **Dynamic Vertical Alignment**: Centers the first notch / first heading link dynamically with the page title as you scroll, avoiding vertical jumps during expansion.
-- **Smart Auto Theme Detection**: Automatically infers light or dark mode based on actual page background/text color analysis and direct detection of Dark Reader forced dark themes, with options to toggle light/dark manually.
-- **Broad Compatibility & Site-Specific Scopes**: Built-in native optimization for **Confluence Cloud**, **DEV Community**, **Wikipedia**, **Medium**, and custom Medium publications, plus a generic HTML semantic parser (Beta) to support any website. Position settings (left/right) and pinned/minimized/closed states can be configured globally or per-site.
-- **Max Height & Internal Scrolling**: Constrained to a compact 480px maximum height with scroll support within both the notches strip and the expanded TOC panel for longer documents.
-- **Security & Privacy First**: Zero external network requests. Hardened against DOM-based Denial of Service (DoS) and ReDoS by enforcing a 500-character length limit on extracted heading texts. All preferences are saved locally in browser storage.
-- **Support Request Form**: A privacy-friendly link to request native support for new hostnames, pre-filled with the hostname (the extension itself does not make any external API calls).
+You are deep in a long Confluence design doc and need the section on rollout risks. You scroll, overshoot, scroll back, and lose your place. Notion has a persistent outline; Confluence, Medium and much of the web don't. dtoc gives them one.
+
+- **Jump anywhere in one click**: a clickable outline built from the page's own headings.
+- **Always know where you are**: the section you are reading is tracked as you scroll.
+- **Stays out of your way**: a slim, hover-to-expand glassmorphic drawer tucks to the viewport edge.
+- **Matches the page**: automatic light or dark theme (including Dark Reader), with a manual override.
+- **Always up to date**: the outline refreshes as single-page apps change, with no reload.
+- **Your layout, your way**: dock it left or right, pin, minimize or close it, globally or per site.
+- **Private by design**: zero external network requests; preferences stay in local browser storage.
+
+### Works where you read
+
+- **Confluence Cloud**: review long docs and wikis without losing your place.
+- **Wikipedia** (all languages), **Medium** (including custom-domain publications) and **DEV Community**: supported out of the box.
+- **Any other website (Beta)**: a generic HTML heading parser; enable it per site from the popup.
+- Need another site? Use the built-in, privacy-friendly support request form (the extension itself makes no external API calls).
+
+### Who it's for
+
+Engineers and product managers reviewing long docs, students and researchers reading long articles, writers checking structure, and anyone on a work laptop who needs open-source, fully local software their security team can audit.
+
+### Quick answers
+
+- **Is it free?** Yes, MIT-licensed.
+- **Does it collect data?** No. See the [Privacy Policy](PRIVACY.md).
+- **Why is the outline empty on a page?** The page has no real heading tags (`h1`-`h6`). Request support for it from the popup.
+
+More screenshots, a walkthrough and a full FAQ: [uncommonlydone.com/tools/dtoc](https://uncommonlydone.com/tools/dtoc).
+
+## Under the hood
+
+- **Hover-to-Expand "Peek" Drawer**: Glassmorphism drawer (since `v3.0.0`) that expands on hover and tucks away to save viewport space.
+- **Minimized Notch Indicator**: Flushed to the viewport edge (left or right), these interactive notches show heading levels and document density.
+- **Dynamic Vertical Alignment**: Centers the first notch / heading link with the page title as you scroll, avoiding vertical jumps during expansion.
+- **Smart Auto Theme Detection**: Infers light or dark mode from page background/text colors and detects Dark Reader forced dark themes.
+- **Site-Specific Scopes**: Native optimization for Confluence Cloud, DEV Community, Wikipedia, Medium and custom Medium publications, plus a generic parser (Beta). Position and pinned/minimized/closed states are configurable globally or per site.
+- **Max Height & Internal Scrolling**: Compact 480px maximum height with scrolling inside both the notch strip and the expanded panel.
+- **Hardened**: Manifest V3, no background script, Shadow DOM style isolation, and a 500-character limit on extracted heading text against DOM DoS and ReDoS.
 
 ## Documentation & Policies
 
