@@ -281,6 +281,15 @@ extensions.forEach(ext => {
         const globalPosition = result.position || 'left';
         const position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
 
+        const globalWidth = result.width !== undefined ? result.width : 300;
+        const width = siteConfig.width !== undefined ? siteConfig.width : globalWidth;
+
+        const globalHeight = result.height !== undefined ? result.height : 480;
+        const height = siteConfig.height !== undefined ? siteConfig.height : globalHeight;
+
+        const globalFontSize = result.fontSize !== undefined ? result.fontSize : 14;
+        const fontSize = siteConfig.fontSize !== undefined ? siteConfig.fontSize : globalFontSize;
+
         const closed = result.closed !== undefined ? result.closed : false;
         
         let pinned = false;
@@ -293,7 +302,7 @@ extensions.forEach(ext => {
           pinned = !result.minimized;
         }
 
-        return { enabled, position, closed, minimized, pinned };
+        return { enabled, position, width, height, fontSize, closed, minimized, pinned };
       }
 
       test("inherits global settings when site-specific settings are not configured on supported sites", () => {
@@ -394,6 +403,72 @@ extensions.forEach(ext => {
         };
         const resolved = resolveSettings(result, 'www.medium.com');
         expect(resolved.enabled).toBe(false);
+        expect(resolved.position).toBe('left');
+      });
+
+      test("defaults width, height, and fontSize when not configured", () => {
+        const result = {
+          enabled: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.width).toBe(300);
+        expect(resolved.height).toBe(480);
+        expect(resolved.fontSize).toBe(14);
+      });
+
+      test("inherits global width, height, and fontSize when site override is absent", () => {
+        const result = {
+          enabled: true,
+          width: 420,
+          height: 650,
+          fontSize: 16,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.width).toBe(420);
+        expect(resolved.height).toBe(650);
+        expect(resolved.fontSize).toBe(16);
+      });
+
+      test("allows per-site override for width, height, and fontSize", () => {
+        const result = {
+          enabled: true,
+          width: 300,
+          height: 480,
+          fontSize: 14,
+          siteSettings: {
+            'medium.com': {
+              width: 500,
+              height: 700,
+              fontSize: 18
+            }
+          }
+        };
+        const resolvedSite = resolveSettings(result, 'medium.com');
+        expect(resolvedSite.width).toBe(500);
+        expect(resolvedSite.height).toBe(700);
+        expect(resolvedSite.fontSize).toBe(18);
+
+        const resolvedOther = resolveSettings(result, 'dev.to');
+        expect(resolvedOther.width).toBe(300);
+        expect(resolvedOther.height).toBe(480);
+        expect(resolvedOther.fontSize).toBe(14);
+      });
+
+      test("reverts to default values on reset", () => {
+        const defaultState = {
+          enabled: true,
+          position: 'left',
+          width: 300,
+          height: 480,
+          fontSize: 14,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(defaultState, 'en.wikipedia.org');
+        expect(resolved.width).toBe(300);
+        expect(resolved.height).toBe(480);
+        expect(resolved.fontSize).toBe(14);
         expect(resolved.position).toBe('left');
       });
     });

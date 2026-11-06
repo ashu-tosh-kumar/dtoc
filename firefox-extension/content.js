@@ -14,7 +14,10 @@
     POSITION: 'position',
     CLOSED: 'closed',
     MINIMIZED: 'minimized',
-    PINNED: 'pinned'
+    PINNED: 'pinned',
+    WIDTH: 'width',
+    HEIGHT: 'height',
+    FONT_SIZE: 'fontSize'
   };
 
   // Map storage keys to internal state property names to decouple them
@@ -23,7 +26,10 @@
     [SETTINGS_KEY.POSITION]: 'position',
     [SETTINGS_KEY.CLOSED]: 'closed',
     [SETTINGS_KEY.MINIMIZED]: 'minimized',
-    [SETTINGS_KEY.PINNED]: 'pinned'
+    [SETTINGS_KEY.PINNED]: 'pinned',
+    [SETTINGS_KEY.WIDTH]: 'width',
+    [SETTINGS_KEY.HEIGHT]: 'height',
+    [SETTINGS_KEY.FONT_SIZE]: 'fontSize'
   };
 
   let state = {
@@ -32,7 +38,10 @@
     closed: false,
     minimized: true, // New default is unpinned (minimized/collapsed)
     pinned: false,
-    theme: 'auto'
+    theme: 'auto',
+    width: 300,
+    height: 480,
+    fontSize: 14
   };
 
   let shadowRoot = null;
@@ -240,7 +249,7 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
-    const keys = ['enabled', 'position', 'closed', 'minimized', 'pinned', 'siteSettings', 'theme'];
+    const keys = ['enabled', 'position', 'closed', 'minimized', 'pinned', 'siteSettings', 'theme', 'width', 'height', 'fontSize'];
     browser.storage.local.get(keys, (result) => {
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
@@ -256,7 +265,20 @@
 
       state.theme = result.theme || 'auto';
 
-      const hasSiteOverride = siteConfig.position !== undefined;
+      const globalWidth = result.width !== undefined ? result.width : 300;
+      state.width = siteConfig.width !== undefined ? siteConfig.width : globalWidth;
+
+      const globalHeight = result.height !== undefined ? result.height : 480;
+      state.height = siteConfig.height !== undefined ? siteConfig.height : globalHeight;
+
+      const globalFontSize = result.fontSize !== undefined ? result.fontSize : 14;
+      state.fontSize = siteConfig.fontSize !== undefined ? siteConfig.fontSize : globalFontSize;
+
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
       const defaultClosed = false;
       const closedVal = hasSiteOverride && siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
       state.closed = closedVal;
@@ -285,7 +307,11 @@
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
-      const hasSiteOverride = siteConfig.position !== undefined;
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
 
       // Update local state first
       if (storageKey === 'pinned') {
@@ -301,7 +327,7 @@
         }
       }
 
-      if (hasSiteOverride && (storageKey === 'pinned' || storageKey === 'minimized' || storageKey === SETTINGS_KEY.CLOSED)) {
+      if (hasSiteOverride && (storageKey === 'pinned' || storageKey === 'minimized' || storageKey === SETTINGS_KEY.CLOSED || storageKey === SETTINGS_KEY.WIDTH || storageKey === SETTINGS_KEY.HEIGHT || storageKey === SETTINGS_KEY.FONT_SIZE)) {
         if (!siteSettings[currentDomain]) {
           siteSettings[currentDomain] = {};
         }
@@ -494,6 +520,44 @@
     });
 
     container.appendChild(collapsedStrip);
+
+    // 3. Resize Handles
+    const handleX = document.createElement('div');
+    handleX.className = 'dtoc-resize-handle dtoc-resize-handle-x';
+    handleX.setAttribute('aria-hidden', 'true');
+
+    const handleY = document.createElement('div');
+    handleY.className = 'dtoc-resize-handle dtoc-resize-handle-y';
+    handleY.setAttribute('aria-hidden', 'true');
+
+    const handleCorner = document.createElement('div');
+    handleCorner.className = 'dtoc-resize-handle dtoc-resize-handle-corner';
+    handleCorner.setAttribute('aria-hidden', 'true');
+    handleCorner.title = 'Drag to resize, double-click to reset';
+
+    const gripSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    gripSvg.setAttribute("viewBox", "0 0 10 10");
+    gripSvg.setAttribute("width", "10");
+    gripSvg.setAttribute("height", "10");
+    gripSvg.setAttribute("fill", "none");
+    gripSvg.setAttribute("stroke", "currentColor");
+    gripSvg.setAttribute("stroke-width", "1.5");
+    gripSvg.setAttribute("stroke-linecap", "round");
+
+    const gripL1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    gripL1.setAttribute("x1", "8"); gripL1.setAttribute("y1", "2"); gripL1.setAttribute("x2", "2"); gripL1.setAttribute("y2", "8");
+    const gripL2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    gripL2.setAttribute("x1", "8"); gripL2.setAttribute("y1", "5"); gripL2.setAttribute("x2", "5"); gripL2.setAttribute("y2", "8");
+    gripSvg.appendChild(gripL1);
+    gripSvg.appendChild(gripL2);
+    handleCorner.appendChild(gripSvg);
+
+    container.appendChild(handleX);
+    container.appendChild(handleY);
+    container.appendChild(handleCorner);
+
+    setupResizeHandlers(handleX, handleY, handleCorner);
+
     shadowRoot.appendChild(container);
 
     // Keyboard accessibility listener (Alt+T)
@@ -522,6 +586,157 @@
         firstLink.focus();
       }
     }
+  }
+
+  function setupResizeHandlers(handleX, handleY, handleCorner) {
+    function startResize(e, type) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!state.pinned) {
+        updateSetting('pinned', true);
+      }
+
+      container.classList.add('resizing');
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startWidth = container.offsetWidth;
+      const startHeight = container.offsetHeight;
+
+      let currentW = startWidth;
+      let currentH = startHeight;
+
+      function onPointerMove(moveEvent) {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+
+        if (type === 'x' || type === 'corner') {
+          let newWidth;
+          if (state.position === 'left') {
+            newWidth = startWidth + deltaX;
+          } else {
+            newWidth = startWidth - deltaX;
+          }
+          currentW = Math.max(200, Math.min(newWidth, Math.min(800, window.innerWidth - 40)));
+          state.width = currentW;
+          container.style.setProperty('--dtoc-width', `${currentW}px`);
+        }
+
+        if (type === 'y' || type === 'corner') {
+          const newHeight = startHeight + deltaY;
+          const containerTop = parseInt(container.style.top, 10) || 64;
+          const maxAvailHeight = window.innerHeight - containerTop - 24;
+          currentH = Math.max(150, Math.min(newHeight, maxAvailHeight));
+          state.height = currentH;
+          container.style.setProperty('--dtoc-height', `${currentH}px`);
+          container.style.maxHeight = `${currentH}px`;
+        }
+      }
+
+      function onPointerUp() {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        container.classList.remove('resizing');
+
+        const updates = {};
+        if (type === 'x' || type === 'corner') {
+          updates.width = currentW;
+        }
+        if (type === 'y' || type === 'corner') {
+          updates.height = currentH;
+        }
+
+        saveDimensions(updates);
+      }
+
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+    }
+
+    handleX.addEventListener('pointerdown', (e) => startResize(e, 'x'));
+    handleY.addEventListener('pointerdown', (e) => startResize(e, 'y'));
+    handleCorner.addEventListener('pointerdown', (e) => startResize(e, 'corner'));
+
+    handleX.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      resetDimension('width');
+    });
+    handleY.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      resetDimension('height');
+    });
+    handleCorner.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      resetDimension('both');
+    });
+  }
+
+  function saveDimensions(updates) {
+    browser.storage.local.get(['siteSettings'], (result) => {
+      const currentDomain = window.location.hostname.replace(/^www\./i, '');
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
+
+      if (hasSiteOverride) {
+        if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
+        if (updates.width !== undefined) siteSettings[currentDomain].width = updates.width;
+        if (updates.height !== undefined) siteSettings[currentDomain].height = updates.height;
+        browser.storage.local.set({ siteSettings }, () => {
+          applyStateToUI();
+        });
+      } else {
+        browser.storage.local.set(updates, () => {
+          applyStateToUI();
+        });
+      }
+    });
+  }
+
+  function resetDimension(target) {
+    browser.storage.local.get(['siteSettings'], (result) => {
+      const currentDomain = window.location.hostname.replace(/^www\./i, '');
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
+
+      if (hasSiteOverride) {
+        if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
+        if (target === 'width' || target === 'both') {
+          delete siteSettings[currentDomain].width;
+          state.width = 300;
+        }
+        if (target === 'height' || target === 'both') {
+          delete siteSettings[currentDomain].height;
+          state.height = 480;
+        }
+        browser.storage.local.set({ siteSettings }, () => {
+          applyStateToUI();
+        });
+      } else {
+        const updates = {};
+        if (target === 'width' || target === 'both') {
+          updates.width = 300;
+          state.width = 300;
+        }
+        if (target === 'height' || target === 'both') {
+          updates.height = 480;
+          state.height = 480;
+        }
+        browser.storage.local.set(updates, () => {
+          applyStateToUI();
+        });
+      }
+    });
   }
 
   function isPageDark() {
@@ -681,6 +896,11 @@
       container.classList.add('page-light');
       container.classList.remove('page-dark');
     }
+
+    // Dimensions & Typography
+    container.style.setProperty('--dtoc-width', `${state.width || 300}px`);
+    container.style.setProperty('--dtoc-height', `${state.height || 480}px`);
+    container.style.setProperty('--dtoc-font-size', `${state.fontSize || 14}px`);
   }
 
   // --- Reactivity & Mutation Handling ---
@@ -1016,8 +1236,9 @@
     const containerTop = Math.max(64, targetCenterViewport - 56);
     container.style.top = `${containerTop}px`;
 
-    // Max height to prevent overflow, capped at 480px for a more compact Notion-like layout
-    const maxContainerHeight = Math.min(480, window.innerHeight - containerTop - 24);
+    // Max height to prevent overflow, capped at configured height
+    const configuredHeight = state.height || 480;
+    const maxContainerHeight = Math.min(configuredHeight, window.innerHeight - containerTop - 24);
     container.style.maxHeight = `${Math.max(150, maxContainerHeight)}px`;
   }
 

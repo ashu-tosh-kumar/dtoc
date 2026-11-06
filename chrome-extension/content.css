@@ -12,9 +12,10 @@
 #dtoc-container {
   position: fixed;
   top: 64px; /* Default below Atlassian top nav */
+  height: var(--dtoc-height, 480px);
   max-height: 480px; /* Notion-like compact max-height */
   min-height: 150px;
-  width: 300px;
+  width: var(--dtoc-width, 300px);
   z-index: 99999;
   display: flex;
   flex-direction: column;
@@ -65,11 +66,11 @@
 
 /* Default Collapsed (Unpinned) state translations */
 #dtoc-container.position-left:not(.pinned) {
-  transform: translateX(-270px); /* Width (300) - Collapsed strip width (30) = 270 */
+  transform: translateX(calc(-1 * (var(--dtoc-width, 300px) - 30px))); /* Width - Collapsed strip width (30) */
 }
 
 #dtoc-container.position-right:not(.pinned) {
-  transform: translateX(270px);
+  transform: translateX(calc(var(--dtoc-width, 300px) - 30px));
 }
 
 /* Expanded state (pinned, keyboard-expanded, or hovered) */
@@ -137,7 +138,7 @@
 }
 
 .dtoc-title {
-  font-size: 13px;
+  font-size: calc(var(--dtoc-font-size, 14px) - 1px);
   font-weight: 500;
   color: rgba(55, 53, 47, 0.65); /* Increased contrast (4.5:1) */
   margin: 0;
@@ -220,7 +221,7 @@
   border-radius: 4px;
   color: #37352f;
   text-decoration: none;
-  font-size: 14px;
+  font-size: var(--dtoc-font-size, 14px);
   font-weight: 400;
   line-height: 1.35;
   transition: background-color 0.1s, color 0.1s;
@@ -252,7 +253,7 @@
   padding: 16px;
   text-align: center;
   color: rgba(55, 53, 47, 0.4);
-  font-size: 13px;
+  font-size: calc(var(--dtoc-font-size, 14px) - 1px);
 }
 
 /* Collapsed Peek Strip Layout */
@@ -494,4 +495,85 @@
 
 .theme-dark .dtoc-collapsed-strip:focus-visible {
   outline-color: #2eaadc;
+}
+
+/* Resizing state */
+#dtoc-container.resizing {
+  transition: none !important;
+  user-select: none !important;
+}
+
+/* Resize handles */
+.dtoc-resize-handle {
+  display: none;
+  position: absolute;
+  z-index: 50;
+  box-sizing: border-box;
+}
+
+/* Show handles only when open / expanded */
+#dtoc-container.pinned .dtoc-resize-handle,
+#dtoc-container.keyboard-expanded .dtoc-resize-handle,
+#dtoc-container:hover .dtoc-resize-handle {
+  display: block;
+}
+
+.dtoc-resize-handle-x {
+  top: 0;
+  bottom: 14px;
+  width: 8px;
+  cursor: ew-resize;
+}
+
+.position-left .dtoc-resize-handle-x {
+  right: -4px;
+}
+
+.position-right .dtoc-resize-handle-x {
+  left: -4px;
+}
+
+.dtoc-resize-handle-y {
+  bottom: -4px;
+  left: 14px;
+  right: 14px;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.dtoc-resize-handle-corner {
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(55, 53, 47, 0.4);
+  transition: color 0.2s, transform 0.1s;
+}
+
+.dtoc-resize-handle-corner:hover {
+  color: rgba(55, 53, 47, 0.8);
+}
+
+.theme-dark .dtoc-resize-handle-corner {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.theme-dark .dtoc-resize-handle-corner:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.position-left .dtoc-resize-handle-corner {
+  right: 0;
+  cursor: nwse-resize;
+}
+
+.position-right .dtoc-resize-handle-corner {
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.position-right .dtoc-resize-handle-corner svg {
+  transform: scaleX(-1);
 }
