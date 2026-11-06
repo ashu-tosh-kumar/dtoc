@@ -376,10 +376,11 @@ document.addEventListener('DOMContentLoaded', () => {
   positionRightBtn.addEventListener('click', () => handlePositionChange('right'));
 
   // Width, Height, FontSize Change handlers
-  function handleWidthChange(newVal) {
+  function handleWidthChange(newVal, updateAll = false) {
     const val = parseInt(newVal, 10);
     if (isNaN(val)) return;
     if (widthVal) widthVal.textContent = `${val}px`;
+    if (widthSlider && widthSlider.value != val) widthSlider.value = val;
 
     if (siteOverrideActive) {
       browser.storage.local.get('siteSettings').then((result) => {
@@ -389,20 +390,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         siteSettings[currentDomain].width = val;
         browser.storage.local.set({ siteSettings }).then(() => {
-          loadAllSettings();
+          if (updateAll) loadAllSettings();
         });
       });
     } else {
       browser.storage.local.set({ width: val }).then(() => {
-        loadAllSettings();
+        if (updateAll) loadAllSettings();
       });
     }
   }
 
-  function handleHeightChange(newVal) {
+  function handleHeightChange(newVal, updateAll = false) {
     const val = parseInt(newVal, 10);
     if (isNaN(val)) return;
     if (heightVal) heightVal.textContent = `${val}px`;
+    if (heightSlider && heightSlider.value != val) heightSlider.value = val;
 
     if (siteOverrideActive) {
       browser.storage.local.get('siteSettings').then((result) => {
@@ -412,20 +414,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         siteSettings[currentDomain].height = val;
         browser.storage.local.set({ siteSettings }).then(() => {
-          loadAllSettings();
+          if (updateAll) loadAllSettings();
         });
       });
     } else {
       browser.storage.local.set({ height: val }).then(() => {
-        loadAllSettings();
+        if (updateAll) loadAllSettings();
       });
     }
   }
 
-  function handleFontSizeChange(newVal) {
+  function handleFontSizeChange(newVal, updateAll = false) {
     const val = parseInt(newVal, 10);
     if (isNaN(val)) return;
     if (fontSizeVal) fontSizeVal.textContent = `${val}px`;
+    if (fontSizeSlider && fontSizeSlider.value != val) fontSizeSlider.value = val;
 
     if (siteOverrideActive) {
       browser.storage.local.get('siteSettings').then((result) => {
@@ -435,55 +438,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         siteSettings[currentDomain].fontSize = val;
         browser.storage.local.set({ siteSettings }).then(() => {
-          loadAllSettings();
+          if (updateAll) loadAllSettings();
         });
       });
     } else {
       browser.storage.local.set({ fontSize: val }).then(() => {
-        loadAllSettings();
+        if (updateAll) loadAllSettings();
       });
     }
   }
 
   if (widthSlider) {
     widthSlider.addEventListener('input', (e) => {
-      if (widthVal) widthVal.textContent = `${e.target.value}px`;
+      handleWidthChange(e.target.value, false);
     });
     widthSlider.addEventListener('change', (e) => {
-      handleWidthChange(e.target.value);
+      handleWidthChange(e.target.value, true);
     });
   }
   if (resetWidthBtn) {
     resetWidthBtn.addEventListener('click', () => {
-      handleWidthChange(300);
+      handleWidthChange(300, true);
     });
   }
 
   if (heightSlider) {
     heightSlider.addEventListener('input', (e) => {
-      if (heightVal) heightVal.textContent = `${e.target.value}px`;
+      handleHeightChange(e.target.value, false);
     });
     heightSlider.addEventListener('change', (e) => {
-      handleHeightChange(e.target.value);
+      handleHeightChange(e.target.value, true);
     });
   }
   if (resetHeightBtn) {
     resetHeightBtn.addEventListener('click', () => {
-      handleHeightChange(480);
+      handleHeightChange(480, true);
     });
   }
 
   if (fontSizeSlider) {
     fontSizeSlider.addEventListener('input', (e) => {
-      if (fontSizeVal) fontSizeVal.textContent = `${e.target.value}px`;
+      handleFontSizeChange(e.target.value, false);
     });
     fontSizeSlider.addEventListener('change', (e) => {
-      handleFontSizeChange(e.target.value);
+      handleFontSizeChange(e.target.value, true);
     });
   }
   if (resetFontSizeBtn) {
     resetFontSizeBtn.addEventListener('click', () => {
-      handleFontSizeChange(14);
+      handleFontSizeChange(14, true);
     });
   }
 

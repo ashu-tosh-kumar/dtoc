@@ -274,18 +274,13 @@
       const globalFontSize = result.fontSize !== undefined ? result.fontSize : 14;
       state.fontSize = siteConfig.fontSize !== undefined ? siteConfig.fontSize : globalFontSize;
 
-      const hasSiteOverride = siteConfig.position !== undefined ||
-                              siteConfig.width !== undefined ||
-                              siteConfig.height !== undefined ||
-                              siteConfig.fontSize !== undefined ||
-                              siteConfig.customized === true;
       const defaultClosed = false;
-      const closedVal = hasSiteOverride && siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
+      const closedVal = siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
       state.closed = closedVal;
 
       // Pin/minimize dual state resolution
-      const pinnedVal = hasSiteOverride ? siteConfig.pinned : result.pinned;
-      const minimizedVal = hasSiteOverride ? siteConfig.minimized : result.minimized;
+      const pinnedVal = siteConfig.pinned !== undefined ? siteConfig.pinned : result.pinned;
+      const minimizedVal = siteConfig.minimized !== undefined ? siteConfig.minimized : result.minimized;
 
       if (pinnedVal !== undefined) {
         state.pinned = pinnedVal;
@@ -374,6 +369,7 @@
               setupMutationObserver();
             } else {
               applyStateToUI();
+              alignContainerWithTitle();
             }
           } else {
             applyStateToUI();
@@ -590,6 +586,9 @@
 
   function setupResizeHandlers(handleX, handleY, handleCorner) {
     function startResize(e, type) {
+      if (e.button !== undefined && e.button !== 0) return;
+      if (container.classList.contains('resizing')) return;
+
       e.preventDefault();
       e.stopPropagation();
 
@@ -599,15 +598,22 @@
 
       container.classList.add('resizing');
 
+      const targetHandle = e.currentTarget || e.target;
+      if (targetHandle && targetHandle.setPointerCapture && e.pointerId !== undefined) {
+        try {
+          targetHandle.setPointerCapture(e.pointerId);
+        } catch (_) {}
+      }
+
       const startX = e.clientX;
       const startY = e.clientY;
-      const startWidth = container.offsetWidth;
-      const startHeight = container.offsetHeight;
+      const startWidth = container.offsetWidth || state.width || 300;
+      const startHeight = container.offsetHeight || state.height || 480;
 
       let currentW = startWidth;
       let currentH = startHeight;
 
-      function onPointerMove(moveEvent) {
+      function onMove(moveEvent) {
         const deltaX = moveEvent.clientX - startX;
         const deltaY = moveEvent.clientY - startY;
 
@@ -620,6 +626,7 @@
           }
           currentW = Math.max(200, Math.min(newWidth, Math.min(800, window.innerWidth - 40)));
           state.width = currentW;
+          container.style.width = `${currentW}px`;
           container.style.setProperty('--dtoc-width', `${currentW}px`);
         }
 
@@ -629,14 +636,25 @@
           const maxAvailHeight = window.innerHeight - containerTop - 24;
           currentH = Math.max(150, Math.min(newHeight, maxAvailHeight));
           state.height = currentH;
-          container.style.setProperty('--dtoc-height', `${currentH}px`);
+          container.style.height = `${currentH}px`;
           container.style.maxHeight = `${currentH}px`;
+          container.style.setProperty('--dtoc-height', `${currentH}px`);
         }
       }
 
-      function onPointerUp() {
-        window.removeEventListener('pointermove', onPointerMove);
-        window.removeEventListener('pointerup', onPointerUp);
+      function onUp() {
+        if (targetHandle && targetHandle.releasePointerCapture && e.pointerId !== undefined) {
+          try {
+            targetHandle.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+        }
+
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+
         container.classList.remove('resizing');
 
         const updates = {};
@@ -650,13 +668,20 @@
         saveDimensions(updates);
       }
 
-      window.addEventListener('pointermove', onPointerMove);
-      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
     }
 
     handleX.addEventListener('pointerdown', (e) => startResize(e, 'x'));
     handleY.addEventListener('pointerdown', (e) => startResize(e, 'y'));
     handleCorner.addEventListener('pointerdown', (e) => startResize(e, 'corner'));
+
+    handleX.addEventListener('mousedown', (e) => startResize(e, 'x'));
+    handleY.addEventListener('mousedown', (e) => startResize(e, 'y'));
+    handleCorner.addEventListener('mousedown', (e) => startResize(e, 'corner'));
 
     handleX.addEventListener('dblclick', (e) => {
       e.stopPropagation();
@@ -687,10 +712,14 @@
         if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
         if (updates.width !== undefined) siteSettings[currentDomain].width = updates.width;
         if (updates.height !== undefined) siteSettings[currentDomain].height = updates.height;
+        siteSettings[currentDomain].pinned = state.pinned;
+        siteSettings[currentDomain].minimized = !state.pinned;
         chrome.storage.local.set({ siteSettings }, () => {
           applyStateToUI();
         });
       } else {
+        updates.pinned = state.pinned;
+        updates.minimized = !state.pinned;
         chrome.storage.local.set(updates, () => {
           applyStateToUI();
         });
@@ -898,9 +927,14 @@
     }
 
     // Dimensions & Typography
-    container.style.setProperty('--dtoc-width', `${state.width || 300}px`);
-    container.style.setProperty('--dtoc-height', `${state.height || 480}px`);
-    container.style.setProperty('--dtoc-font-size', `${state.fontSize || 14}px`);
+    const curWidth = state.width || 300;
+    const curHeight = state.height || 480;
+    const curFontSize = state.fontSize || 14;
+    container.style.width = `${curWidth}px`;
+    container.style.height = `${curHeight}px`;
+    container.style.setProperty('--dtoc-width', `${curWidth}px`);
+    container.style.setProperty('--dtoc-height', `${curHeight}px`);
+    container.style.setProperty('--dtoc-font-size', `${curFontSize}px`);
   }
 
   // --- Reactivity & Mutation Handling ---
@@ -1239,6 +1273,7 @@
     // Max height to prevent overflow, capped at configured height
     const configuredHeight = state.height || 480;
     const maxContainerHeight = Math.min(configuredHeight, window.innerHeight - containerTop - 24);
+    container.style.height = `${configuredHeight}px`;
     container.style.maxHeight = `${Math.max(150, maxContainerHeight)}px`;
   }
 

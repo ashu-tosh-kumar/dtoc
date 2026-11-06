@@ -13,7 +13,7 @@
   position: fixed;
   top: 64px; /* Default below Atlassian top nav */
   height: var(--dtoc-height, 480px);
-  max-height: 480px; /* Notion-like compact max-height */
+  max-height: calc(100vh - 80px);
   min-height: 150px;
   width: var(--dtoc-width, 300px);
   z-index: 99999;
@@ -507,7 +507,7 @@
 .dtoc-resize-handle {
   display: none;
   position: absolute;
-  z-index: 50;
+  z-index: 100;
   box-sizing: border-box;
 }
 
@@ -520,48 +520,120 @@
 
 .dtoc-resize-handle-x {
   top: 0;
-  bottom: 14px;
-  width: 8px;
+  bottom: 0;
+  width: 12px;
   cursor: ew-resize;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.dtoc-resize-handle-x::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.15s ease;
 }
 
 .position-left .dtoc-resize-handle-x {
-  right: -4px;
+  right: -6px;
 }
 
 .position-right .dtoc-resize-handle-x {
-  left: -4px;
+  left: -6px;
+}
+
+.dtoc-resize-handle-x:hover,
+#dtoc-container.resizing .dtoc-resize-handle-x {
+  background-color: rgba(35, 131, 226, 0.08);
+}
+
+.dtoc-resize-handle-x:hover::after,
+#dtoc-container.resizing .dtoc-resize-handle-x::after {
+  background-color: #2383e2;
 }
 
 .dtoc-resize-handle-y {
-  bottom: -4px;
-  left: 14px;
-  right: 14px;
-  height: 8px;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 12px;
   cursor: ns-resize;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.dtoc-resize-handle-y::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.dtoc-resize-handle-y:hover,
+#dtoc-container.resizing .dtoc-resize-handle-y {
+  background-color: rgba(35, 131, 226, 0.08);
+}
+
+.dtoc-resize-handle-y:hover::after,
+#dtoc-container.resizing .dtoc-resize-handle-y::after {
+  background-color: #2383e2;
 }
 
 .dtoc-resize-handle-corner {
   bottom: 0;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
+  z-index: 105;
   display: flex;
   align-items: center;
   justify-content: center;
   color: rgba(55, 53, 47, 0.4);
-  transition: color 0.2s, transform 0.1s;
+  transition: color 0.15s, background-color 0.15s, transform 0.1s;
+  border-radius: 4px;
 }
 
-.dtoc-resize-handle-corner:hover {
-  color: rgba(55, 53, 47, 0.8);
+.dtoc-resize-handle-corner:hover,
+#dtoc-container.resizing .dtoc-resize-handle-corner {
+  color: #2383e2;
+  background-color: rgba(35, 131, 226, 0.15);
 }
 
 .theme-dark .dtoc-resize-handle-corner {
   color: rgba(255, 255, 255, 0.4);
 }
 
-.theme-dark .dtoc-resize-handle-corner:hover {
-  color: rgba(255, 255, 255, 0.8);
+.theme-dark .dtoc-resize-handle-corner:hover,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-corner {
+  color: #2eaadc;
+  background-color: rgba(46, 170, 220, 0.2);
+}
+
+.theme-dark .dtoc-resize-handle-x:hover,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-x {
+  background-color: rgba(46, 170, 220, 0.12);
+}
+
+.theme-dark .dtoc-resize-handle-x:hover::after,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-x::after {
+  background-color: #2eaadc;
+}
+
+.theme-dark .dtoc-resize-handle-y:hover,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-y {
+  background-color: rgba(46, 170, 220, 0.12);
+}
+
+.theme-dark .dtoc-resize-handle-y:hover::after,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-y::after {
+  background-color: #2eaadc;
 }
 
 .position-left .dtoc-resize-handle-corner {

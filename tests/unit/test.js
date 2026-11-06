@@ -290,20 +290,61 @@ extensions.forEach(ext => {
         const globalFontSize = result.fontSize !== undefined ? result.fontSize : 14;
         const fontSize = siteConfig.fontSize !== undefined ? siteConfig.fontSize : globalFontSize;
 
-        const closed = result.closed !== undefined ? result.closed : false;
+        const defaultClosed = false;
+        const closed = siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
         
         let pinned = false;
         let minimized = true;
-        if (result.pinned !== undefined) {
-          pinned = result.pinned;
-          minimized = !result.pinned;
-        } else if (result.minimized !== undefined) {
-          minimized = result.minimized;
-          pinned = !result.minimized;
+        const pinnedVal = siteConfig.pinned !== undefined ? siteConfig.pinned : result.pinned;
+        const minimizedVal = siteConfig.minimized !== undefined ? siteConfig.minimized : result.minimized;
+        if (pinnedVal !== undefined) {
+          pinned = pinnedVal;
+          minimized = !pinnedVal;
+        } else if (minimizedVal !== undefined) {
+          minimized = minimizedVal;
+          pinned = !minimizedVal;
         }
 
         return { enabled, position, width, height, fontSize, closed, minimized, pinned };
       }
+
+      test("inherits global pinned state even when site has width/height override", () => {
+        const result = {
+          enabled: true,
+          pinned: true,
+          minimized: false,
+          siteSettings: {
+            'medium.com': {
+              width: 450
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.pinned).toBe(true);
+        expect(resolved.minimized).toBe(false);
+        expect(resolved.width).toBe(450);
+      });
+
+      test("allows per-site override for pinned state", () => {
+        const result = {
+          enabled: true,
+          pinned: false,
+          minimized: true,
+          siteSettings: {
+            'medium.com': {
+              pinned: true,
+              minimized: false
+            }
+          }
+        };
+        const resolvedMedium = resolveSettings(result, 'medium.com');
+        expect(resolvedMedium.pinned).toBe(true);
+        expect(resolvedMedium.minimized).toBe(false);
+
+        const resolvedOther = resolveSettings(result, 'dev.to');
+        expect(resolvedOther.pinned).toBe(false);
+        expect(resolvedOther.minimized).toBe(true);
+      });
 
       test("inherits global settings when site-specific settings are not configured on supported sites", () => {
         const result = {
