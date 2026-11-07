@@ -1,7 +1,7 @@
 # Release Notes — v3.1.0
 
 **Release date**: 2026-11-03  
-**Previous release**: [v3.0.0](RELEASE_NOTES_v3.0.0.md)
+**Previous release**: [v3.0.0](../CHANGELOG.md#v300)
 
 ---
 

@@ -45,8 +45,8 @@ git checkout -b fix/my-bug
 Branch naming convention: `<type>/<kebab-case-description>` (types: `feature`, `fix`, `refactor`, `docs`, `spike`).
 
 ### Step 2: Write Failing Tests (TDD)
-- **For logic changes**: Open [tests/unit/test.js](file:///Users/ashutosh/projects/My/dtoc/tests/unit/test.js) and add a test case under the relevant block.
-- **For integration/UI changes**: Open [tests/e2e.spec.js](file:///Users/ashutosh/projects/My/dtoc/tests/e2e.spec.js) and append a Playwright test.
+- **For logic changes**: Open [tests/unit/test.js](../tests/unit/test.js) and add a test case under the relevant block.
+- **For integration/UI changes**: Open [tests/e2e.spec.js](../tests/e2e.spec.js) and append a Playwright test.
 
 ### Step 3: Run Tests (Verify Failure)
 ```bash
@@ -60,9 +60,9 @@ Verify that your newly added tests fail (TDD red phase).
 
 ### Step 4: Implement Logic
 Modify the extension source code:
-- [chrome-extension/content.js](file:///Users/ashutosh/projects/My/dtoc/chrome-extension/content.js)
-- [chrome-extension/popup.js](file:///Users/ashutosh/projects/My/dtoc/chrome-extension/popup.js)
-- Reflect identical changes in [firefox-extension/content.js](file:///Users/ashutosh/projects/My/dtoc/firefox-extension/content.js) and [firefox-extension/popup.js](file:///Users/ashutosh/projects/My/dtoc/firefox-extension/popup.js) (or copy the logic code as needed).
+- [chrome-extension/content.js](../chrome-extension/content.js)
+- [chrome-extension/popup.js](../chrome-extension/popup.js)
+- Reflect identical changes in [firefox-extension/content.js](../firefox-extension/content.js) and [firefox-extension/popup.js](../firefox-extension/popup.js) (or copy the logic code as needed).
 
 > [!IMPORTANT]
 > Keep code clean, avoid dynamic code execution (`eval`), and use `.textContent` to safely inject page content to prevent XSS.
@@ -82,7 +82,7 @@ npm run test:e2e
 1. Open Google Chrome and navigate to `chrome://extensions`.
 2. Toggle **Developer mode** in the top-right corner.
 3. Click **Load unpacked** in the top-left.
-4. Select the [chrome-extension](file:///Users/ashutosh/projects/My/dtoc/chrome-extension) folder.
+4. Select the [chrome-extension](../chrome-extension) folder.
 5. Open any Confluence, Dev.to, or Medium article to test the floating TOC.
 6. When you modify files under `chrome-extension/`, reload the extension by clicking the refresh (↻) icon in `chrome://extensions`.
 
@@ -90,7 +90,7 @@ npm run test:e2e
 1. Open Firefox and navigate to `about:debugging`.
 2. Click **This Firefox** in the sidebar.
 3. Click **Load Temporary Add-on...**
-4. Navigate to the [firefox-extension](file:///Users/ashutosh/projects/My/dtoc/firefox-extension) folder and select [manifest.json](file:///Users/ashutosh/projects/My/dtoc/firefox-extension/manifest.json).
+4. Navigate to the [firefox-extension](../firefox-extension) folder and select [manifest.json](../firefox-extension/manifest.json).
 5. Open any supported site to test.
 6. When you modify files under `firefox-extension/`, click **Reload** in `about:debugging`.
 

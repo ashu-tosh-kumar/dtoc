@@ -20,14 +20,14 @@ When adopting this role, always act as a senior browser extension engineer. You 
 
 ### File Locations
 - **Extension Logic (Chrome)**:
-  - [chrome-extension/content.js](file:///Users/ashutosh/projects/My/dtoc/chrome-extension/content.js) (DOM queries, UI rendering, heading parses)
-  - [chrome-extension/popup.js](file:///Users/ashutosh/projects/My/dtoc/chrome-extension/popup.js) (Popup settings, siteSettings persistence)
+  - [chrome-extension/content.js](../../chrome-extension/content.js) (DOM queries, UI rendering, heading parses)
+  - [chrome-extension/popup.js](../../chrome-extension/popup.js) (Popup settings, siteSettings persistence)
 - **Extension Logic (Firefox)**:
-  - [firefox-extension/content.js](file:///Users/ashutosh/projects/My/dtoc/firefox-extension/content.js)
-  - [firefox-extension/popup.js](file:///Users/ashutosh/projects/My/dtoc/firefox-extension/popup.js)
+  - [firefox-extension/content.js](../../firefox-extension/content.js)
+  - [firefox-extension/popup.js](../../firefox-extension/popup.js)
 - **Tests**:
-  - [tests/unit/test.js](file:///Users/ashutosh/projects/My/dtoc/tests/unit/test.js) (Jest unit tests)
-  - [tests/e2e.spec.js](file:///Users/ashutosh/projects/My/dtoc/tests/e2e.spec.js) (Playwright E2E tests)
+  - [tests/unit/test.js](../../tests/unit/test.js) (Jest unit tests)
+  - [tests/e2e.spec.js](../../tests/e2e.spec.js) (Playwright E2E tests)
 
 ### CLI Commands
 - Run unit tests: `npm run test`
@@ -44,7 +44,7 @@ When adopting this role, always act as a senior browser extension engineer. You 
 - Identify which tests require updates.
 
 ### 2. Test Phase (TDD Red)
-- Open [tests/unit/test.js](file:///Users/ashutosh/projects/My/dtoc/tests/unit/test.js) (or [tests/e2e.spec.js](file:///Users/ashutosh/projects/My/dtoc/tests/e2e.spec.js) if UI/integration related).
+- Open [tests/unit/test.js](../../tests/unit/test.js) (or [tests/e2e.spec.js](../../tests/e2e.spec.js) if UI/integration related).
 - Add failing test cases verifying both happy paths and edge cases (e.g., empty DOM, undefined values, invalid settings structures).
 - Run `npm run test` or `npm run test:e2e` to verify that they fail.
 
