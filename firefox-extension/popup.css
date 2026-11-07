@@ -559,17 +559,20 @@ input:checked + .slider:before {
   color: var(--text-secondary);
 }
 
-.footer .open-source-text {
+.footer .open-source-text,
+.footer .website-text {
   margin-top: 6px;
 }
 
-.footer .open-source-text a {
+.footer .open-source-text a,
+.footer .website-text a {
   color: var(--accent-text);
   text-decoration: none;
   font-weight: 500;
 }
 
-.footer .open-source-text a:hover {
+.footer .open-source-text a:hover,
+.footer .website-text a:hover {
   text-decoration: underline;
 }
 
