@@ -51,6 +51,18 @@ describe("Extension API usage and files structure", () => {
     expect(popupJs).toMatch(/browser\.storage\.local/);
     expect(popupJs).not.toMatch(/chrome\.storage\.local/);
   });
+
+  test("popup.html includes GitHub and DTOC homepage links in both extensions", () => {
+    extensions.forEach(extDir => {
+      const popupHtml = fs.readFileSync(path.join(__dirname, '..', '..', extDir, 'popup.html'), 'utf8');
+      expect(popupHtml).toContain('https://github.com/ashu-tosh-kumar/dtoc');
+      expect(popupHtml).toContain('https://uncommonlydone.com/tools/dtoc');
+      expect(popupHtml).toContain('DTOC Homepage');
+      expect(popupHtml).toContain('icons/icon16.png');
+      expect(popupHtml.indexOf('https://uncommonlydone.com/tools/dtoc'))
+        .toBeGreaterThan(popupHtml.indexOf('https://github.com/ashu-tosh-kumar/dtoc'));
+    });
+  });
 });
 
 extensions.forEach(ext => {
