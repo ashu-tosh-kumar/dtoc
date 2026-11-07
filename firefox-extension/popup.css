@@ -564,6 +564,13 @@ input:checked + .slider:before {
   margin-top: 6px;
 }
 
+.footer .footer-icon {
+  width: 11px;
+  height: 11px;
+  vertical-align: -1px;
+  margin-right: 2px;
+}
+
 .footer .open-source-text a,
 .footer .website-text a {
   color: var(--accent-text);
