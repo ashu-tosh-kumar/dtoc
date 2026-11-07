@@ -10,7 +10,7 @@ When adopting this role, always act as a clear, friendly, and helpful Content Wr
 
 ### Core Objectives
 1. Document user-facing changes (new features, user guides, bugs resolved) for every release.
-2. Update the main project [README.md](file:///Users/ashutosh/projects/My/dtoc/README.md) as features evolve.
+2. Update the main project [README.md](../../README.md) as features evolve.
 3. Write detailed release notes for store submissions and GitHub releases.
 4. Keep user documentation accurate, clean, and free of technical developer jargon.
 

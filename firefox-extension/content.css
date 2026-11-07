@@ -12,9 +12,10 @@
 #dtoc-container {
   position: fixed;
   top: 64px; /* Default below Atlassian top nav */
-  max-height: 480px; /* Notion-like compact max-height */
+  height: var(--dtoc-height, 480px);
+  max-height: calc(100vh - 80px);
   min-height: 150px;
-  width: 300px;
+  width: var(--dtoc-width, 300px);
   z-index: 99999;
   display: flex;
   flex-direction: column;
@@ -65,11 +66,11 @@
 
 /* Default Collapsed (Unpinned) state translations */
 #dtoc-container.position-left:not(.pinned) {
-  transform: translateX(-270px); /* Width (300) - Collapsed strip width (30) = 270 */
+  transform: translateX(calc(-1 * (var(--dtoc-width, 300px) - 30px))); /* Width - Collapsed strip width (30) */
 }
 
 #dtoc-container.position-right:not(.pinned) {
-  transform: translateX(270px);
+  transform: translateX(calc(var(--dtoc-width, 300px) - 30px));
 }
 
 /* Expanded state (pinned, keyboard-expanded, or hovered) */
@@ -134,10 +135,11 @@
   align-items: center;
   padding: 14px 16px 8px 16px;
   background-color: transparent;
+  gap: 8px;
 }
 
 .dtoc-title {
-  font-size: 13px;
+  font-size: calc(var(--dtoc-font-size, 14px) - 1px);
   font-weight: 500;
   color: rgba(55, 53, 47, 0.65); /* Increased contrast (4.5:1) */
   margin: 0;
@@ -146,11 +148,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .dtoc-controls {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .icon-btn {
@@ -184,8 +188,12 @@
 
 .dtoc-content {
   flex-grow: 1;
+  width: 100%;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 4px 0 12px 0;
+  box-sizing: border-box;
 }
 
 /* Scrollbar styling for a cleaner look */
@@ -207,26 +215,33 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .toc-item {
   margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .toc-link {
   display: block;
+  box-sizing: border-box;
   margin: 2px 10px;
+  width: calc(100% - 20px);
+  max-width: calc(100% - 20px);
   padding: 6px 12px;
   border-radius: 4px;
   color: #37352f;
   text-decoration: none;
-  font-size: 14px;
+  font-size: var(--dtoc-font-size, 14px);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.4;
   transition: background-color 0.1s, color 0.1s;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
 }
 
 .toc-link:hover {
@@ -252,7 +267,7 @@
   padding: 16px;
   text-align: center;
   color: rgba(55, 53, 47, 0.4);
-  font-size: 13px;
+  font-size: calc(var(--dtoc-font-size, 14px) - 1px);
 }
 
 /* Collapsed Peek Strip Layout */
@@ -333,6 +348,7 @@
 
 .dtoc-notch {
   height: 2px;
+  flex-shrink: 0;
   background-color: rgba(55, 53, 47, 0.20);
   border-radius: 1px;
   transition: width 0.2s, background-color 0.2s;
@@ -494,4 +510,157 @@
 
 .theme-dark .dtoc-collapsed-strip:focus-visible {
   outline-color: #2eaadc;
+}
+
+/* Resizing state */
+#dtoc-container.resizing {
+  transition: none !important;
+  user-select: none !important;
+}
+
+/* Resize handles */
+.dtoc-resize-handle {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+/* Show handles only when open / expanded */
+#dtoc-container.pinned .dtoc-resize-handle,
+#dtoc-container.keyboard-expanded .dtoc-resize-handle,
+#dtoc-container:hover .dtoc-resize-handle {
+  display: block;
+}
+
+.dtoc-resize-handle-x {
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  cursor: ew-resize;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.dtoc-resize-handle-x::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.position-left .dtoc-resize-handle-x {
+  right: -6px;
+}
+
+.position-right .dtoc-resize-handle-x {
+  left: -6px;
+}
+
+.dtoc-resize-handle-x:hover,
+#dtoc-container.resizing .dtoc-resize-handle-x {
+  background-color: rgba(35, 131, 226, 0.08);
+}
+
+.dtoc-resize-handle-x:hover::after,
+#dtoc-container.resizing .dtoc-resize-handle-x::after {
+  background-color: #2383e2;
+}
+
+.dtoc-resize-handle-y {
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  cursor: ns-resize;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.dtoc-resize-handle-y::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.dtoc-resize-handle-y:hover,
+#dtoc-container.resizing .dtoc-resize-handle-y {
+  background-color: rgba(35, 131, 226, 0.08);
+}
+
+.dtoc-resize-handle-y:hover::after,
+#dtoc-container.resizing .dtoc-resize-handle-y::after {
+  background-color: #2383e2;
+}
+
+.dtoc-resize-handle-corner {
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  z-index: 105;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(55, 53, 47, 0.4);
+  transition: color 0.15s, background-color 0.15s, transform 0.1s;
+  border-radius: 4px;
+}
+
+.dtoc-resize-handle-corner:hover,
+#dtoc-container.resizing .dtoc-resize-handle-corner {
+  color: #2383e2;
+  background-color: rgba(35, 131, 226, 0.15);
+}
+
+.theme-dark .dtoc-resize-handle-corner {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.theme-dark .dtoc-resize-handle-corner:hover,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-corner {
+  color: #2eaadc;
+  background-color: rgba(46, 170, 220, 0.2);
+}
+
+.theme-dark .dtoc-resize-handle-x:hover,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-x {
+  background-color: rgba(46, 170, 220, 0.12);
+}
+
+.theme-dark .dtoc-resize-handle-x:hover::after,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-x::after {
+  background-color: #2eaadc;
+}
+
+.theme-dark .dtoc-resize-handle-y:hover,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-y {
+  background-color: rgba(46, 170, 220, 0.12);
+}
+
+.theme-dark .dtoc-resize-handle-y:hover::after,
+#dtoc-container.theme-dark.resizing .dtoc-resize-handle-y::after {
+  background-color: #2eaadc;
+}
+
+.position-left .dtoc-resize-handle-corner {
+  right: 0;
+  cursor: nwse-resize;
+}
+
+.position-right .dtoc-resize-handle-corner {
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.position-right .dtoc-resize-handle-corner svg {
+  transform: scaleX(-1);
 }

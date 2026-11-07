@@ -24,6 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetSiteBtn = document.getElementById('reset-site-btn');
   const resetAllBtn = document.getElementById('reset-all-btn');
 
+  const widthSlider = document.getElementById('width-slider');
+  const widthVal = document.getElementById('width-val');
+  const resetWidthBtn = document.getElementById('reset-width-btn');
+
+  const heightSlider = document.getElementById('height-slider');
+  const heightVal = document.getElementById('height-val');
+  const resetHeightBtn = document.getElementById('reset-height-btn');
+
+  const fontSizeSlider = document.getElementById('font-size-slider');
+  const fontSizeVal = document.getElementById('font-size-val');
+  const resetFontSizeBtn = document.getElementById('reset-font-size-btn');
+
   // Supported site patterns
   const otherSupportedSites = ['.atlassian.net', 'dev.to', 'wikipedia.org'];
   const MEDIUM_DOMAINS = [
@@ -156,13 +168,22 @@ document.addEventListener('DOMContentLoaded', () => {
       enabled: true,
       position: 'left',
       theme: 'auto',
+      width: 300,
+      height: 480,
+      fontSize: 14,
       siteSettings: {}
     };
 
     browser.storage.local.get(defaultSettings).then((result) => {
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain];
-      const hasSiteOverride = siteConfig !== undefined && siteConfig.position !== undefined;
+      const hasSiteOverride = siteConfig !== undefined && (
+        siteConfig.position !== undefined ||
+        siteConfig.width !== undefined ||
+        siteConfig.height !== undefined ||
+        siteConfig.fontSize !== undefined ||
+        siteConfig.customized === true
+      );
 
       siteOverrideActive = hasSiteOverride;
 
@@ -269,6 +290,30 @@ document.addEventListener('DOMContentLoaded', () => {
         themeDarkBtn.classList.remove('active');
         themeDarkBtn.setAttribute('aria-pressed', 'false');
       }
+
+      // Width, Height, Text Size
+      const curWidth = (siteOverrideActive && siteConfig && siteConfig.width !== undefined)
+        ? siteConfig.width
+        : (result.width !== undefined ? result.width : 300);
+      const curHeight = (siteOverrideActive && siteConfig && siteConfig.height !== undefined)
+        ? siteConfig.height
+        : (result.height !== undefined ? result.height : 480);
+      const curFontSize = (siteOverrideActive && siteConfig && siteConfig.fontSize !== undefined)
+        ? siteConfig.fontSize
+        : (result.fontSize !== undefined ? result.fontSize : 14);
+
+      if (widthSlider) {
+        widthSlider.value = curWidth;
+        if (widthVal) widthVal.textContent = `${curWidth}px`;
+      }
+      if (heightSlider) {
+        heightSlider.value = curHeight;
+        if (heightVal) heightVal.textContent = `${curHeight}px`;
+      }
+      if (fontSizeSlider) {
+        fontSizeSlider.value = curFontSize;
+        if (fontSizeVal) fontSizeVal.textContent = `${curFontSize}px`;
+      }
     });
   }
 
@@ -330,6 +375,121 @@ document.addEventListener('DOMContentLoaded', () => {
   positionLeftBtn.addEventListener('click', () => handlePositionChange('left'));
   positionRightBtn.addEventListener('click', () => handlePositionChange('right'));
 
+  // Width, Height, FontSize Change handlers
+  function handleWidthChange(newVal, updateAll = false) {
+    const val = parseInt(newVal, 10);
+    if (isNaN(val)) return;
+    if (widthVal) widthVal.textContent = `${val}px`;
+    if (widthSlider && widthSlider.value != val) widthSlider.value = val;
+
+    if (siteOverrideActive) {
+      browser.storage.local.get('siteSettings').then((result) => {
+        const siteSettings = result.siteSettings || {};
+        if (!siteSettings[currentDomain]) {
+          siteSettings[currentDomain] = {};
+        }
+        siteSettings[currentDomain].width = val;
+        browser.storage.local.set({ siteSettings }).then(() => {
+          if (updateAll) loadAllSettings();
+        });
+      });
+    } else {
+      browser.storage.local.set({ width: val }).then(() => {
+        if (updateAll) loadAllSettings();
+      });
+    }
+  }
+
+  function handleHeightChange(newVal, updateAll = false) {
+    const val = parseInt(newVal, 10);
+    if (isNaN(val)) return;
+    if (heightVal) heightVal.textContent = `${val}px`;
+    if (heightSlider && heightSlider.value != val) heightSlider.value = val;
+
+    if (siteOverrideActive) {
+      browser.storage.local.get('siteSettings').then((result) => {
+        const siteSettings = result.siteSettings || {};
+        if (!siteSettings[currentDomain]) {
+          siteSettings[currentDomain] = {};
+        }
+        siteSettings[currentDomain].height = val;
+        browser.storage.local.set({ siteSettings }).then(() => {
+          if (updateAll) loadAllSettings();
+        });
+      });
+    } else {
+      browser.storage.local.set({ height: val }).then(() => {
+        if (updateAll) loadAllSettings();
+      });
+    }
+  }
+
+  function handleFontSizeChange(newVal, updateAll = false) {
+    const val = parseInt(newVal, 10);
+    if (isNaN(val)) return;
+    if (fontSizeVal) fontSizeVal.textContent = `${val}px`;
+    if (fontSizeSlider && fontSizeSlider.value != val) fontSizeSlider.value = val;
+
+    if (siteOverrideActive) {
+      browser.storage.local.get('siteSettings').then((result) => {
+        const siteSettings = result.siteSettings || {};
+        if (!siteSettings[currentDomain]) {
+          siteSettings[currentDomain] = {};
+        }
+        siteSettings[currentDomain].fontSize = val;
+        browser.storage.local.set({ siteSettings }).then(() => {
+          if (updateAll) loadAllSettings();
+        });
+      });
+    } else {
+      browser.storage.local.set({ fontSize: val }).then(() => {
+        if (updateAll) loadAllSettings();
+      });
+    }
+  }
+
+  if (widthSlider) {
+    widthSlider.addEventListener('input', (e) => {
+      handleWidthChange(e.target.value, false);
+    });
+    widthSlider.addEventListener('change', (e) => {
+      handleWidthChange(e.target.value, true);
+    });
+  }
+  if (resetWidthBtn) {
+    resetWidthBtn.addEventListener('click', () => {
+      handleWidthChange(300, true);
+    });
+  }
+
+  if (heightSlider) {
+    heightSlider.addEventListener('input', (e) => {
+      handleHeightChange(e.target.value, false);
+    });
+    heightSlider.addEventListener('change', (e) => {
+      handleHeightChange(e.target.value, true);
+    });
+  }
+  if (resetHeightBtn) {
+    resetHeightBtn.addEventListener('click', () => {
+      handleHeightChange(480, true);
+    });
+  }
+
+  if (fontSizeSlider) {
+    fontSizeSlider.addEventListener('input', (e) => {
+      handleFontSizeChange(e.target.value, false);
+    });
+    fontSizeSlider.addEventListener('change', (e) => {
+      handleFontSizeChange(e.target.value, true);
+    });
+  }
+  if (resetFontSizeBtn) {
+    resetFontSizeBtn.addEventListener('click', () => {
+      handleFontSizeChange(14, true);
+    });
+  }
+
   // Theme Toggle Clicks
   themeAutoBtn.addEventListener('click', () => {
     browser.storage.local.set({ theme: 'auto' }).then(() => {
@@ -351,26 +511,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Bottom: "Only for <site>" Button Click
   onlyForBtn.addEventListener('click', () => {
-    browser.storage.local.get(['enabled', 'position', 'siteSettings']).then((result) => {
+    browser.storage.local.get(['enabled', 'position', 'width', 'height', 'fontSize', 'siteSettings']).then((result) => {
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
-      const hasPositionOverride = siteConfig.position !== undefined;
+      const hasOverride = siteConfig.position !== undefined ||
+                          siteConfig.width !== undefined ||
+                          siteConfig.height !== undefined ||
+                          siteConfig.fontSize !== undefined ||
+                          siteConfig.customized === true;
 
       if (!siteSettings[currentDomain]) {
         siteSettings[currentDomain] = {};
       }
 
-      if (hasPositionOverride) {
-        // Disable override: delete site-specific position
+      if (hasOverride) {
+        // Disable override: delete site-specific overrides
         delete siteSettings[currentDomain].position;
+        delete siteSettings[currentDomain].width;
+        delete siteSettings[currentDomain].height;
+        delete siteSettings[currentDomain].fontSize;
+        delete siteSettings[currentDomain].customized;
         
         // Clean up empty site settings object
         if (Object.keys(siteSettings[currentDomain]).length === 0) {
           delete siteSettings[currentDomain];
         }
       } else {
-        // Enable override: copy global position
+        // Enable override: copy global settings
         siteSettings[currentDomain].position = result.position || 'left';
+        siteSettings[currentDomain].width = result.width !== undefined ? result.width : 300;
+        siteSettings[currentDomain].height = result.height !== undefined ? result.height : 480;
+        siteSettings[currentDomain].fontSize = result.fontSize !== undefined ? result.fontSize : 14;
+        siteSettings[currentDomain].customized = true;
       }
 
       browser.storage.local.set({ siteSettings }).then(() => {
@@ -378,12 +550,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   });
+
   // Restore TOC button action (only resets closed/minimized state, doesn't force enable)
   restoreBtn.addEventListener('click', () => {
     browser.storage.local.get(['siteSettings']).then((result) => {
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
-      const hasSiteOverride = siteConfig.position !== undefined;
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
 
       if (hasSiteOverride) {
         if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
@@ -444,6 +621,9 @@ document.addEventListener('DOMContentLoaded', () => {
       minimized: true,
       pinned: false,
       theme: 'auto',
+      width: 300,
+      height: 480,
+      fontSize: 14,
       siteSettings: {}
     }).then(() => {
       loadAllSettings();

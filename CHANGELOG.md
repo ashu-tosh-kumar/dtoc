@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.0] - 2026-11-07
+
+- **Adjustable TOC Dimensions & Typography**: Made the open TOC dialog dimensions and text size fully adjustable. Users can interactively drag horizontal, vertical, and corner resize handles on the open TOC overlay, with double-click reset to defaults.
+- **Popup Dimension & Font Size Controls**: Added interactive slider controls and inline reset buttons in the extension popup for TOC Width (200px–600px, default: 300px), TOC Height (200px–800px, default: 480px), and Text Size (11px–20px, default: 14px), with global settings and per-site override support.
+- **Dynamic Text Wrap & Responsive Header**: Heading links wrap cleanly across multiple lines without overflowing boundaries (`white-space: normal`, `overflow-wrap: break-word`). The TOC header title dynamically adapts, displaying compact "TOC" / "TOC (Beta)" on narrow drawer widths and full "Table of Contents" / "Table of Contents (Beta)" on wider layouts.
+- **Pinning & Live Drag Interaction**: Preserved pinned state behavior during live drag-resizing, enabling responsive edge drag-resize while pinned.
+- **Extension Context Invalidation Guard**: Added runtime guards to safely handle extension context invalidation errors during extension updates.
+- **Customer-Led Store Listings & Documentation**: Overhauled `README.md` and store listings across Chrome, Edge, and Firefox around the reader's problem, scroll fatigue, and core user workflows.
+- **Official Showcase Integration**: Added official website showcase badge and homepage link pointing to `uncommonlydone.com/tools/dtoc`.
+- **Standards & Relative Link Compliance**: Standardized AI, CI/CD, and badges compliance with `ai-docs`, and replaced absolute documentation links with portable relative markdown links.
+
 ## [v3.1.0] - 2026-11-03
 
 - **Native Wikipedia Support**: Added native support for Wikipedia (`wikipedia.org` and subdomains like `en.wikipedia.org`) out of the box, with dedicated content container parsing (`#mw-content-text .mw-parser-output`) and article title detection (`#firstHeading`).

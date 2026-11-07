@@ -281,20 +281,70 @@ extensions.forEach(ext => {
         const globalPosition = result.position || 'left';
         const position = siteConfig.position !== undefined ? siteConfig.position : globalPosition;
 
-        const closed = result.closed !== undefined ? result.closed : false;
+        const globalWidth = result.width !== undefined ? result.width : 300;
+        const width = siteConfig.width !== undefined ? siteConfig.width : globalWidth;
+
+        const globalHeight = result.height !== undefined ? result.height : 480;
+        const height = siteConfig.height !== undefined ? siteConfig.height : globalHeight;
+
+        const globalFontSize = result.fontSize !== undefined ? result.fontSize : 14;
+        const fontSize = siteConfig.fontSize !== undefined ? siteConfig.fontSize : globalFontSize;
+
+        const defaultClosed = false;
+        const closed = siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
         
         let pinned = false;
         let minimized = true;
-        if (result.pinned !== undefined) {
-          pinned = result.pinned;
-          minimized = !result.pinned;
-        } else if (result.minimized !== undefined) {
-          minimized = result.minimized;
-          pinned = !result.minimized;
+        const pinnedVal = siteConfig.pinned !== undefined ? siteConfig.pinned : result.pinned;
+        const minimizedVal = siteConfig.minimized !== undefined ? siteConfig.minimized : result.minimized;
+        if (pinnedVal !== undefined) {
+          pinned = pinnedVal;
+          minimized = !pinnedVal;
+        } else if (minimizedVal !== undefined) {
+          minimized = minimizedVal;
+          pinned = !minimizedVal;
         }
 
-        return { enabled, position, closed, minimized, pinned };
+        return { enabled, position, width, height, fontSize, closed, minimized, pinned };
       }
+
+      test("inherits global pinned state even when site has width/height override", () => {
+        const result = {
+          enabled: true,
+          pinned: true,
+          minimized: false,
+          siteSettings: {
+            'medium.com': {
+              width: 450
+            }
+          }
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.pinned).toBe(true);
+        expect(resolved.minimized).toBe(false);
+        expect(resolved.width).toBe(450);
+      });
+
+      test("allows per-site override for pinned state", () => {
+        const result = {
+          enabled: true,
+          pinned: false,
+          minimized: true,
+          siteSettings: {
+            'medium.com': {
+              pinned: true,
+              minimized: false
+            }
+          }
+        };
+        const resolvedMedium = resolveSettings(result, 'medium.com');
+        expect(resolvedMedium.pinned).toBe(true);
+        expect(resolvedMedium.minimized).toBe(false);
+
+        const resolvedOther = resolveSettings(result, 'dev.to');
+        expect(resolvedOther.pinned).toBe(false);
+        expect(resolvedOther.minimized).toBe(true);
+      });
 
       test("inherits global settings when site-specific settings are not configured on supported sites", () => {
         const result = {
@@ -395,6 +445,118 @@ extensions.forEach(ext => {
         const resolved = resolveSettings(result, 'www.medium.com');
         expect(resolved.enabled).toBe(false);
         expect(resolved.position).toBe('left');
+      });
+
+      test("defaults width, height, and fontSize when not configured", () => {
+        const result = {
+          enabled: true,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.width).toBe(300);
+        expect(resolved.height).toBe(480);
+        expect(resolved.fontSize).toBe(14);
+      });
+
+      test("inherits global width, height, and fontSize when site override is absent", () => {
+        const result = {
+          enabled: true,
+          width: 420,
+          height: 650,
+          fontSize: 16,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(result, 'medium.com');
+        expect(resolved.width).toBe(420);
+        expect(resolved.height).toBe(650);
+        expect(resolved.fontSize).toBe(16);
+      });
+
+      test("allows per-site override for width, height, and fontSize", () => {
+        const result = {
+          enabled: true,
+          width: 300,
+          height: 480,
+          fontSize: 14,
+          siteSettings: {
+            'medium.com': {
+              width: 500,
+              height: 700,
+              fontSize: 18
+            }
+          }
+        };
+        const resolvedSite = resolveSettings(result, 'medium.com');
+        expect(resolvedSite.width).toBe(500);
+        expect(resolvedSite.height).toBe(700);
+        expect(resolvedSite.fontSize).toBe(18);
+
+        const resolvedOther = resolveSettings(result, 'dev.to');
+        expect(resolvedOther.width).toBe(300);
+        expect(resolvedOther.height).toBe(480);
+        expect(resolvedOther.fontSize).toBe(14);
+      });
+
+      test("reverts to default values on reset", () => {
+        const defaultState = {
+          enabled: true,
+          position: 'left',
+          width: 300,
+          height: 480,
+          fontSize: 14,
+          siteSettings: {}
+        };
+        const resolved = resolveSettings(defaultState, 'en.wikipedia.org');
+        expect(resolved.width).toBe(300);
+        expect(resolved.height).toBe(480);
+        expect(resolved.fontSize).toBe(14);
+        expect(resolved.position).toBe('left');
+      });
+    });
+
+    describe("header title responsiveness logic", () => {
+      function getHeaderTitle(width, fontSize = 14, isBeta = false, overflowMock = null) {
+        const fullText = isBeta ? 'Table of Contents (Beta)' : 'Table of Contents';
+        const shortText = isBeta ? 'TOC (Beta)' : 'TOC';
+
+        if (overflowMock !== null) {
+          return overflowMock ? shortText : fullText;
+        }
+
+        const titleFontSize = Math.max(10, fontSize - 1);
+        const neededWidth = isBeta
+          ? Math.round(14 * titleFontSize + 96)
+          : Math.round(10.5 * titleFontSize + 96);
+
+        return width >= neededWidth ? fullText : shortText;
+      }
+
+      test("displays 'Table of Contents' when width is large enough (default 300px)", () => {
+        expect(getHeaderTitle(300, 14, false)).toBe('Table of Contents');
+      });
+
+      test("displays 'TOC' when width is narrow (e.g. 200px, 220px)", () => {
+        expect(getHeaderTitle(200, 14, false)).toBe('TOC');
+        expect(getHeaderTitle(220, 14, false)).toBe('TOC');
+      });
+
+      test("displays 'Table of Contents (Beta)' on unsupported sites when width is large enough", () => {
+        expect(getHeaderTitle(300, 14, true)).toBe('Table of Contents (Beta)');
+      });
+
+      test("displays 'TOC (Beta)' on unsupported sites when width is narrow", () => {
+        expect(getHeaderTitle(200, 14, true)).toBe('TOC (Beta)');
+        expect(getHeaderTitle(260, 14, true)).toBe('TOC (Beta)');
+      });
+
+      test("adjusts threshold when font size is increased", () => {
+        expect(getHeaderTitle(250, 14, false)).toBe('Table of Contents');
+        expect(getHeaderTitle(250, 20, false)).toBe('TOC');
+      });
+
+      test("uses DOM overflow measurement when elements are laid out", () => {
+        expect(getHeaderTitle(220, 14, false, true)).toBe('TOC');
+        expect(getHeaderTitle(300, 14, false, false)).toBe('Table of Contents');
       });
     });
   });

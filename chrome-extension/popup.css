@@ -216,6 +216,94 @@ body {
   color: var(--text-secondary);
 }
 
+/* Slider Controls */
+.slider-control-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-control-wrapper input[type="range"] {
+  width: 85px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--bg-input);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.slider-control-wrapper input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.slider-control-wrapper input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.slider-control-wrapper input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.slider-control-wrapper input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+.slider-val-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.setting-val-badge {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace, var(--font-family);
+  color: var(--text-secondary);
+  background-color: var(--bg-input);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  min-width: 44px;
+  text-align: center;
+}
+
+.inline-reset-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inline-reset-btn:hover {
+  background-color: var(--bg-input);
+  color: var(--accent-text);
+  border-color: var(--accent-color);
+}
+
 /* Toggle Switch Styles */
 .switch {
   position: relative;

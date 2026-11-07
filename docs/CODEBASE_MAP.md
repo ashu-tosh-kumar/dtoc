@@ -42,6 +42,7 @@ dtoc/
 │   ├── AGENT_TEAM.md           # AI agent roles, handoff workflow, quality gates
 │   ├── PRD.md                  # Product Requirements Document (historical reference)
 │   ├── NEW_SITES_FEASIBILITY.md# Feasibility analysis for extension expansion
+│   ├── RELEASE_NOTES_v3.2.0.md # Release notes for current version (v3.2.0)
 │   └── store-listings/         # Web store (Chrome, Edge, Firefox) & YouTube showcase copy
 │       ├── chrome-web-store.md # Chrome Web Store listing metadata & justifications
 │       ├── edge-add-ons.md     # Microsoft Edge Add-ons listing metadata & keywords

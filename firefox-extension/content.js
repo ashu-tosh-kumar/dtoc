@@ -14,7 +14,10 @@
     POSITION: 'position',
     CLOSED: 'closed',
     MINIMIZED: 'minimized',
-    PINNED: 'pinned'
+    PINNED: 'pinned',
+    WIDTH: 'width',
+    HEIGHT: 'height',
+    FONT_SIZE: 'fontSize'
   };
 
   // Map storage keys to internal state property names to decouple them
@@ -23,7 +26,10 @@
     [SETTINGS_KEY.POSITION]: 'position',
     [SETTINGS_KEY.CLOSED]: 'closed',
     [SETTINGS_KEY.MINIMIZED]: 'minimized',
-    [SETTINGS_KEY.PINNED]: 'pinned'
+    [SETTINGS_KEY.PINNED]: 'pinned',
+    [SETTINGS_KEY.WIDTH]: 'width',
+    [SETTINGS_KEY.HEIGHT]: 'height',
+    [SETTINGS_KEY.FONT_SIZE]: 'fontSize'
   };
 
   let state = {
@@ -32,7 +38,10 @@
     closed: false,
     minimized: true, // New default is unpinned (minimized/collapsed)
     pinned: false,
-    theme: 'auto'
+    theme: 'auto',
+    width: 300,
+    height: 480,
+    fontSize: 14
   };
 
   let shadowRoot = null;
@@ -85,9 +94,14 @@
       .replace(/^-+|-+$/g, '');
   }
 
+  function isContextValid() {
+    return typeof browser !== 'undefined' && !!browser.runtime && !!browser.runtime.id;
+  }
+
   // --- Initialization ---
 
   function init() {
+    if (!isContextValid()) return;
     // Clear dtoc-generated URL fragments to prevent browser scroll-to-hash on
     // reload. Only clear fragments with the "dtoc-" prefix (IDs we assigned);
     // native heading IDs are left intact so site-default behaviour is preserved.
@@ -118,6 +132,10 @@
 
     // Observer for body/html theme changes (e.g. classes or attributes like data-theme)
     const pageThemeObserver = new MutationObserver(() => {
+      if (!isContextValid()) {
+        pageThemeObserver.disconnect();
+        return;
+      }
       if (isViewMode() && container) {
         applyStateToUI();
       }
@@ -138,6 +156,10 @@
     // Observer for Dark Reader extension toggling (injects/removes <style class="darkreader"> in <head>)
     if (document.head) {
       const darkReaderObserver = new MutationObserver((mutations) => {
+        if (!isContextValid()) {
+          darkReaderObserver.disconnect();
+          return;
+        }
         for (const mutation of mutations) {
           for (const node of [...mutation.addedNodes, ...mutation.removedNodes]) {
             if ((node.nodeName === 'STYLE' && node.classList?.contains('darkreader')) ||
@@ -156,6 +178,7 @@
     window.addEventListener('resize', () => {
       if (isViewMode()) {
         alignContainerWithTitle();
+        updateHeaderTitle();
       }
     });
   }
@@ -240,8 +263,10 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
-    const keys = ['enabled', 'position', 'closed', 'minimized', 'pinned', 'siteSettings', 'theme'];
+    if (!isContextValid()) return;
+    const keys = ['enabled', 'position', 'closed', 'minimized', 'pinned', 'siteSettings', 'theme', 'width', 'height', 'fontSize'];
     browser.storage.local.get(keys, (result) => {
+      if (!isContextValid()) return;
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
@@ -256,14 +281,22 @@
 
       state.theme = result.theme || 'auto';
 
-      const hasSiteOverride = siteConfig.position !== undefined;
+      const globalWidth = result.width !== undefined ? result.width : 300;
+      state.width = siteConfig.width !== undefined ? siteConfig.width : globalWidth;
+
+      const globalHeight = result.height !== undefined ? result.height : 480;
+      state.height = siteConfig.height !== undefined ? siteConfig.height : globalHeight;
+
+      const globalFontSize = result.fontSize !== undefined ? result.fontSize : 14;
+      state.fontSize = siteConfig.fontSize !== undefined ? siteConfig.fontSize : globalFontSize;
+
       const defaultClosed = false;
-      const closedVal = hasSiteOverride && siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
+      const closedVal = siteConfig.closed !== undefined ? siteConfig.closed : (result.closed !== undefined ? result.closed : defaultClosed);
       state.closed = closedVal;
 
       // Pin/minimize dual state resolution
-      const pinnedVal = hasSiteOverride ? siteConfig.pinned : result.pinned;
-      const minimizedVal = hasSiteOverride ? siteConfig.minimized : result.minimized;
+      const pinnedVal = siteConfig.pinned !== undefined ? siteConfig.pinned : result.pinned;
+      const minimizedVal = siteConfig.minimized !== undefined ? siteConfig.minimized : result.minimized;
 
       if (pinnedVal !== undefined) {
         state.pinned = pinnedVal;
@@ -281,11 +314,17 @@
   }
 
   function updateSetting(storageKey, value) {
+    if (!isContextValid()) return;
     browser.storage.local.get(['siteSettings'], (result) => {
+      if (!isContextValid()) return;
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
-      const hasSiteOverride = siteConfig.position !== undefined;
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
 
       // Update local state first
       if (storageKey === 'pinned') {
@@ -301,7 +340,7 @@
         }
       }
 
-      if (hasSiteOverride && (storageKey === 'pinned' || storageKey === 'minimized' || storageKey === SETTINGS_KEY.CLOSED)) {
+      if (hasSiteOverride && (storageKey === 'pinned' || storageKey === 'minimized' || storageKey === SETTINGS_KEY.CLOSED || storageKey === SETTINGS_KEY.WIDTH || storageKey === SETTINGS_KEY.HEIGHT || storageKey === SETTINGS_KEY.FONT_SIZE)) {
         if (!siteSettings[currentDomain]) {
           siteSettings[currentDomain] = {};
         }
@@ -336,7 +375,9 @@
   }
 
   function listenForSettingsChanges() {
+    if (!isContextValid()) return;
     browser.storage.onChanged.addListener((changes, namespace) => {
+      if (!isContextValid()) return;
       if (namespace === 'local') {
         loadSettings(() => {
           if (state.enabled && isViewMode()) {
@@ -348,6 +389,7 @@
               setupMutationObserver();
             } else {
               applyStateToUI();
+              alignContainerWithTitle();
             }
           } else {
             applyStateToUI();
@@ -360,6 +402,8 @@
   // --- UI Injection ---
 
   function injectUI() {
+    if (!isContextValid()) return;
+    if (!document.body) return;
     // Don't inject multiple times
     if (document.getElementById('dtoc-host')) return;
 
@@ -397,6 +441,7 @@
     // Toggle aria-expanded on hover
     container.addEventListener('mouseenter', () => {
       container.setAttribute('aria-expanded', 'true');
+      updateHeaderTitle();
     });
     container.addEventListener('mouseleave', () => {
       if (!state.pinned) {
@@ -414,7 +459,6 @@
 
     const title = document.createElement('h2');
     title.className = 'dtoc-title';
-    title.textContent = isSupportedSite() ? 'Table of Contents' : 'Table of Contents (Beta)';
 
     const controls = document.createElement('div');
     controls.className = 'dtoc-controls';
@@ -494,7 +538,46 @@
     });
 
     container.appendChild(collapsedStrip);
+
+    // 3. Resize Handles
+    const handleX = document.createElement('div');
+    handleX.className = 'dtoc-resize-handle dtoc-resize-handle-x';
+    handleX.setAttribute('aria-hidden', 'true');
+
+    const handleY = document.createElement('div');
+    handleY.className = 'dtoc-resize-handle dtoc-resize-handle-y';
+    handleY.setAttribute('aria-hidden', 'true');
+
+    const handleCorner = document.createElement('div');
+    handleCorner.className = 'dtoc-resize-handle dtoc-resize-handle-corner';
+    handleCorner.setAttribute('aria-hidden', 'true');
+    handleCorner.title = 'Drag to resize, double-click to reset';
+
+    const gripSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    gripSvg.setAttribute("viewBox", "0 0 10 10");
+    gripSvg.setAttribute("width", "10");
+    gripSvg.setAttribute("height", "10");
+    gripSvg.setAttribute("fill", "none");
+    gripSvg.setAttribute("stroke", "currentColor");
+    gripSvg.setAttribute("stroke-width", "1.5");
+    gripSvg.setAttribute("stroke-linecap", "round");
+
+    const gripL1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    gripL1.setAttribute("x1", "8"); gripL1.setAttribute("y1", "2"); gripL1.setAttribute("x2", "2"); gripL1.setAttribute("y2", "8");
+    const gripL2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    gripL2.setAttribute("x1", "8"); gripL2.setAttribute("y1", "5"); gripL2.setAttribute("x2", "5"); gripL2.setAttribute("y2", "8");
+    gripSvg.appendChild(gripL1);
+    gripSvg.appendChild(gripL2);
+    handleCorner.appendChild(gripSvg);
+
+    container.appendChild(handleX);
+    container.appendChild(handleY);
+    container.appendChild(handleCorner);
+
+    setupResizeHandlers(handleX, handleY, handleCorner);
+
     shadowRoot.appendChild(container);
+    updateHeaderTitle();
 
     // Keyboard accessibility listener (Alt+T)
     window.addEventListener('keydown', handleKeyDown);
@@ -517,11 +600,201 @@
     } else {
       container.classList.add('keyboard-expanded');
       container.setAttribute('aria-expanded', 'true');
+      updateHeaderTitle();
       const firstLink = shadowRoot.querySelector('.toc-link');
       if (firstLink) {
         firstLink.focus();
       }
     }
+  }
+
+  function setupResizeHandlers(handleX, handleY, handleCorner) {
+    function startResize(e, type) {
+      if (e.button !== undefined && e.button !== 0) return;
+      if (container.classList.contains('resizing')) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!state.pinned) {
+        updateSetting('pinned', true);
+      }
+
+      container.classList.add('resizing');
+
+      const targetHandle = e.currentTarget || e.target;
+      if (targetHandle && targetHandle.setPointerCapture && e.pointerId !== undefined) {
+        try {
+          targetHandle.setPointerCapture(e.pointerId);
+        } catch (_) {}
+      }
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startWidth = container.offsetWidth || state.width || 300;
+      const startHeight = container.offsetHeight || state.height || 480;
+
+      let currentW = startWidth;
+      let currentH = startHeight;
+
+      function onMove(moveEvent) {
+        const deltaX = moveEvent.clientX - startX;
+        const deltaY = moveEvent.clientY - startY;
+
+        if (type === 'x' || type === 'corner') {
+          let newWidth;
+          if (state.position === 'left') {
+            newWidth = startWidth + deltaX;
+          } else {
+            newWidth = startWidth - deltaX;
+          }
+          currentW = Math.max(200, Math.min(newWidth, Math.min(800, window.innerWidth - 40)));
+          state.width = currentW;
+          container.style.width = `${currentW}px`;
+          container.style.setProperty('--dtoc-width', `${currentW}px`);
+          updateHeaderTitle();
+        }
+
+        if (type === 'y' || type === 'corner') {
+          const newHeight = startHeight + deltaY;
+          const containerTop = parseInt(container.style.top, 10) || 64;
+          const maxAvailHeight = window.innerHeight - containerTop - 24;
+          currentH = Math.max(150, Math.min(newHeight, maxAvailHeight));
+          state.height = currentH;
+          container.style.height = `${currentH}px`;
+          container.style.maxHeight = `${currentH}px`;
+          container.style.setProperty('--dtoc-height', `${currentH}px`);
+        }
+      }
+
+      function onUp() {
+        if (targetHandle && targetHandle.releasePointerCapture && e.pointerId !== undefined) {
+          try {
+            targetHandle.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+        }
+
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+
+        container.classList.remove('resizing');
+
+        const updates = {};
+        if (type === 'x' || type === 'corner') {
+          updates.width = currentW;
+        }
+        if (type === 'y' || type === 'corner') {
+          updates.height = currentH;
+        }
+
+        saveDimensions(updates);
+      }
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    }
+
+    handleX.addEventListener('pointerdown', (e) => startResize(e, 'x'));
+    handleY.addEventListener('pointerdown', (e) => startResize(e, 'y'));
+    handleCorner.addEventListener('pointerdown', (e) => startResize(e, 'corner'));
+
+    handleX.addEventListener('mousedown', (e) => startResize(e, 'x'));
+    handleY.addEventListener('mousedown', (e) => startResize(e, 'y'));
+    handleCorner.addEventListener('mousedown', (e) => startResize(e, 'corner'));
+
+    handleX.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      resetDimension('width');
+    });
+    handleY.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      resetDimension('height');
+    });
+    handleCorner.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      resetDimension('both');
+    });
+  }
+
+  function saveDimensions(updates) {
+    if (!isContextValid()) return;
+    browser.storage.local.get(['siteSettings'], (result) => {
+      if (!isContextValid()) return;
+      const currentDomain = window.location.hostname.replace(/^www\./i, '');
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
+
+      if (hasSiteOverride) {
+        if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
+        if (updates.width !== undefined) siteSettings[currentDomain].width = updates.width;
+        if (updates.height !== undefined) siteSettings[currentDomain].height = updates.height;
+        siteSettings[currentDomain].pinned = state.pinned;
+        siteSettings[currentDomain].minimized = !state.pinned;
+        browser.storage.local.set({ siteSettings }, () => {
+          applyStateToUI();
+        });
+      } else {
+        updates.pinned = state.pinned;
+        updates.minimized = !state.pinned;
+        browser.storage.local.set(updates, () => {
+          applyStateToUI();
+        });
+      }
+    });
+  }
+
+  function resetDimension(target) {
+    if (!isContextValid()) return;
+    browser.storage.local.get(['siteSettings'], (result) => {
+      if (!isContextValid()) return;
+      const currentDomain = window.location.hostname.replace(/^www\./i, '');
+      const siteSettings = result.siteSettings || {};
+      const siteConfig = siteSettings[currentDomain] || {};
+      const hasSiteOverride = siteConfig.position !== undefined ||
+                              siteConfig.width !== undefined ||
+                              siteConfig.height !== undefined ||
+                              siteConfig.fontSize !== undefined ||
+                              siteConfig.customized === true;
+
+      if (hasSiteOverride) {
+        if (!siteSettings[currentDomain]) siteSettings[currentDomain] = {};
+        if (target === 'width' || target === 'both') {
+          delete siteSettings[currentDomain].width;
+          state.width = 300;
+        }
+        if (target === 'height' || target === 'both') {
+          delete siteSettings[currentDomain].height;
+          state.height = 480;
+        }
+        browser.storage.local.set({ siteSettings }, () => {
+          applyStateToUI();
+        });
+      } else {
+        const updates = {};
+        if (target === 'width' || target === 'both') {
+          updates.width = 300;
+          state.width = 300;
+        }
+        if (target === 'height' || target === 'both') {
+          updates.height = 480;
+          state.height = 480;
+        }
+        browser.storage.local.set(updates, () => {
+          applyStateToUI();
+        });
+      }
+    });
   }
 
   function isPageDark() {
@@ -681,6 +954,61 @@
       container.classList.add('page-light');
       container.classList.remove('page-dark');
     }
+
+    // Dimensions & Typography
+    const curWidth = state.width || 300;
+    const curHeight = state.height || 480;
+    const curFontSize = state.fontSize || 14;
+    container.style.width = `${curWidth}px`;
+    container.style.height = `${curHeight}px`;
+    container.style.setProperty('--dtoc-width', `${curWidth}px`);
+    container.style.setProperty('--dtoc-height', `${curHeight}px`);
+    container.style.setProperty('--dtoc-font-size', `${curFontSize}px`);
+
+    updateHeaderTitle();
+  }
+
+  function updateHeaderTitle() {
+    if (!shadowRoot) return;
+    const title = shadowRoot.querySelector('.dtoc-title');
+    if (!title) return;
+
+    const isBeta = !isSupportedSite();
+    const fullText = isBeta ? 'Table of Contents (Beta)' : 'Table of Contents';
+    const shortText = isBeta ? 'TOC (Beta)' : 'TOC';
+
+    // First attempt live DOM measurement if element is laid out
+    title.textContent = fullText;
+
+    const header = shadowRoot.querySelector('.dtoc-header');
+    if (header && header.clientWidth > 0) {
+      if (title.scrollWidth > title.clientWidth) {
+        title.textContent = shortText;
+        title.title = fullText;
+      } else {
+        title.title = '';
+      }
+      return;
+    }
+
+    // Fallback when container is hidden, unrendered, or in headless environments
+    const curWidth = state.width || (container ? container.offsetWidth : 300) || 300;
+    const curFontSize = state.fontSize || 14;
+    const titleFontSize = Math.max(10, curFontSize - 1);
+    // Threshold calculation:
+    // Header padding (32px) + controls (56px) + gap (8px) = 96px
+    // In sans-serif uppercase, "Table of Contents" takes ~10.5em, "Table of Contents (Beta)" takes ~14em
+    const neededWidth = isBeta
+      ? Math.round(14 * titleFontSize + 96)
+      : Math.round(10.5 * titleFontSize + 96);
+
+    if (curWidth < neededWidth) {
+      title.textContent = shortText;
+      title.title = fullText;
+    } else {
+      title.textContent = fullText;
+      title.title = '';
+    }
   }
 
   // --- Reactivity & Mutation Handling ---
@@ -693,9 +1021,14 @@
     let currentTarget = null;
 
     const callback = function(mutationsList, observer) {
+      if (!isContextValid()) {
+        observer.disconnect();
+        return;
+      }
       // Debounce the parsing to avoid performance hits during rapid DOM updates
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
+        if (!isContextValid()) return;
         // Re-check view mode in case SPA navigated to edit mode
         if (!isViewMode()) {
           if (container && !container.classList.contains('hidden')) {
@@ -730,6 +1063,7 @@
     // instead of a broad document-level MutationObserver.
     let lastUrl = location.href;
     setInterval(() => {
+      if (!isContextValid()) return;
       const currentUrl = location.href;
       const targetNode = getContentContainer();
 
@@ -880,6 +1214,10 @@
       .filter(h => h.offsetParent !== null && sanitizeText(h.textContent));
 
     scrollspyListener = () => {
+      if (!isContextValid()) {
+        window.removeEventListener('scroll', scrollspyListener);
+        return;
+      }
       // Align container dynamically
       alignContainerWithTitle();
 
@@ -939,12 +1277,13 @@
   }
 
   function safeQuerySelector(parent, selector) {
+    if (!parent) return null;
     try {
       return parent.querySelector(selector);
     } catch (e) {
       // Malformed selectors (e.g. from page-controlled IDs) degrade to "not found";
       // anything else is a real bug and must surface.
-      if (e instanceof DOMException) {
+      if (e instanceof DOMException || e.name === 'SyntaxError') {
         console.warn(`[dtoc] Invalid selector: ${selector}`, e);
         return null;
       }
@@ -1016,8 +1355,10 @@
     const containerTop = Math.max(64, targetCenterViewport - 56);
     container.style.top = `${containerTop}px`;
 
-    // Max height to prevent overflow, capped at 480px for a more compact Notion-like layout
-    const maxContainerHeight = Math.min(480, window.innerHeight - containerTop - 24);
+    // Max height to prevent overflow, capped at configured height
+    const configuredHeight = state.height || 480;
+    const maxContainerHeight = Math.min(configuredHeight, window.innerHeight - containerTop - 24);
+    container.style.height = `${configuredHeight}px`;
     container.style.maxHeight = `${Math.max(150, maxContainerHeight)}px`;
   }
 
@@ -1053,6 +1394,7 @@
       titleA.className = 'toc-link';
       titleA.href = '#';
       titleA.textContent = titleInfo.text;
+      titleA.title = titleInfo.text;
 
       titleA.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1120,6 +1462,7 @@
       a.className = 'toc-link';
       a.href = `#${id}`;
       a.textContent = text;
+      a.title = text;
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
