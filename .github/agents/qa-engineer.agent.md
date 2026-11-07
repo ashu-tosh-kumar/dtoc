@@ -39,9 +39,9 @@ When reviewing a commit/PR, execute these checks:
 - Check code coverage. Ensure new logic has complete unit coverage.
 
 ### 3. Browser Manual Verification
-- Load Chrome extension unpacked from [chrome-extension](file:///Users/ashutosh/projects/My/dtoc/chrome-extension).
+- Load Chrome extension unpacked from [chrome-extension](../../chrome-extension).
   - Open `chrome://extensions`, enable developer mode, click "Load unpacked", select the directory.
-- Load Firefox extension from [firefox-extension](file:///Users/ashutosh/projects/My/dtoc/firefox-extension).
+- Load Firefox extension from [firefox-extension](../../firefox-extension).
   - Open `about:debugging` -> This Firefox -> Load Temporary Add-on -> Select `firefox-extension/manifest.json`.
 - Test on:
   - Supported sites: Confluence, Dev.to, and Medium (including custom-domain publications, see [SUPPORTED_SITES.md](../../SUPPORTED_SITES.md)).
