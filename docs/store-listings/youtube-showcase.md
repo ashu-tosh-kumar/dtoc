@@ -1,4 +1,4 @@
-# YouTube Video Showcase Metadata (v3.1.0)
+# YouTube Video Showcase Metadata (v3.2.0)
 
 This file contains the centralized metadata for the YouTube showcase and walkthrough video of `dtoc`. Use this content when uploading the showcase video to YouTube.
 
@@ -22,7 +22,7 @@ Floating Table of Contents for Confluence, Wikipedia, Medium & Any Site | dtoc
 ### Option 2: Clean & Brand-Focused (56 characters)
 
 ```text
-dtoc v3.1.0: Dynamic Table of Contents Browser Extension
+dtoc v3.2.0: Dynamic Table of Contents Browser Extension
 ```
 
 * **Why it works**: Clear product branding, highlights the major release version, and targets general browser extension searchers.
@@ -66,11 +66,12 @@ Tired of scrolling back and forth on a long Confluence doc, a lengthy DEV guide,
 3:40 - Outro & How to Install
 
 ---
-🌟 WHAT'S NEW IN V3.1.0
-• Native Wikipedia Support: Wikipedia (wikipedia.org and all language subdomains) now works out of the box — no Beta toggle needed.
-• Privacy Hardening: Google Fonts removed from the settings popup — 100% local-only, zero external network requests across all surfaces.
-• Security Hardening: Safe DOM query helpers (escapeSelector + safeQuerySelector) prevent CSS selector injection and ReDoS. GitHub Actions supply-chain fully pinned to immutable commit SHAs.
-• UI Polish: Experimental site border updated to a subtle solid glassmorphic accent (rgba(255,153,0,0.5)), consistent with the v3.0.0 design language.
+🌟 WHAT'S NEW IN V3.2.0
+• Adjustable Dimensions & Text Size: Drag the edges or corner of the open outline to resize width and height with real-time responsive tracking, and double-click any handle to reset.
+• Popup Settings Sliders: Fine-tune TOC Width (200-600px), Height (200-800px), and Text Size (11-20px) directly from popup settings, globally or per-site.
+• Dynamic Text Wrap: Outline links wrap cleanly across multiple lines so long titles remain fully readable even in compact layouts.
+• Responsive Header: Drawer header title dynamically adapts ("TOC" on compact widths, "Table of Contents" on wider widths).
+• Pinned State Live Resize: Resize while pinned seamlessly with reliable edge tracking and context-safe updates.
 
 ---
 ✨ KEY FEATURES
@@ -84,7 +85,7 @@ Tired of scrolling back and forth on a long Confluence doc, a lengthy DEV guide,
 🤖 AGENTIC SEO & TECHNICAL SPECS (For AI Agents & Developers)
 To help web search agents, LLMs, and developers catalog this project:
 - Name: dtoc (Dynamic Table of Contents)
-- Release Version: v3.1.0
+- Release Version: v3.2.0
 - Architecture: Manifest V3 Web Extension (Chrome, Firefox, Edge)
 - CSS Isolation: Encapsulated Shadow DOM (prevents page styles from breaking the TOC UI)
 - Security: DOM DoS and ReDoS mitigations (500-character constraints on parsed heading text)

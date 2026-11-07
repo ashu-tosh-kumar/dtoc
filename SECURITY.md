@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-`dtoc` only supports the latest active release version. Security updates are published directly to the latest release branch (e.g., if the current version is `3.0.0`, security updates will be rolled out as `3.0.1`, `3.0.2`, etc.; if the current version is `3.1.0`, updates will be rolled out as `3.1.1`, `3.1.2`, etc.). Older major or minor versions are not actively maintained for security patches.
+`dtoc` only supports the latest active release version. Security updates are published directly to the latest release branch (e.g., if the current version is `3.1.0`, security updates will be rolled out as `3.1.1`, `3.1.2`, etc.; if the current version is `3.2.0`, updates will be rolled out as `3.2.1`, `3.2.2`, etc.). Older major or minor versions are not actively maintained for security patches.
 
 | Version | Supported          |
 | ------- | ------------------ |
