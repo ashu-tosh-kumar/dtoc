@@ -94,9 +94,14 @@
       .replace(/^-+|-+$/g, '');
   }
 
+  function isContextValid() {
+    return typeof browser !== 'undefined' && !!browser.runtime && !!browser.runtime.id;
+  }
+
   // --- Initialization ---
 
   function init() {
+    if (!isContextValid()) return;
     // Clear dtoc-generated URL fragments to prevent browser scroll-to-hash on
     // reload. Only clear fragments with the "dtoc-" prefix (IDs we assigned);
     // native heading IDs are left intact so site-default behaviour is preserved.
@@ -127,6 +132,10 @@
 
     // Observer for body/html theme changes (e.g. classes or attributes like data-theme)
     const pageThemeObserver = new MutationObserver(() => {
+      if (!isContextValid()) {
+        pageThemeObserver.disconnect();
+        return;
+      }
       if (isViewMode() && container) {
         applyStateToUI();
       }
@@ -147,6 +156,10 @@
     // Observer for Dark Reader extension toggling (injects/removes <style class="darkreader"> in <head>)
     if (document.head) {
       const darkReaderObserver = new MutationObserver((mutations) => {
+        if (!isContextValid()) {
+          darkReaderObserver.disconnect();
+          return;
+        }
         for (const mutation of mutations) {
           for (const node of [...mutation.addedNodes, ...mutation.removedNodes]) {
             if ((node.nodeName === 'STYLE' && node.classList?.contains('darkreader')) ||
@@ -249,8 +262,10 @@
   // --- Settings Management ---
 
   function loadSettings(callback) {
+    if (!isContextValid()) return;
     const keys = ['enabled', 'position', 'closed', 'minimized', 'pinned', 'siteSettings', 'theme', 'width', 'height', 'fontSize'];
     browser.storage.local.get(keys, (result) => {
+      if (!isContextValid()) return;
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
@@ -298,7 +313,9 @@
   }
 
   function updateSetting(storageKey, value) {
+    if (!isContextValid()) return;
     browser.storage.local.get(['siteSettings'], (result) => {
+      if (!isContextValid()) return;
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
@@ -357,7 +374,9 @@
   }
 
   function listenForSettingsChanges() {
+    if (!isContextValid()) return;
     browser.storage.onChanged.addListener((changes, namespace) => {
+      if (!isContextValid()) return;
       if (namespace === 'local') {
         loadSettings(() => {
           if (state.enabled && isViewMode()) {
@@ -382,6 +401,8 @@
   // --- UI Injection ---
 
   function injectUI() {
+    if (!isContextValid()) return;
+    if (!document.body) return;
     // Don't inject multiple times
     if (document.getElementById('dtoc-host')) return;
 
@@ -698,7 +719,9 @@
   }
 
   function saveDimensions(updates) {
+    if (!isContextValid()) return;
     browser.storage.local.get(['siteSettings'], (result) => {
+      if (!isContextValid()) return;
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
@@ -728,7 +751,9 @@
   }
 
   function resetDimension(target) {
+    if (!isContextValid()) return;
     browser.storage.local.get(['siteSettings'], (result) => {
+      if (!isContextValid()) return;
       const currentDomain = window.location.hostname.replace(/^www\./i, '');
       const siteSettings = result.siteSettings || {};
       const siteConfig = siteSettings[currentDomain] || {};
@@ -947,9 +972,14 @@
     let currentTarget = null;
 
     const callback = function(mutationsList, observer) {
+      if (!isContextValid()) {
+        observer.disconnect();
+        return;
+      }
       // Debounce the parsing to avoid performance hits during rapid DOM updates
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
+        if (!isContextValid()) return;
         // Re-check view mode in case SPA navigated to edit mode
         if (!isViewMode()) {
           if (container && !container.classList.contains('hidden')) {
@@ -984,6 +1014,7 @@
     // instead of a broad document-level MutationObserver.
     let lastUrl = location.href;
     setInterval(() => {
+      if (!isContextValid()) return;
       const currentUrl = location.href;
       const targetNode = getContentContainer();
 
@@ -1134,6 +1165,10 @@
       .filter(h => h.offsetParent !== null && sanitizeText(h.textContent));
 
     scrollspyListener = () => {
+      if (!isContextValid()) {
+        window.removeEventListener('scroll', scrollspyListener);
+        return;
+      }
       // Align container dynamically
       alignContainerWithTitle();
 
@@ -1193,12 +1228,13 @@
   }
 
   function safeQuerySelector(parent, selector) {
+    if (!parent) return null;
     try {
       return parent.querySelector(selector);
     } catch (e) {
       // Malformed selectors (e.g. from page-controlled IDs) degrade to "not found";
       // anything else is a real bug and must surface.
-      if (e instanceof DOMException) {
+      if (e instanceof DOMException || e.name === 'SyntaxError') {
         console.warn(`[dtoc] Invalid selector: ${selector}`, e);
         return null;
       }

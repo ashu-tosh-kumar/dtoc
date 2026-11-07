@@ -185,8 +185,12 @@
 
 .dtoc-content {
   flex-grow: 1;
+  width: 100%;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 4px 0 12px 0;
+  box-sizing: border-box;
 }
 
 /* Scrollbar styling for a cleaner look */
@@ -208,15 +212,22 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .toc-item {
   margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .toc-link {
   display: block;
+  box-sizing: border-box;
   margin: 2px 10px;
+  width: calc(100% - 20px);
+  max-width: calc(100% - 20px);
   padding: 6px 12px;
   border-radius: 4px;
   color: #37352f;
@@ -225,9 +236,9 @@
   font-weight: 400;
   line-height: 1.4;
   transition: background-color 0.1s, color 0.1s;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
 }
 
 .toc-link:hover {
