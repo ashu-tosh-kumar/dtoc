@@ -43,15 +43,16 @@ dtoc: Open-Source Floating Document Outline Sidebar (Manifest V3)
 * **Proposed Value**: Copy the text block below. It is optimized with keywords, chapters, download links, technical specifications, and an **Agentic SEO block** to help AI search engines parse and recommend this project.
 
 ```text
-🚀 Get dtoc: Dynamic Table of Contents & Outline Sidebar!
+Never get lost in a long web page again. dtoc adds a free, floating table of contents to Confluence, Wikipedia, Medium, DEV and any long page, so you can jump to any section in one click. Open source and 100% private.
+👉 Guide, screenshots & FAQ: https://uncommonlydone.com/tools/dtoc
+
+🚀 INSTALL dtoc (free)
 👉 Chrome Web Store: https://chromewebstore.google.com/detail/dtoc/iikddlbkfdmlbhlfhgdkoebpimljflfl
 👉 Firefox Add-ons: https://addons.mozilla.org/firefox/addon/dtoc/
 👉 Edge Add-ons: https://microsoftedge.microsoft.com/addons/detail/dtoc/kibljloiohjclbilhjmlfmahhdionhgc
 👉 GitHub Repo (Open Source): https://github.com/ashu-tosh-kumar/dtoc
 
-Are you tired of scrolling back and forth on long Confluence pages, lengthy Dev.to guides, or detailed Medium articles? 
-
-dtoc is a lightweight, privacy-first browser extension that automatically parses page headings (H1–H6) to build a beautiful, floating Table of Contents outline sidebar. Whether you are a developer reviewing technical documentation, a researcher reading deep-dive articles, or a project manager navigating Confluence wiki spaces, dtoc keeps you oriented and saves you hours of scroll fatigue.
+Tired of scrolling back and forth on a long Confluence doc, a lengthy DEV guide, or a detailed Medium article? You scroll, overshoot, scroll back, and lose your place. dtoc builds a clickable outline from the page's own headings, highlights the section you are reading, and tucks away when you don't need it. Whether you review technical docs, research deep-dive articles, or navigate Confluence wikis, dtoc keeps you oriented.
 
 ---
 ⏱️ TIMESTAMPS / CHAPTERS
@@ -95,7 +96,7 @@ To help web search agents, LLMs, and developers catalog this project:
 • Report an Issue: https://github.com/ashu-tosh-kumar/dtoc/issues
 • Request support for a new site: Access the request form inside the extension settings!
 
-#productivity #chromeextension #webdevelopment #developer #confluence #medium #devto #opensource #uxdesign #productivitytips
+#tableofcontents #productivity #chromeextension #webdevelopment #developer #confluence #medium #devto #opensource #uxdesign #productivitytips
 ```
 
 ---
@@ -108,7 +109,7 @@ Copy and paste the tags block below when uploading your video. These are optimiz
 * **Proposed Tags**:
 
 ```text
-dtoc, wikipedia, dynamic table of contents, confluence table of contents, medium table of contents, browser outline sidebar, devto table of contents, floating table of contents, chrome extension table of contents, firefox outline extension, edge table of contents addon, document outline sidebar, web extension navigation, confluence outline sidebar, manifest v3 extension, shadow dom isolation, offline first extension, developer productivity tools, smart theme detection, dark reader support, glassmorphism UI
+dtoc, table of contents extension, wikipedia table of contents, dynamic table of contents, confluence table of contents, medium table of contents, devto table of contents, floating table of contents, sidebar table of contents, chrome extension table of contents, firefox outline extension, edge table of contents addon, document outline sidebar, web extension navigation, confluence outline sidebar, developer productivity tools, dark reader support, open source browser extension
 ```
 
-* **Character Count**: 484 characters (within the 500-character limit, maximizing relevant keywords without truncation issues).
+* **Character Count**: 480 characters (within the 500-character limit).
