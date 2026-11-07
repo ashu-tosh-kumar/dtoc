@@ -57,6 +57,51 @@
           </div>
         </div>
       </div>
+
+      <!-- TOC Width -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <div id="width-label" class="setting-label">TOC Width</div>
+          <div class="setting-desc">Adjust dialog width</div>
+        </div>
+        <div class="setting-control slider-control-wrapper">
+          <input type="range" id="width-slider" min="200" max="800" step="10" value="300" aria-labelledby="width-label">
+          <div class="slider-val-row">
+            <span id="width-val" class="setting-val-badge">300px</span>
+            <button id="reset-width-btn" class="inline-reset-btn" title="Reset width to default (300px)" aria-label="Reset width to default">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOC Height -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <div id="height-label" class="setting-label">TOC Height</div>
+          <div class="setting-desc">Adjust dialog length</div>
+        </div>
+        <div class="setting-control slider-control-wrapper">
+          <input type="range" id="height-slider" min="150" max="900" step="10" value="480" aria-labelledby="height-label">
+          <div class="slider-val-row">
+            <span id="height-val" class="setting-val-badge">480px</span>
+            <button id="reset-height-btn" class="inline-reset-btn" title="Reset height to default (480px)" aria-label="Reset height to default">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOC Font Size -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <div id="font-size-label" class="setting-label">Text Size</div>
+          <div class="setting-desc">TOC font size</div>
+        </div>
+        <div class="setting-control slider-control-wrapper">
+          <input type="range" id="font-size-slider" min="11" max="22" step="1" value="14" aria-labelledby="font-size-label">
+          <div class="slider-val-row">
+            <span id="font-size-val" class="setting-val-badge">14px</span>
+            <button id="reset-font-size-btn" class="inline-reset-btn" title="Reset text size to default (14px)" aria-label="Reset text size to default">↺</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Only for Site filter button -->

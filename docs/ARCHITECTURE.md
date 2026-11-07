@@ -51,6 +51,11 @@ DTOC stores its settings in the root of `chrome.storage.local` using the followi
   // Global position of the TOC overlay
   "position": "left", // "left" | "right"
 
+  // Global dimensions & typography
+  "width": 300, // number (px), default: 300
+  "height": 480, // number (px), default: 480
+  "fontSize": 14, // number (px), default: 14
+
   // User-controlled states of the TOC overlay on the current page
   "closed": false, // boolean
   "minimized": false, // boolean
@@ -59,7 +64,10 @@ DTOC stores its settings in the root of `chrome.storage.local` using the followi
   "siteSettings": {
     "medium.com": {
       "enabled": true, // Override to enable/disable on this domain
-      "position": "right" // Override position for this domain (optional)
+      "position": "right", // Override position for this domain (optional)
+      "width": 360, // Override width for this domain (optional)
+      "height": 550, // Override height for this domain (optional)
+      "fontSize": 15 // Override font size for this domain (optional)
     },
     "levelup.gitconnected.com": {
       "enabled": true
@@ -77,6 +85,9 @@ When a content script initializes or storage changes, the script resolves settin
 3. **Position**:
    - If domain has a site override `siteSettings[domain].position`: uses overridden position.
    - Otherwise: uses global `position`.
+4. **Dimensions & Typography (Width, Height, Font Size)**:
+   - If domain has a site override `siteSettings[domain].{width, height, fontSize}`: uses overridden value.
+   - Otherwise: uses global `width`, `height`, or `fontSize` (falling back to default values: 300px, 480px, 14px).
 
 ---
 
