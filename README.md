@@ -48,7 +48,7 @@ You are deep in a long Confluence design doc and need the section on rollout ris
 - **Stays out of your way**: a slim, hover-to-expand glassmorphic drawer tucks to the viewport edge.
 - **Matches the page**: automatic light or dark theme (including Dark Reader), with a manual override.
 - **Always up to date**: the outline refreshes as single-page apps change, with no reload.
-- **Your layout, your way**: dock it left or right, pin, minimize or close it, globally or per site.
+- **Your layout, your way**: dock it left or right, resize dimensions, adjust text size, pin, minimize or close it, globally or per site.
 - **Private by design**: zero external network requests; preferences stay in local browser storage.
 
 ### Works where you read
@@ -76,8 +76,9 @@ More screenshots, a walkthrough and a full FAQ: [uncommonlydone.com/tools/dtoc](
 - **Minimized Notch Indicator**: Flushed to the viewport edge (left or right), these interactive notches show heading levels and document density.
 - **Dynamic Vertical Alignment**: Centers the first notch / heading link with the page title as you scroll, avoiding vertical jumps during expansion.
 - **Smart Auto Theme Detection**: Infers light or dark mode from page background/text colors and detects Dark Reader forced dark themes.
-- **Site-Specific Scopes**: Native optimization for Confluence Cloud, DEV Community, Wikipedia, Medium and custom Medium publications, plus a generic parser (Beta). Position and pinned/minimized/closed states are configurable globally or per site.
-- **Max Height & Internal Scrolling**: Compact 480px maximum height with scrolling inside both the notch strip and the expanded panel.
+- **Site-Specific Scopes**: Native optimization for Confluence Cloud, DEV Community, Wikipedia, Medium and custom Medium publications, plus a generic parser (Beta). Position, dimensions (width/height), text size, and pinned/minimized/closed states are configurable globally or per site.
+- **Adjustable Dimensions & Typography**: Resize the drawer directly using responsive edge drag handles or adjust Width (200–600px), Height (200–800px), and Text Size (11–20px) from popup settings, with double-click reset, clean text wrap, and adaptive header title.
+- **Max Height & Internal Scrolling**: Configurable height (default 480px) with scrolling inside both the notch strip and the expanded panel.
 - **Hardened**: Manifest V3, no background script, Shadow DOM style isolation, and a 500-character limit on extracted heading text against DOM DoS and ReDoS.
 
 ## Documentation & Policies

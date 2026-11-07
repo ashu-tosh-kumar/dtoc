@@ -1,6 +1,6 @@
-# Mozilla Firefox Add-ons Listing Metadata (v3.1.0)
+# Mozilla Firefox Add-ons Listing Metadata (v3.2.0)
 
-This file contains the centralized metadata for the Mozilla Firefox Add-ons (AMO) Store listing of `dtoc`. Use this content to update the store listing when publishing version 3.1.0.
+This file contains the centralized metadata for the Mozilla Firefox Add-ons (AMO) Store listing of `dtoc`. Use this content to update the store listing when publishing version 3.2.0.
 
 * **Official Homepage / Website**: `https://uncommonlydone.com/tools/dtoc`
 
@@ -40,7 +40,7 @@ Picture a long Confluence design doc and you need the section on rollout risks. 
 *   Stays out of your way: a slim drawer tucks to the edge of the page and opens when you hover.
 *   Matches the page: automatic light or dark theme, with a manual override.
 *   Always up to date: the outline refreshes as dynamic pages change, with no reload.
-*   Your layout, your way: dock it left or right, globally or per site. Hide or minimize it any time.
+*   Your layout, your way: dock it left or right, drag to resize dimensions, customize width, height and font size, globally or per site. Hide or minimize it any time.
 
 ---
 
@@ -69,17 +69,18 @@ dtoc has no server, no account, and no analytics:
 
 ---
 
-### **What's New In v3.1.0**
-*   Wikipedia now works out of the box on every language, with no Beta toggle.
-*   Fully local: removed the last external font request from the settings popup, so dtoc makes zero network requests.
-*   Safer on any page: hardened against malicious or oversized page headings.
-*   Cleaner look on Beta sites: a subtle solid accent border replaces the dashed one.
+### **What's New In v3.2.0**
+*   **Adjustable Dimensions & Text Size**: Drag the edges or corner of the open outline to resize width and height with real-time responsive tracking, and double-click any handle to reset.
+*   **Popup Settings Sliders**: Fine-tune TOC Width (200-600px), Height (200-800px), and Text Size (11-20px) directly from popup settings, globally or per-site.
+*   **Dynamic Text Wrap**: Outline links wrap cleanly across multiple lines so long titles remain fully readable even in compact layouts.
+*   **Responsive Header**: Drawer header title dynamically adapts ("TOC" on compact widths, "Table of Contents" on wider widths).
+*   **Pinned State Live Resize**: Resize while pinned seamlessly with reliable edge tracking and context-safe updates.
 
 ---
 
 ### **Permissions Explained**
 *   "Read and change your data on all websites": Required to run the content script that parses heading tags and renders the floating outline overlay on supported and user-enabled pages.
-*   "storage": Required to persist user preferences (TOC position, closed/minimized state, per-site overrides) locally.
+*   "storage": Required to persist user preferences (TOC position, dimensions, font size, closed/minimized state, per-site overrides) locally.
 *   "activeTab": Used to safely check the current tab's hostname in the settings popup, allowing you to customize settings for the active site or request support.
 
 ---
