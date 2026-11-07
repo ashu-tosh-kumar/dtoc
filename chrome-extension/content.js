@@ -1309,6 +1309,7 @@
       titleA.className = 'toc-link';
       titleA.href = '#';
       titleA.textContent = titleInfo.text;
+      titleA.title = titleInfo.text;
 
       titleA.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1376,6 +1377,7 @@
       a.className = 'toc-link';
       a.href = `#${id}`;
       a.textContent = text;
+      a.title = text;
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
