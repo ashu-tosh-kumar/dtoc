@@ -178,6 +178,7 @@
     window.addEventListener('resize', () => {
       if (isViewMode()) {
         alignContainerWithTitle();
+        updateHeaderTitle();
       }
     });
   }
@@ -440,6 +441,7 @@
     // Toggle aria-expanded on hover
     container.addEventListener('mouseenter', () => {
       container.setAttribute('aria-expanded', 'true');
+      updateHeaderTitle();
     });
     container.addEventListener('mouseleave', () => {
       if (!state.pinned) {
@@ -457,7 +459,6 @@
 
     const title = document.createElement('h2');
     title.className = 'dtoc-title';
-    title.textContent = isSupportedSite() ? 'Table of Contents' : 'Table of Contents (Beta)';
 
     const controls = document.createElement('div');
     controls.className = 'dtoc-controls';
@@ -576,6 +577,7 @@
     setupResizeHandlers(handleX, handleY, handleCorner);
 
     shadowRoot.appendChild(container);
+    updateHeaderTitle();
 
     // Keyboard accessibility listener (Alt+T)
     window.addEventListener('keydown', handleKeyDown);
@@ -598,6 +600,7 @@
     } else {
       container.classList.add('keyboard-expanded');
       container.setAttribute('aria-expanded', 'true');
+      updateHeaderTitle();
       const firstLink = shadowRoot.querySelector('.toc-link');
       if (firstLink) {
         firstLink.focus();
@@ -649,6 +652,7 @@
           state.width = currentW;
           container.style.width = `${currentW}px`;
           container.style.setProperty('--dtoc-width', `${currentW}px`);
+          updateHeaderTitle();
         }
 
         if (type === 'y' || type === 'corner') {
@@ -960,6 +964,51 @@
     container.style.setProperty('--dtoc-width', `${curWidth}px`);
     container.style.setProperty('--dtoc-height', `${curHeight}px`);
     container.style.setProperty('--dtoc-font-size', `${curFontSize}px`);
+
+    updateHeaderTitle();
+  }
+
+  function updateHeaderTitle() {
+    if (!shadowRoot) return;
+    const title = shadowRoot.querySelector('.dtoc-title');
+    if (!title) return;
+
+    const isBeta = !isSupportedSite();
+    const fullText = isBeta ? 'Table of Contents (Beta)' : 'Table of Contents';
+    const shortText = isBeta ? 'TOC (Beta)' : 'TOC';
+
+    // First attempt live DOM measurement if element is laid out
+    title.textContent = fullText;
+
+    const header = shadowRoot.querySelector('.dtoc-header');
+    if (header && header.clientWidth > 0) {
+      if (title.scrollWidth > title.clientWidth) {
+        title.textContent = shortText;
+        title.title = fullText;
+      } else {
+        title.title = '';
+      }
+      return;
+    }
+
+    // Fallback when container is hidden, unrendered, or in headless environments
+    const curWidth = state.width || (container ? container.offsetWidth : 300) || 300;
+    const curFontSize = state.fontSize || 14;
+    const titleFontSize = Math.max(10, curFontSize - 1);
+    // Threshold calculation:
+    // Header padding (32px) + controls (56px) + gap (8px) = 96px
+    // In sans-serif uppercase, "Table of Contents" takes ~10.5em, "Table of Contents (Beta)" takes ~14em
+    const neededWidth = isBeta
+      ? Math.round(14 * titleFontSize + 96)
+      : Math.round(10.5 * titleFontSize + 96);
+
+    if (curWidth < neededWidth) {
+      title.textContent = shortText;
+      title.title = fullText;
+    } else {
+      title.textContent = fullText;
+      title.title = '';
+    }
   }
 
   // --- Reactivity & Mutation Handling ---

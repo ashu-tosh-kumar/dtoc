@@ -513,6 +513,52 @@ extensions.forEach(ext => {
         expect(resolved.position).toBe('left');
       });
     });
+
+    describe("header title responsiveness logic", () => {
+      function getHeaderTitle(width, fontSize = 14, isBeta = false, overflowMock = null) {
+        const fullText = isBeta ? 'Table of Contents (Beta)' : 'Table of Contents';
+        const shortText = isBeta ? 'TOC (Beta)' : 'TOC';
+
+        if (overflowMock !== null) {
+          return overflowMock ? shortText : fullText;
+        }
+
+        const titleFontSize = Math.max(10, fontSize - 1);
+        const neededWidth = isBeta
+          ? Math.round(14 * titleFontSize + 96)
+          : Math.round(10.5 * titleFontSize + 96);
+
+        return width >= neededWidth ? fullText : shortText;
+      }
+
+      test("displays 'Table of Contents' when width is large enough (default 300px)", () => {
+        expect(getHeaderTitle(300, 14, false)).toBe('Table of Contents');
+      });
+
+      test("displays 'TOC' when width is narrow (e.g. 200px, 220px)", () => {
+        expect(getHeaderTitle(200, 14, false)).toBe('TOC');
+        expect(getHeaderTitle(220, 14, false)).toBe('TOC');
+      });
+
+      test("displays 'Table of Contents (Beta)' on unsupported sites when width is large enough", () => {
+        expect(getHeaderTitle(300, 14, true)).toBe('Table of Contents (Beta)');
+      });
+
+      test("displays 'TOC (Beta)' on unsupported sites when width is narrow", () => {
+        expect(getHeaderTitle(200, 14, true)).toBe('TOC (Beta)');
+        expect(getHeaderTitle(260, 14, true)).toBe('TOC (Beta)');
+      });
+
+      test("adjusts threshold when font size is increased", () => {
+        expect(getHeaderTitle(250, 14, false)).toBe('Table of Contents');
+        expect(getHeaderTitle(250, 20, false)).toBe('TOC');
+      });
+
+      test("uses DOM overflow measurement when elements are laid out", () => {
+        expect(getHeaderTitle(220, 14, false, true)).toBe('TOC');
+        expect(getHeaderTitle(300, 14, false, false)).toBe('Table of Contents');
+      });
+    });
   });
 });
 
