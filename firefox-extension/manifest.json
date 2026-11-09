@@ -3,6 +3,7 @@
   "name": "dtoc",
   "version": "3.2.0",
   "description": "Generate a floating, sticky Table of Contents on Confluence, Medium, Dev.to, Wikipedia, and any web page.",
+  "homepage_url": "https://uncommonlydone.com/tools/dtoc",
   "permissions": [
     "storage",
     "activeTab"

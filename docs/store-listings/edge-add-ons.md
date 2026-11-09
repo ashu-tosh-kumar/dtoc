@@ -77,6 +77,11 @@ dtoc has no server, no account, and no analytics:
 • Does it collect data? No.
 • Why is the outline empty on a page? Some pages have no real heading tags. Request support for a site from the extension menu.
 
+*** LINKS & SUPPORT ***
+• Official Guide & FAQ: https://uncommonlydone.com/tools/dtoc
+• Source Code (GitHub): https://github.com/ashu-tosh-kumar/dtoc
+• Video Showcase: https://youtu.be/-vvvjiyMUjQ
+
 For developers: Manifest V3, no background script, Shadow DOM style isolation, MIT licensed.
 ```
 
